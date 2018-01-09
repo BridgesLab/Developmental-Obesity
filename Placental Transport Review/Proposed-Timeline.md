@@ -10,3 +10,4 @@
 
 * Find the formatting rules for JPhys
 * Think about a figure or figures
+* Decide how to integrate Mollys writing
