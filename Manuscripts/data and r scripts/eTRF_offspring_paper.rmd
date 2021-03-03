@@ -1,0 +1,60 @@
+---
+title: "eTRF offspring body composition analysis"
+author: "Molly C. Mulcahy"
+date: "2/25/2021"
+output: html_document
+---
+#This document contains primary data and analysis for the dissertation work involving early time-restricted feeding during gestation effect on mouse offspring
+
+#setup chunk
+```{r setup, include=FALSE}
+library(processx)
+library(devtools)
+library(dplyr)
+library(readr)
+library(car)
+library(knitr)
+library(tidyr)
+library(lme4)
+library(broom)
+library(RCurl)
+library(ggplot2)
+
+#figures made will go to directory called figures, will make them as both png and pdf files 
+opts_chunk$set(fig.path='figures/',
+               echo=FALSE, warning=FALSE, message=FALSE,dev=c('png','pdf'))
+options(scipen = 2, digits = 3)
+# set echo and message to TRUE if you want to display code blocks and code output respectively
+knitr::knit_hooks$set(inline = function(x) {
+  knitr:::format_sci(x, 'md')
+})
+#write standard error function for later use
+se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
+# sets color scheme for plots
+color.scheme <- c('navyblue','firebrick1')
+```
+
+#Data Entry
+```{r data-entry-MRI}
+MRI.data.file<-"MRI.Off.data.csv"
+MRI.raw.data<-read_csv(MRI.data.file,
+                       col_types = cols(
+  ID = col_factor(levels = NULL),
+  age = col_double(),
+  animal.id = col_factor(levels = NULL),
+  MouseID = col_factor(levels = NULL),
+  Sex = col_factor(levels = NULL),
+  Genotype = col_factor(levels = NULL),
+  values = col_double(),
+  assay = col_factor(levels = NULL),
+  experiment.date = col_date(format = ""),
+  treatment = col_factor(levels = NULL),
+  dam = col_factor(levels = NULL),
+  cohort = col_factor(levels = NULL),
+  gram.values = col_double()))
+```
+#Pre-HFD analysis (PND 21- PND 70)
+```{r body-weight}
+BW.data<-filter(MRI.raw.data, assay=="Body Weight")
+##
+```
