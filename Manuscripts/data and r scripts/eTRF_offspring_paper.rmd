@@ -58,3 +58,52 @@ MRI.raw.data<-read_csv(MRI.data.file,
 BW.data<-filter(MRI.raw.data, assay=="Body Weight")
 ##
 ```
+
+```{r data-entry-intake}
+intake.data.raw<-("Intake.Off.data.csv")
+intake.data<-read_csv(intake.data.raw,
+                      col_types = cols(
+                        cage = col_factor(levels = NULL),
+                        "# in cage" = col_double(),
+                        week = col_integer(),
+                        "IDs" = col_factor(levels = NULL),
+                        start = col_double(),
+                        end=col_double(),
+                        date = col_character(),
+                        notes = col_factor(levels=NULL),
+                        diet = col_factor(levels = NULL),
+                        cohort = col_factor(levels = NULL),
+                        food.consumed = col_double(),
+                        kcals.consumed = col_double(),
+                        food.cumulative = col_double(),
+                        treatment = col_factor(levels = NULL),
+                        sex = col_factor(levels = NULL)
+                        ))
+```
+
+```{r intake-plots}
+#individual plots
+ggplot(intake.data, aes(week, kcals.consumed,col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(aes(col = treatment))+
+  facet_grid(diet~sex)+
+  labs(x="week",y="kcals consumed")+
+  ggtitle("Kcals consumed per cage per week")+
+  scale_color_manual(values = color.scheme)
+
+average.intake<-intake.data%>%
+  group_by(week, diet, treatment, sex)%>%
+  select(kcals.consumed)%>%
+  summarize(avg.kcals = mean(kcals.consumed),
+            error.kcals = se(kcals.consumed))
+#averaged plot
+ggplot(average.intake, aes(week, avg.kcals,col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(aes(col = treatment))+
+  facet_grid(diet~sex)+
+  labs(x="week",y="kcals consumed")+
+  ggtitle("Kcals consumed per cage per week")+
+  scale_color_manual(values = color.scheme)
+#cumulative intake plot
+ggplot(intake.data,aes())
+```
