@@ -31,7 +31,7 @@ knitr::knit_hooks$set(inline = function(x) {
 #write standard error function for later use
 se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
 # sets color scheme for plots
-color.scheme <- c('navyblue','firebrick1')
+color.scheme <- c('gray69','gray36')
 ```
 
 #Data Entry
@@ -54,11 +54,69 @@ MRI.raw.data<-read_csv(MRI.data.file,
   gram.values = col_double()))
 ```
 #Pre-HFD analysis (PND 21- PND 70)
-```{r body-weight}
-BW.data<-filter(MRI.raw.data, assay=="Body Weight")
-##
-```
+#Body Composition
+```{r Figure-2-A-B-C}
+#table of unique animals for body composition numbers
+MRI.raw.data %>%
+  group_by(Sex,treatment) %>%
+  distinct(ID, .keep_all = T) %>%
+  count %>%
+  kable(caption="Animals in each group of this cohort")
+#Body Weight data table
+BW.data<-filter(MRI.raw.data, assay=="Body Weight")%>%
+  filter(age<70)%>%
+  group_by(age, treatment, Sex)%>%
+  summarize_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+##Body Weight plot
+ggplot(BW.data,aes(age, gram.values_mean, col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(span = 0.7,aes(col = treatment), se = FALSE)+
+  facet_grid(.~Sex)+
+  scale_color_manual(values = color.scheme)+
+  labs(title = "Offspring Body Weight", y = "Body weight (grams)",x="Age (days)")+
+  theme(text = element_text(size=16),legend.position = c(0.9,0.19))
+#Lean Mass data table
+LM.data<-filter(MRI.raw.data, assay=="Lean Mass")%>%
+  filter(age<70)%>%
+  group_by(age, treatment, Sex)%>%
+  summarize_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+#Lean Mass Plot
+ggplot(LM.data,aes(age, gram.values_mean, col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(span = 0.7,aes(col = treatment), se = FALSE)+
+  facet_grid(.~Sex)+
+  scale_color_manual(values = color.scheme)+
+  labs(title = "Offspring Lean Mass", y = "Lean Mass (grams)",x="Age (days)")+
+  theme(text = element_text(size=16),legend.position = c(0.9,0.80))
+#Body Fat Data table
+FM.data<-filter(MRI.raw.data, assay=="Total Fat Mass")%>%
+  filter(age<70)%>%
+  group_by(age, treatment, Sex)%>%
+  summarize_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+#Body Fat Plot
+ggplot(FM.data,aes(age, gram.values_mean, col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(span = 0.7,aes(col = treatment), se = FALSE)+
+  facet_grid(.~Sex)+
+  scale_color_manual(values = color.scheme)+
+  labs(title = "Offspring Fat Mass", y = "Fat Mass (grams)",x="Age (days)")+
+  theme(text = element_text(size=16),legend.position = c(0.9,0.80))
 
+#Body Composition stats
+
+#Body Weight 
+BW.data.stats <-MRI.raw.data%>%
+  filter(assay ==    "Body Weight")
+null.lme<-lmer(gram.values ~ 1 + (1|MouseID) + (1|dam), data = BW.data.stats)
+age.lme <-lmer(gram.values ~ age + (1|MouseID) + (1|dam), data = BW.data.stats)
+anova(null.lme, age.lme)#significant
+diet.lme<-lmer(gram.values ~ age*treatment + (1|MouseID) + (1|dam), data = BW.data.stats)
+anova(age.lme, diet.lme)#significant diet age interaction
+#Females
+
+#males
+```
+#Food Intake Data
 ```{r data-entry-intake}
 intake.data.raw<-("Intake.Off.data.csv")
 intake.data<-read_csv(intake.data.raw,
@@ -76,34 +134,53 @@ intake.data<-read_csv(intake.data.raw,
                         food.consumed = col_double(),
                         kcals.consumed = col_double(),
                         food.cumulative = col_double(),
-                        treatment = col_factor(levels = NULL),
+                        treatment = col_factor(levels = c("eTRF","AL")),
                         sex = col_factor(levels = NULL)
                         ))
 ```
 
-```{r intake-plots}
-#individual plots
-ggplot(intake.data, aes(week, kcals.consumed,col = treatment))+
-  geom_point(aes(col = treatment))+
-  geom_smooth(aes(col = treatment))+
-  facet_grid(diet~sex)+
-  labs(x="week",y="kcals consumed")+
-  ggtitle("Kcals consumed per cage per week")+
-  scale_color_manual(values = color.scheme)
+#Food Intake
+```{r pre-HFD-intake}
+#Table of Cages in Food Intake Analyses
+intake.data %>%
+  group_by(sex,treatment) %>%
+  distinct(cage, .keep_all = T) %>%
+  count %>%
+  kable(caption="Cages in each group")
 
+#make averaged dataset
 average.intake<-intake.data%>%
+   filter(!(week=="5"&cage=="2031"))%>%
   group_by(week, diet, treatment, sex)%>%
-  select(kcals.consumed)%>%
-  summarize(avg.kcals = mean(kcals.consumed),
-            error.kcals = se(kcals.consumed))
-#averaged plot
-ggplot(average.intake, aes(week, avg.kcals,col = treatment))+
+  summarize_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+#Filter out HFD from dataset
+Pre.HFD.data<-average.intake%>%
+  filter(diet=="NCD")
+
+#Plot of averaged.intake
+ggplot(Pre.HFD.data, aes(week, kcals.consumed_mean,col = treatment))+
   geom_point(aes(col = treatment))+
-  geom_smooth(aes(col = treatment))+
-  facet_grid(diet~sex)+
-  labs(x="week",y="kcals consumed")+
-  ggtitle("Kcals consumed per cage per week")+
-  scale_color_manual(values = color.scheme)
+  geom_smooth(aes(col = treatment), se=FALSE, span =0.7)+
+  geom_errorbar(aes(ymin = kcals.consumed_mean -kcals.consumed_se, ymax = kcals.consumed_mean +kcals.consumed_se), width = 0.3)+
+  facet_grid(.~sex)+
+  labs(title="Food Intake", subtitle = "average kcals per cage per week", y = "Food Intake (kcals)", x="Week")+
+  scale_color_manual(values = color.scheme)+
+   theme(text = element_text(size=16),legend.position = c(0.1,0.80))
+
 #cumulative intake plot
-ggplot(intake.data,aes())
+ggplot(Pre.HFD.data, aes(week, food.cumulative_mean, col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(aes(col = treatment), se=FALSE)+
+  geom_errorbar(aes(ymin = food.cumulative_mean -food.cumulative_se, ymax = food.cumulative_mean +food.cumulative_se), width = 0.3)+
+  facet_grid(.~sex)+
+  labs(x="Week",y="Cumulative Food Intake (kcals)")+
+  ggtitle("Cumulative Food Intake, NCD")+
+  scale_color_manual(values = color.scheme)+
+  theme(text = element_text(size=16),legend.position = c(0.1,0.80))
+
+#statistics for weekly food intake
+
+#statistics for culumaltive food intake
+
 ```
