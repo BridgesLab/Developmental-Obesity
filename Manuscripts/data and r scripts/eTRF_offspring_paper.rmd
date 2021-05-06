@@ -2,7 +2,9 @@
 title: "eTRF offspring body composition analysis"
 author: "Molly C. Mulcahy"
 date: "2/25/2021"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 #This document contains primary data and analysis for the dissertation work involving early time-restricted feeding during gestation effect on mouse offspring
 
@@ -43,78 +45,169 @@ MRI.raw.data<-read_csv(MRI.data.file,
   age = col_double(),
   animal.id = col_factor(levels = NULL),
   MouseID = col_factor(levels = NULL),
-  Sex = col_factor(levels = NULL),
+  Sex = col_factor(levels = c("M","F")),
   Genotype = col_factor(levels = NULL),
   values = col_double(),
   assay = col_factor(levels = NULL),
   experiment.date = col_date(format = ""),
-  treatment = col_factor(levels = NULL),
+  treatment = col_factor(levels = c("AL","eTRF")),
   dam = col_factor(levels = NULL),
   cohort = col_factor(levels = NULL),
   gram.values = col_double()))
+
+MRI.raw.data<-MRI.raw.data%>%
+  mutate(sex = case_when(
+    Sex =="M"~"male",
+    Sex=="F"~"female"))
 ```
 #Pre-HFD analysis (PND 21- PND 70)
 #Body Composition
-```{r Figure-2-A-B-C}
+```{r Figure2A}
 #table of unique animals for body composition numbers
 MRI.raw.data %>%
-  group_by(Sex,treatment) %>%
+  group_by(sex,treatment) %>%
   distinct(ID, .keep_all = T) %>%
   count %>%
   kable(caption="Animals in each group of this cohort")
 #Body Weight data table
 BW.data<-filter(MRI.raw.data, assay=="Body Weight")%>%
   filter(age<70)%>%
-  group_by(age, treatment, Sex)%>%
+  group_by(age, treatment, sex)%>%
   summarize_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
 ##Body Weight plot
 ggplot(BW.data,aes(age, gram.values_mean, col = treatment))+
   geom_point(aes(col = treatment))+
   geom_smooth(span = 0.7,aes(col = treatment), se = FALSE)+
-  facet_grid(.~Sex)+
+  facet_grid(.~sex)+
   scale_color_manual(values = color.scheme)+
   labs(title = "Offspring Body Weight", y = "Body weight (grams)",x="Age (days)")+
   theme(text = element_text(size=16),legend.position = c(0.9,0.19))
+
+#Females
+#female body weight data set
+BW.data.females<-MRI.raw.data%>%
+  filter(age<70)%>%
+  filter(sex=="female")%>%
+  filter(assay=="Body Weight")
+#mixed linear models
+null.bw.lme.f<-lmer(gram.values ~ 1 + (1|MouseID) + (1|dam), data = BW.data.females)
+age.bw.lme.f <-lmer(gram.values ~ age + (1|MouseID) + (1|dam), data = BW.data.females)
+anova(null.bw.lme.f, age.bw.lme.f)#significant effect of age
+diet.bw.lme.f<-lmer(gram.values ~ treatment+age +age:treatment + (1|MouseID) + (1|dam), data = BW.data.females)
+anova(age.bw.lme.f, diet.bw.lme.f)#significant diet age interaction, p=0.014
+anova(diet.bw.lme.f)%>%tidy%>%kable()
+#anova(diet.bw.lme.f)%>%tidy%>%filter(term =="age:treatment")%>%pull(p.value)
+F.BW.effect<-fixef(diet.bw.lme.f)
+#Males
+#male body weight data set
+BW.data.males<-MRI.raw.data%>%
+  filter(age<70)%>%
+  filter(sex=="male")%>%
+  filter(assay=="Body Weight")
+
+null.bw.lme.m<-lmer(gram.values ~ 1 + (1|MouseID) + (1|dam), data = BW.data.males)
+age.bw.lme.m <-lmer(gram.values ~ age + (1|MouseID) + (1|dam), data = BW.data.males)
+anova(null.bw.lme.m, age.bw.lme.m)#significant
+diet.bw.lme.m<-lmer(gram.values ~ treatment+age +age:treatment + (1|MouseID) + (1|dam), data = BW.data.males)
+anova(age.bw.lme.m, diet.bw.lme.m)#NOT SIGNIFICANT, p=0.7
+anova(diet.bw.lme.m)
+fixef(diet.bw.lme.m)
+```
+There is a significant interaction of age and treatment in females where age-matched AL female have a ,p-value.
+
+```{r Fig2C}
 #Lean Mass data table
 LM.data<-filter(MRI.raw.data, assay=="Lean Mass")%>%
   filter(age<70)%>%
-  group_by(age, treatment, Sex)%>%
+  group_by(age, treatment, sex)%>%
   summarize_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
 #Lean Mass Plot
 ggplot(LM.data,aes(age, gram.values_mean, col = treatment))+
   geom_point(aes(col = treatment))+
   geom_smooth(span = 0.7,aes(col = treatment), se = FALSE)+
-  facet_grid(.~Sex)+
+  facet_grid(.~sex)+
   scale_color_manual(values = color.scheme)+
   labs(title = "Offspring Lean Mass", y = "Lean Mass (grams)",x="Age (days)")+
   theme(text = element_text(size=16),legend.position = c(0.9,0.80))
+
+#stats
+
+#Females
+#female lean mass data set
+LM.data.females<-MRI.raw.data%>%
+  filter(assay=="Lean Mass")%>%
+   filter(age<70)%>%
+  filter(sex=="female")
+
+null.lm.lme.f<-lmer(gram.values ~ 1 + (1|MouseID) + (1|dam), data = LM.data.females)
+age.lm.lme.f <-lmer(gram.values ~ age + (1|MouseID) + (1|dam), data = LM.data.females)
+anova(null.lm.lme.f, age.lm.lme.f)#significant effect of age
+diet.lm.lme.f<-lmer(gram.values ~ treatment+age +age:treatment + (1|MouseID) + (1|dam), data = LM.data.females)
+anova(age.lm.lme.f, diet.lm.lme.f)#significant diet age interaction, p=0.0062
+#anova(diet.lm.lme.f)%>%tidy%>%filter(term =="age:treatment")%>%pull(p.value)
+fixef(diet.lm.lme.f)#
+coefficients(diet.lm.lme.f)
+
+#Males
+#male body weight data set
+LM.data.males<-MRI.raw.data%>%
+  filter(assay=="Lean Mass")%>%
+  filter(age<70)%>%
+  filter(sex=="male")
+
+null.lm.lme.m<-lmer(gram.values ~ 1 + (1|MouseID) + (1|dam), data = LM.data.males)
+age.lm.lme.m <-lmer(gram.values ~ age + (1|MouseID) + (1|dam), data = LM.data.males)
+anova(null.lm.lme.m, age.lm.lme.m)#significant
+diet.lm.lme.m<-lmer(gram.values ~ treatment+age +age:treatment + (1|MouseID) + (1|dam), data = LM.data.males)
+anova(age.lm.lme.m, diet.lm.lme.m)#NOT SIGNIFICANT, p=0.75
+#anova(diet.lm.lme.m)%>%tidy%>%filter(term =="age:treatment")%>%pull(p.value)
+fixef(diet.lm.lme.m)#
+coefficients(diet.lm.lme.m)
+```
+
+```{r Fig2B}
 #Body Fat Data table
 FM.data<-filter(MRI.raw.data, assay=="Total Fat Mass")%>%
   filter(age<70)%>%
-  group_by(age, treatment, Sex)%>%
+  group_by(age, treatment, sex)%>%
   summarize_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
 #Body Fat Plot
 ggplot(FM.data,aes(age, gram.values_mean, col = treatment))+
   geom_point(aes(col = treatment))+
   geom_smooth(span = 0.7,aes(col = treatment), se = FALSE)+
-  facet_grid(.~Sex)+
+  facet_grid(.~sex)+
   scale_color_manual(values = color.scheme)+
   labs(title = "Offspring Fat Mass", y = "Fat Mass (grams)",x="Age (days)")+
   theme(text = element_text(size=16),legend.position = c(0.9,0.80))
+#Stats
+#females
+FM.data.females<-MRI.raw.data%>%
+  filter(assay=="Total Fat Mass")%>%
+  filter(age<70)%>%
+  filter(sex=="female")
 
-#Body Composition stats
-
-#Body Weight 
-BW.data.stats <-MRI.raw.data%>%
-  filter(assay ==    "Body Weight")
-null.lme<-lmer(gram.values ~ 1 + (1|MouseID) + (1|dam), data = BW.data.stats)
-age.lme <-lmer(gram.values ~ age + (1|MouseID) + (1|dam), data = BW.data.stats)
-anova(null.lme, age.lme)#significant
-diet.lme<-lmer(gram.values ~ age*treatment + (1|MouseID) + (1|dam), data = BW.data.stats)
-anova(age.lme, diet.lme)#significant diet age interaction
-#Females
-
+null.fm.lme.f<-lmer(gram.values ~ 1 + (1|MouseID) + (1|dam), data = FM.data.females)
+age.fm.lme.f <-lmer(gram.values ~ age + (1|MouseID) + (1|dam), data = FM.data.females)
+anova(null.fm.lme.f, age.fm.lme.f)#significant
+diet.fm.lme.f<-lmer(gram.values ~ treatment+age +age:treatment + (1|MouseID) + (1|dam), data = FM.data.females)
+anova(age.fm.lme.f, diet.fm.lme.f)# p=0.43
+#anova(diet.fm.lme.f)%>%tidy%>%filter(term =="age:treatment")%>%pull(p.value)
+fixef(diet.fm.lme.f)#
+coefficients(diet.fm.lme.f)
 #males
+FM.data.males<-MRI.raw.data%>%
+  filter(assay=="Total Fat Mass")%>%
+  filter(age<70)%>%
+  filter(sex=="male")
+
+null.fm.lme.m<-lmer(gram.values ~ 1 + (1|MouseID) + (1|dam), data = FM.data.males)
+age.fm.lme.m <-lmer(gram.values ~ age + (1|MouseID) + (1|dam), data = FM.data.males)
+anova(null.fm.lme.m, age.fm.lme.m)#significant
+diet.fm.lme.m<-lmer(gram.values ~ treatment+age +age:treatment + (1|MouseID) + (1|dam), data = FM.data.males)
+anova(age.fm.lme.m, diet.fm.lme.m)# p=0.3
+#anova(diet.fm.lme.m)%>%tidy%>%filter(term =="age:treatment")%>%pull(p.value)
+fixef(diet.fm.lme.m)#
+coefficients(diet.fm.lme.m)
 ```
 #Food Intake Data
 ```{r data-entry-intake}
@@ -135,12 +228,12 @@ intake.data<-read_csv(intake.data.raw,
                         kcals.consumed = col_double(),
                         food.cumulative = col_double(),
                         treatment = col_factor(levels = c("eTRF","AL")),
-                        sex = col_factor(levels = NULL)
+                        sex = col_factor(levels = c("female","male"))
                         ))
 ```
 
 #Food Intake
-```{r pre-HFD-intake}
+```{r Fig2D}
 #Table of Cages in Food Intake Analyses
 intake.data %>%
   group_by(sex,treatment) %>%
@@ -151,11 +244,16 @@ intake.data %>%
 #make averaged dataset
 average.intake<-intake.data%>%
    filter(!(week=="5"&cage=="2031"))%>%
+   filter(!(week=="6"&cage=="2031"))%>%
+   filter(!(week=="7"&cage=="2031"))%>%
   group_by(week, diet, treatment, sex)%>%
   summarize_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
 
 #Filter out HFD from dataset
 Pre.HFD.data<-average.intake%>%
+  filter(diet=="NCD")
+
+intake.data.NCD<-intake.data%>%
   filter(diet=="NCD")
 
 #Plot of averaged.intake
@@ -164,10 +262,35 @@ ggplot(Pre.HFD.data, aes(week, kcals.consumed_mean,col = treatment))+
   geom_smooth(aes(col = treatment), se=FALSE, span =0.7)+
   geom_errorbar(aes(ymin = kcals.consumed_mean -kcals.consumed_se, ymax = kcals.consumed_mean +kcals.consumed_se), width = 0.3)+
   facet_grid(.~sex)+
-  labs(title="Food Intake", subtitle = "average kcals per cage per week", y = "Food Intake (kcals)", x="Week")+
+  labs(title="Weekly Food Intake", y = "Food Intake (kcals)", x="Week")+
   scale_color_manual(values = color.scheme)+
    theme(text = element_text(size=16),legend.position = c(0.1,0.80))
 
+
+##Female
+intake.data.NCD.F<-intake.data.NCD%>%
+  filter(sex=="female")
+
+null.week.food.lme.F<-lmer(kcals.consumed ~ 1 + (1|cage), intake.data.NCD.F)
+age.week.food.lme.F<-lmer(kcals.consumed ~ week + (1|cage), intake.data.NCD.F)
+anova(null.week.food.lme.F, age.week.food.lme.F)# no effect of age,p= 0.068
+group.week.food.lme.F<-lmer(kcals.consumed~ week*treatment +(1|cage), intake.data.NCD.F)
+anova(age.week.food.lme.F, group.week.food.lme.F)# effect of group in female(p=0.049)
+fixef(group.week.food.lme.F)
+##Male
+intake.data.NCD.M<-intake.data.NCD%>%
+  filter(sex=="male")
+
+null.week.food.lme.M<-lmer(kcals.consumed ~ 1 + (1|cage), intake.data.NCD.M)
+age.week.food.lme.M<-lmer(kcals.consumed ~ week + (1|cage), intake.data.NCD.M)
+anova(null.week.food.lme.M, age.week.food.lme.M)# effect of age,p= 0.00079
+group.week.food.lme.M<-lmer(kcals.consumed~ week*treatment +(1|cage), intake.data.NCD.M)
+anova(age.week.food.lme.M, group.week.food.lme.M)# no effect of group in male(p=0.60)
+fixef(group.week.food.lme.M)
+```
+
+
+```{r fig2E}
 #cumulative intake plot
 ggplot(Pre.HFD.data, aes(week, food.cumulative_mean, col = treatment))+
   geom_point(aes(col = treatment))+
@@ -175,12 +298,541 @@ ggplot(Pre.HFD.data, aes(week, food.cumulative_mean, col = treatment))+
   geom_errorbar(aes(ymin = food.cumulative_mean -food.cumulative_se, ymax = food.cumulative_mean +food.cumulative_se), width = 0.3)+
   facet_grid(.~sex)+
   labs(x="Week",y="Cumulative Food Intake (kcals)")+
-  ggtitle("Cumulative Food Intake, NCD")+
+  ggtitle("Cumulative Food Intake")+
   scale_color_manual(values = color.scheme)+
   theme(text = element_text(size=16),legend.position = c(0.1,0.80))
 
-#statistics for weekly food intake
 
-#statistics for culumaltive food intake
 
+#statistics for cumulative food intake
+
+##Female
+null.cumu.food.lme.F<-lmer(food.cumulative ~ 1 + (1|cage), intake.data.NCD.F)
+age.cumu.food.lme.F<-lmer(food.cumulative~ week + (1|cage), intake.data.NCD.F)
+anova(null.cumu.food.lme.F, age.cumu.food.lme.F)# effect of age,p< 0.0001
+group.cumu.food.lme.F<-lmer(food.cumulative~ week*treatment +(1|cage), intake.data.NCD.F)
+anova(age.cumu.food.lme.F, group.cumu.food.lme.F)#effect of group in female (p=0.00022)
+fixef(group.cumu.food.lme.F)
+##Male
+null.cumu.food.lme.M<-lmer(food.cumulative ~ 1 + (1|cage), intake.data.NCD.M)
+age.cumu.food.lme.M<-lmer(food.cumulative~ week + (1|cage), intake.data.NCD.M)
+anova(null.cumu.food.lme.M, age.cumu.food.lme.M)# effect of age,p< 0.0001
+group.cumu.food.lme.M<-lmer(food.cumulative~ week*treatment +(1|cage), intake.data.NCD.M)
+anova(age.cumu.food.lme.M, group.cumu.food.lme.M)# no effect of group in male(p=0.34)
+fixef(group.cumu.food.lme.M)
+
+```
+
+```{r Fig2F}
+NCD.ITT.raw.data<-read_csv("NCD.ITT.Offspring.csv",
+                           col_types = cols(
+                             ID = col_factor(levels = NULL),
+                             cage = col_factor(levels = NULL),
+                             time = col_integer(),
+                             glucose = col_double(),
+                             treatment = col_factor(levels = c("eTRF","AL")),
+                             sex = col_factor(levels = c("female","male")),
+                             cohort = col_factor(levels = NULL),
+                             dam = col_factor(levels = NULL),
+                             rel.glucose = col_double()
+                           ))
+
+summary.ITT<-NCD.ITT.raw.data%>%
+  group_by(sex, time, treatment)%>%
+  summarise_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+#plot, time course
+ggplot(summary.ITT, aes(time, glucose_mean))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(aes(col = treatment), se = FALSE)+
+  geom_errorbar(aes(ymin = glucose_mean -glucose_se, ymax = glucose_mean + glucose_se))+
+  facet_grid(.~sex)+
+  scale_color_manual(values = color.scheme )+
+  labs(title = "Insulin Tolerance Test", y = "Blood Glucose (mg/dL)", x = "Time (minutes)")+
+   theme(text = element_text(size=16),legend.position = c(0.9,0.80))
+
+#Stats
+##Males
+NCD.ITT.M<-NCD.ITT.raw.data%>%
+  filter(sex == "male")
+null.NCDITT.lme.m<-lmer(glucose ~ 1 + (1|ID) + (1|dam), data = NCD.ITT.M)
+age.NCDITT.lme.m <-lmer(glucose ~ time + (1|ID) + (1|dam), data = NCD.ITT.M)
+anova(null.NCDITT.lme.m, age.NCDITT.lme.m)#significant, p=0.0062
+diet.NCDITT.lme.m<-lmer(glucose ~ time + treatment + time:treatment + (1|ID) + (1|dam), data = NCD.ITT.M)
+anova(age.NCDITT.lme.m, diet.NCDITT.lme.m)# p=0.062
+fixef(diet.NCDITT.lme.m)
+##Females
+NCD.ITT.F<-NCD.ITT.raw.data%>%
+  filter(sex == "female")
+null.NCDITT.lme.f<-lmer(glucose ~ 1 + (1|ID) + (1|dam), data = NCD.ITT.F)
+age.NCDITT.lme.f <-lmer(glucose ~ time + (1|ID) + (1|dam), data = NCD.ITT.F)
+anova(null.NCDITT.lme.f, age.NCDITT.lme.f)#significant, p=0.0021
+diet.NCDITT.lme.f<-lmer(glucose ~ time + treatment + time:treatment + (1|ID) + (1|dam), data = NCD.ITT.F)
+anova(age.NCDITT.lme.f, diet.NCDITT.lme.f)# p=0.88
+fixef(diet.NCDITT.lme.m)
+```
+
+```{r Fig2G}
+   #FBG
+  FBG.data<- NCD.ITT.raw.data%>%
+     filter(time=="0")%>%
+    group_by(sex, treatment)%>%
+    summarise_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+  #FBG plot
+  ggplot(FBG.data, aes(treatment, glucose_mean, fill = treatment))+
+    geom_col(aes(fill = treatment))+
+    facet_grid(.~sex)+
+    geom_errorbar(aes(ymin = glucose_mean -glucose_se, ymax = glucose_mean + glucose_se), width = 0.3)+
+    scale_fill_manual(values = color.scheme)+
+    labs(title = "Fasting Blood Glucose", y = "Blood Glucose (mg/dL)")+
+   theme(text = element_text(size=16))
+  
+  #stats
+  ##female
+  FBG.stats.F<-NCD.ITT.raw.data%>%
+     filter(time=="0")%>%
+    filter(sex=="female")
+leveneTest(glucose~treatment, FBG.stats.F)#p=0.45, equal variance
+shapiro.test(FBG.stats.F$glucose[FBG.stats.F$treatment=="AL"])#0.5, normal
+shapiro.test(FBG.stats.F$glucose[FBG.stats.F$treatment=="eTRF"])#0.6, normal
+
+t.test(glucose~ treatment, data = FBG.stats.F)#p=0.3
+  ##male
+  FBG.stats.M<-NCD.ITT.raw.data%>%
+     filter(time=="0")%>%
+    filter(sex=="male")
+leveneTest(glucose~treatment, FBG.stats.M)#p=0.92, equal variance
+shapiro.test(FBG.stats.M$glucose[FBG.stats.M$treatment=="AL"])#0.6, normal
+shapiro.test(FBG.stats.M$glucose[FBG.stats.M$treatment=="eTRF"])#0.9, normal
+
+t.test(glucose~ treatment, data = FBG.stats.M)#p=0.2
+  
+```
+
+```{r Fig2H}
+NCD.GTT.data.file<-"NCD.GTT.raw.data.csv"
+NCD.GTT.raw.data<-read_csv(NCD.GTT.data.file,
+    col_types = cols(
+  ID = col_factor(levels = NULL),
+  time = col_integer(),
+  glucose = col_double(),
+  cage = col_factor(levels = NULL),
+  dam = col_factor(levels = NULL),
+  sex = col_factor(levels = NULL),
+  treatment = col_factor(levels = c("eTRF","AL")),
+  cohort = col_factor(levels = NULL)
+  ))
+#Summary data set
+summary.GTT<-NCD.GTT.raw.data%>%
+  group_by(sex, time, treatment)%>%
+  summarise_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+NCD.GTT.raw.data %>%
+  group_by(sex,treatment) %>%
+  distinct(ID, .keep_all = T) %>%
+  count %>%
+  kable(caption="IDS in each group")
+
+#plot, time course
+ggplot(summary.GTT, aes(time, mean))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(aes(col = treatment), se = FALSE)+
+  geom_errorbar(aes(ymin = mean -se, ymax = mean + se))+
+  facet_grid(.~sex)+
+  scale_color_manual(values = color.scheme )+
+  labs(title = "Glucose Tolerance Test", y = "Blood Glucose (mg/dL)", x = "Time (minutes)")+
+   theme(text = element_text(size=16),legend.position = c(0.4,0.80))
+
+#Stats
+##Males
+NCD.GTT.M<-NCD.GTT.raw.data%>%
+  filter(sex == "male")
+null.NCDGTT.lme.m<-lmer(glucose ~ 1 + (1|ID) + (1|dam), data = NCD.GTT.M)
+age.NCDGTT.lme.m <-lmer(glucose ~ time + (1|ID) + (1|dam), data = NCD.GTT.M)
+anova(null.NCDGTT.lme.m, age.NCDGTT.lme.m)#significant, p=0.0062
+diet.NCDGTT.lme.m<-lmer(glucose ~ time + treatment + time:treatment + (1|ID) + (1|dam), data = NCD.GTT.M)
+anova(age.NCDGTT.lme.m, diet.NCDGTT.lme.m)# p=0.17
+fixef(diet.NCDGTT.lme.m)
+##Females
+NCD.ITT.F<-NCD.GTT.raw.data%>%
+  filter(sex == "female")
+null.NCDITT.lme.f<-lmer(glucose ~ 1 + (1|ID) + (1|dam), data = NCD.ITT.F)
+age.NCDITT.lme.f <-lmer(glucose ~ time + (1|ID) + (1|dam), data = NCD.ITT.F)
+anova(null.NCDITT.lme.f, age.NCDITT.lme.f)#significant, p=0.0021
+diet.NCDITT.lme.f<-lmer(glucose ~ time + treatment + time:treatment + (1|ID) + (1|dam), data = NCD.ITT.F)
+anova(age.NCDITT.lme.f, diet.NCDITT.lme.f)# p=0.79
+fixef(diet.NCDITT.lme.m)
+```
+#Post HFD analysis(PND 70-sacrifice)
+
+```{r Fig3A}
+#Body Weight data table
+BW.data.HFD<-filter(MRI.raw.data, assay=="Body Weight")%>%
+  filter(age>=70)%>%
+  group_by(age, treatment, sex)%>%
+  summarize_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+##Body Weight plot
+ggplot(BW.data.HFD,aes(age, gram.values_mean, col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(span = 0.7,aes(col = treatment), se = FALSE)+
+  facet_grid(.~sex)+
+  scale_color_manual(values = c("gray36", "gray69"))+
+  labs(title = "Offspring Body Weight", y = "Body weight (grams)",x="Age (days)")+
+  theme(text = element_text(size=16),legend.position = c(0.9,0.19))
+
+#Females
+#female body weight data set
+HFD.BW.data.females<-MRI.raw.data%>%
+  filter(age>=70)%>%
+  filter(sex=="female")%>%
+  filter(assay=="Body Weight")
+#mixed linear models
+HFD.null.bw.lme.f<-lmer(gram.values ~ 1 + (1|MouseID) + (1|dam), data = HFD.BW.data.females)
+HFD.age.bw.lme.f <-lmer(gram.values ~ age + (1|MouseID) + (1|dam), data = HFD.BW.data.females)
+anova(HFD.null.bw.lme.f, HFD.age.bw.lme.f)#significant effect of age
+HFD.diet.bw.lme.f<-lmer(gram.values ~ treatment+age +age:treatment + (1|MouseID) + (1|dam), data = HFD.BW.data.females)
+anova(HFD.age.bw.lme.f, HFD.diet.bw.lme.f)#no diet age interaction, p=0.073
+#anova(HFD.diet.bw.lme.f)%>%tidy%>%kable()
+#anova(diet.bw.lme.f)%>%tidy%>%filter(term =="age:treatment")%>%pull(p.value)
+F.BW.effect<-fixef(HFD.diet.bw.lme.f)
+#Males
+#male body weight data set
+BW.data.males<-MRI.raw.data%>%
+  filter(age<70)%>%
+  filter(Sex=="M")%>%
+  filter(assay=="Body Weight")
+
+null.bw.lme.m<-lmer(gram.values ~ 1 + (1|MouseID) + (1|dam), data = BW.data.males)
+age.bw.lme.m <-lmer(gram.values ~ age + (1|MouseID) + (1|dam), data = BW.data.males)
+anova(null.bw.lme.m, age.bw.lme.m)#significant
+diet.bw.lme.m<-lmer(gram.values ~ treatment+age +age:treatment + (1|MouseID) + (1|dam), data = BW.data.males)
+anova(age.bw.lme.m, diet.bw.lme.m)#NOT SIGNIFICANT, p=0.7
+anova(diet.bw.lme.m)
+fixef(diet.bw.lme.m)
+
+```
+
+
+```{r Fig3B}
+#Fat Mass data table
+FM.data.HFD<-filter(MRI.raw.data, assay=="Total Fat Mass")%>%
+  filter(age>=70)%>%
+  group_by(age, treatment, sex)%>%
+  summarize_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+##Fat Mass plot
+ggplot(FM.data.HFD,aes(age, gram.values_mean, col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(span = 0.7,aes(col = treatment), se = FALSE)+
+  facet_grid(.~sex)+
+  scale_color_manual(values = c("gray36", "gray69"))+
+  labs(title = "Offspring Fat Mass", y = "Fat Mass (grams)",x="Age (days)")+
+  theme(text = element_text(size=16),legend.position = c(0.9,0.19))
+
+#Females
+#female fat mass data set
+HFD.FM.data.females<-MRI.raw.data%>%
+  filter(age>=70)%>%
+  filter(sex=="female")%>%
+  filter(assay=="Total Fat Mass")
+#mixed linear models
+HFD.null.fm.lme.f<-lmer(gram.values ~ 1 + (1|MouseID) + (1|dam), data = HFD.FM.data.females)
+HFD.age.fm.lme.f <-lmer(gram.values ~ age + (1|MouseID) + (1|dam), data = HFD.FM.data.females)
+anova(HFD.null.fm.lme.f, HFD.age.fm.lme.f)#significant effect of age
+HFD.diet.fm.lme.f<-lmer(gram.values ~ treatment+age +age:treatment + (1|MouseID) + (1|dam), data = HFD.FM.data.females)
+anova(HFD.age.fm.lme.f, HFD.diet.fm.lme.f)#p=0.30
+fixef(HFD.diet.fm.lme.f)
+##males
+#male fat mass data set
+HFD.FM.data.males<-MRI.raw.data%>%
+  filter(age>=70)%>%
+  filter(sex=="male")%>%
+  filter(assay=="Total Fat Mass")
+#mixed linear models
+HFD.null.fm.lme.m<-lmer(gram.values ~ 1 + (1|MouseID) + (1|dam), data = HFD.FM.data.males)
+HFD.age.fm.lme.m <-lmer(gram.values ~ age + (1|MouseID) + (1|dam), data = HFD.FM.data.males)
+anova(HFD.null.fm.lme.m, HFD.age.fm.lme.m)#significant effect of age
+HFD.diet.fm.lme.m<-lmer(gram.values ~ treatment+age +age:treatment + (1|MouseID) + (1|dam), data = HFD.FM.data.males)
+anova(HFD.age.fm.lme.m, HFD.diet.fm.lme.m)#p=0.075
+fixef(HFD.diet.fm.lme.m)
+```
+
+```{r Fig3C}
+#Lean Mass data table
+LM.data.HFD<-filter(MRI.raw.data, assay=="Lean Mass")%>%
+  filter(age>=70)%>%
+  group_by(age, treatment, sex)%>%
+  summarize_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+##Lean Mass plot
+ggplot(LM.data.HFD,aes(age, gram.values_mean, col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(span = 0.7,aes(col = treatment), se = FALSE)+
+  facet_grid(.~sex)+
+  scale_color_manual(values = c("gray36", "gray69"))+
+  labs(title = "Offspring Lean Mass", y = "Lean Mass (grams)",x="Age (days)")+
+  theme(text = element_text(size=16),legend.position = c(0.9,0.19))
+#stats
+##females
+#female fat mass data set
+HFD.LM.data.females<-MRI.raw.data%>%
+  filter(age>=70)%>%
+  filter(sex=="female")%>%
+  filter(assay=="Lean Mass")
+#mixed linear models
+HFD.null.lm.lme.f<-lmer(gram.values ~ 1 + (1|MouseID) + (1|dam), data = HFD.LM.data.females)
+HFD.age.lm.lme.f <-lmer(gram.values ~ age + (1|MouseID) + (1|dam), data = HFD.LM.data.females)
+anova(HFD.null.lm.lme.f, HFD.age.lm.lme.f)#significant effect of age
+HFD.diet.lm.lme.f<-lmer(gram.values ~ treatment+age +age:treatment + (1|MouseID) + (1|dam), data = HFD.LM.data.females)
+anova(HFD.age.lm.lme.f, HFD.diet.lm.lme.f)#p=0.85
+fixef(HFD.diet.lm.lme.f)
+##males
+#male fat mass data set
+HFD.LM.data.males<-MRI.raw.data%>%
+  filter(age>=70)%>%
+  filter(sex=="male")%>%
+  filter(assay=="Lean Mass")
+#mixed linear models
+HFD.null.lm.lme.m<-lmer(gram.values ~ 1 + (1|MouseID) + (1|dam), data = HFD.LM.data.males)
+HFD.age.lm.lme.m <-lmer(gram.values ~ age + (1|MouseID) + (1|dam), data = HFD.LM.data.males)
+anova(HFD.null.lm.lme.m, HFD.age.lm.lme.m)#significant effect of age
+HFD.diet.lm.lme.m<-lmer(gram.values ~ treatment+age +age:treatment + (1|MouseID) + (1|dam), data = HFD.LM.data.males)
+anova(HFD.age.lm.lme.m, HFD.diet.lm.lme.m)#p=0.28
+fixef(HFD.diet.lm.lme.m)
+```
+
+```{r Fig3D}
+#Filter out NCD from dataset
+HFD.data<-average.intake%>%
+  filter(diet=="HFD")
+
+intake.data.HFD<-intake.data%>%
+  filter(diet=="HFD")
+
+#Plot of averaged.intake
+ggplot(HFD.data, aes(week, kcals.consumed_mean,col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(aes(col = treatment), se=FALSE, span =0.7)+
+  geom_errorbar(aes(ymin = kcals.consumed_mean -kcals.consumed_se, ymax = kcals.consumed_mean +kcals.consumed_se), width = 0.3)+
+  facet_grid(.~sex)+
+  labs(title="Weekly Food Intake", y = "Food Intake (kcals)", x="Week")+
+  scale_color_manual(values = color.scheme)+
+   theme(text = element_text(size=16),legend.position = c(0.9,0.80))
+
+#stats
+intake.data.HFD.F<-intake.data.HFD%>%
+  filter(sex=="female")
+
+null.week.HFD.food.lme.F<-lmer(kcals.consumed ~ 1 + (1|cage), intake.data.HFD.F)
+age.week.HFD.food.lme.F<-lmer(kcals.consumed ~ week + (1|cage), intake.data.HFD.F)
+anova(null.week.HFD.food.lme.F, age.week.HFD.food.lme.F)# no effect of age,p= 0.068
+group.week.HFD.food.lme.F<-lmer(kcals.consumed~ week*treatment +(1|cage), intake.data.HFD.F)
+anova(age.week.HFD.food.lme.F, group.week.HFD.food.lme.F)# no effect of group in female(p=0.76)
+fixef(group.week.HFD.food.lme.F)
+##Male
+intake.data.HFD.M<-intake.data.HFD%>%
+  filter(sex=="male")
+
+null.week.HFD.food.lme.M<-lmer(kcals.consumed ~ 1 + (1|cage), intake.data.HFD.M)
+age.week.HFD.food.lme.M<-lmer(kcals.consumed ~ week + (1|cage), intake.data.HFD.M)
+anova(null.week.HFD.food.lme.M, age.week.HFD.food.lme.M)# no effect of age,p= 0.068
+group.week.HFD.food.lme.M<-lmer(kcals.consumed~ week*treatment +(1|cage), intake.data.HFD.M)
+anova(age.week.HFD.food.lme.M, group.week.HFD.food.lme.M)# no effect of group in female(p=0.57)
+fixef(group.week.HFD.food.lme.M)
+```
+
+
+```{r Fig3E}
+
+HFD.data.filtered<-HFD.data%>%
+  filter(!(week == 15))
+#Plot of  cumulative intake
+ggplot(HFD.data.filtered, aes(week, food.cumulative_mean,col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(aes(col = treatment), se=FALSE, span =0.7)+
+  geom_errorbar(aes(ymin = food.cumulative_mean -food.cumulative_se, ymax = food.cumulative_mean +food.cumulative_se), width = 0.3)+
+  facet_grid(.~sex)+
+  labs(title="Cumulative Food Intake", y = "Cumulative Food Intake (kcals)", x="Week")+
+  scale_color_manual(values = color.scheme)+
+   theme(text = element_text(size=16),legend.position = c(0.1,0.80))
+
+#statistics
+##Female
+null.cumu.HFD.food.lme.F<-lmer(food.cumulative ~ 1 + (1|cage), intake.data.HFD.F)
+age.cumu.HFD.food.lme.F<-lmer(food.cumulative~ week + (1|cage), intake.data.HFD.F)
+anova(null.cumu.HFD.food.lme.F, age.cumu.HFD.food.lme.F)# effect of age,p< 0.0001
+group.cumu.HFD.food.lme.F<-lmer(food.cumulative~ week*treatment +(1|cage), intake.data.HFD.F)
+anova(age.cumu.HFD.food.lme.F, group.cumu.HFD.food.lme.F)# noeffect of group in female (p=0.47)
+fixef(group.cumu.HFD.food.lme.F)
+##Male
+null.cumu.HFD.food.lme.M<-lmer(food.cumulative ~ 1 + (1|cage), intake.data.HFD.M)
+age.cumu.HFD.food.lme.M<-lmer(food.cumulative~ week + (1|cage), intake.data.HFD.M)
+anova(null.cumu.HFD.food.lme.M, age.cumu.HFD.food.lme.M)# effect of age,p< 0.0001
+group.cumu.HFD.food.lme.M<-lmer(food.cumulative~ week*treatment +(1|cage), intake.data.HFD.M)
+anova(age.cumu.HFD.food.lme.M, group.cumu.HFD.food.lme.M)# no effect of group in male(p=0.55)
+fixef(group.cumu.HFD.food.lme.M)
+
+```
+
+
+```{r Fig3F}
+#High fat diet Insulin tolerance test
+HFD.ITT.file <-"HFD.ITT.Offspring.csv"
+HFD.ITT.raw.data<-read_csv(HFD.ITT.file,
+                           col_types = cols(
+                             cage = col_factor(levels = NULL),
+                               ID = col_factor(levels = NULL),
+                               time = col_integer(),
+                               glucose = col_double(),
+                               crash = col_factor(levels = NULL),
+                               dam = col_factor(levels = NULL),
+                               cohort = col_factor(levels = NULL),
+                               treatment = col_factor(levels = c("eTRF","AL")),
+                               sex = col_factor(levels = c("female","male")),
+                               rel.glucose = col_double()
+                           ))
+
+#Summary data set
+summary.HFD.ITT<-HFD.ITT.raw.data%>%
+  group_by(sex, time, treatment)%>%
+  summarise_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+HFD.ITT.raw.data %>%
+  group_by(sex,treatment) %>%
+  distinct(ID, .keep_all = T) %>%
+  count %>%
+  kable(caption="IDS in each group")
+
+#plot, time course
+ggplot(summary.HFD.ITT, aes(time, glucose_mean))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(aes(col = treatment), se = FALSE)+
+  geom_errorbar(aes(ymin = glucose_mean - glucose_se, ymax = glucose_mean + glucose_se))+
+  facet_grid(.~sex)+
+  scale_color_manual(values = color.scheme )+
+  labs(title = "Insulin Tolerance Test", y = "Blood Glucose (mg/dL)", x = "Time (minutes)")+
+   theme(text = element_text(size=16),legend.position = c(0.4,0.80))
+
+#Stats
+##Males
+HFD.ITT.M<-HFD.ITT.raw.data%>%
+  filter(sex == "male")
+null.HFD.ITT.lme.m<-lmer(glucose ~ 1 + (1|ID) + (1|dam), data = HFD.ITT.M)
+age.HFD.ITT.lme.m <-lmer(glucose ~ time + (1|ID) + (1|dam), data = HFD.ITT.M)
+anova(null.HFD.ITT.lme.m, age.HFD.ITT.lme.m)#significant, p=0.0062
+diet.HFD.ITT.lme.m<-lmer(glucose ~ time + treatment + time:treatment + (1|ID) + (1|dam), data = HFD.ITT.M)
+anova(age.HFD.ITT.lme.m, diet.HFD.ITT.lme.m)# p=0.17
+fixef(diet.HFD.ITT.lme.m)
+##females
+##Males
+HFD.ITT.F<-HFD.ITT.raw.data%>%
+  filter(sex == "female")
+null.HFD.ITT.lme.f<-lmer(glucose ~ 1 + (1|ID) + (1|dam), data = HFD.ITT.F)
+age.HFD.ITT.lme.f <-lmer(glucose ~ time + (1|ID) + (1|dam), data = HFD.ITT.F)
+anova(null.HFD.ITT.lme.f, age.HFD.ITT.lme.f)#significant, p=0.0062
+diet.HFD.ITT.lme.f<-lmer(glucose ~ time + treatment + time:treatment + (1|ID) + (1|dam), data = HFD.ITT.F)
+anova(age.HFD.ITT.lme.f, diet.HFD.ITT.lme.f)# p=0.85
+fixef(diet.HFD.ITT.lme.f)
+```
+
+```{r Fig3G}
+#generate HFD ITT data set
+HFD.FBG.data<-HFD.ITT.raw.data%>%
+  filter(time=="0")
+#HFD ITT summary data set
+summary.HFD.FBG<-HFD.FBG.data%>%
+  group_by(sex, treatment)%>%
+  summarise_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+#plot
+ggplot(summary.HFD.FBG,  aes(treatment, glucose_mean, fill = treatment))+
+  geom_col(aes(fill = treatment))+
+  facet_grid(.~sex)+
+  scale_fill_manual(values = color.scheme)+
+  geom_errorbar(aes(ymin = glucose_mean - glucose_se, ymax = glucose_mean + glucose_se), width = 0.3)+
+  labs(title = "Fasting Blood Glucose", y = "Blood Glucose (mg/dL)")+
+   theme(text = element_text(size=16))
+
+ #stats
+  ##female
+  HFD.FBG.stats.F<-HFD.ITT.raw.data%>%
+     filter(time=="0")%>%
+    filter(sex=="female")
+leveneTest(glucose~treatment, HFD.FBG.stats.F)#p=0.76, equal variance
+shapiro.test(HFD.FBG.stats.F$glucose[HFD.FBG.stats.F$treatment=="AL"])#0.6, normal
+shapiro.test(HFD.FBG.stats.F$glucose[HFD.FBG.stats.F$treatment=="eTRF"])#0.99, normal
+
+t.test(glucose~ treatment, data = HFD.FBG.stats.F)#p=0.2
+  ##male
+  HFD.FBG.stats.M<-HFD.ITT.raw.data%>%
+     filter(time=="0")%>%
+    filter(sex=="male")
+leveneTest(glucose~treatment, HFD.FBG.stats.M)#p=0.34, equal variance
+shapiro.test(HFD.FBG.stats.M$glucose[HFD.FBG.stats.M$treatment=="AL"])#0.9, normal
+shapiro.test(HFD.FBG.stats.M$glucose[HFD.FBG.stats.M$treatment=="eTRF"])#0.3, normal
+
+t.test(glucose~ treatment, data = HFD.FBG.stats.M)#p=0.4
+```
+
+
+```{r Fig3H}
+#Glucose tolerance test
+HFD.GTT.file<-"HFD.GTT.Offspring.csv"
+HFD.GTT.raw.data<-read_csv(HFD.GTT.file,
+                           col_types = cols(
+                             cage = col_factor(levels = NULL),
+                               ID = col_factor(levels = NULL),
+                               time = col_integer(),
+                               glucose = col_double(),
+                               dam = col_factor(levels = NULL),
+                               cohort = col_factor(levels = NULL),
+                               treatment = col_factor(levels = c("eTRF","AL")),
+                               sex = col_factor(levels = c("female","male")),
+                               rel.glucose = col_double()
+                           ))
+
+##summary dataset
+summary.HFD.GTT<-HFD.GTT.raw.data%>%
+  group_by(sex, treatment, time)%>%
+  summarise_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+#Plot
+ggplot(summary.HFD.GTT, aes(time, glucose_mean, col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(aes(col = treatment), se = FALSE)+
+  geom_errorbar(aes(ymin = glucose_mean - glucose_se, ymax = glucose_mean + glucose_se))+
+  facet_grid(.~sex)+
+  scale_color_manual(values = color.scheme )+
+  labs(title = "Glucose Tolerance Test", y = "Blood Glucose (mg/dL)", x = "Time (minutes)")+
+   theme(text = element_text(size=16),legend.position = c(0.4,0.80))
+
+#Stats
+##Males
+HFD.GTT.M<-HFD.GTT.raw.data%>%
+  filter(sex == "male")
+null.HFD.GTT.lme.m<-lmer(glucose ~ 1 + (1|ID) + (1|dam), data = HFD.GTT.M)
+age.HFD.GTT.lme.m <-lmer(glucose ~ time + (1|ID) + (1|dam), data = HFD.GTT.M)
+anova(null.HFD.GTT.lme.m, age.HFD.GTT.lme.m)#significant, p=0.0062
+diet.HFD.GTT.lme.m<-lmer(glucose ~ time + treatment + time:treatment + (1|ID) + (1|dam), data = HFD.GTT.M)
+anova(age.HFD.GTT.lme.m, diet.HFD.GTT.lme.m)# p=0.14
+fixef(diet.HFD.GTT.lme.m)
+##females
+HFD.GTT.F<-HFD.GTT.raw.data%>%
+  filter(sex == "female")
+null.HFD.GTT.lme.f<-lmer(glucose ~ 1 + (1|ID) + (1|dam), data = HFD.GTT.F)
+age.HFD.GTT.lme.f <-lmer(glucose ~ time + (1|ID) + (1|dam), data = HFD.GTT.F)
+anova(null.HFD.GTT.lme.f, age.HFD.GTT.lme.f)#significant, p=0.0062
+diet.HFD.GTT.lme.f<-lmer(glucose ~ time + treatment + time:treatment + (1|ID) + (1|dam), data = HFD.GTT.F)
+anova(age.HFD.GTT.lme.f, diet.HFD.GTT.lme.f)# p=0.61
+fixef(diet.HFD.GTT.lme.f)
+```
+#maternal counts
+```{r maternal-info}
+MRI.raw.data %>%
+  group_by(dam,treatment) %>%
+    distinct(dam) %>%
+  group_by(treatment)%>%
+  count(treatment) %>%
+  kable(caption="Dams per feeding group")
 ```
