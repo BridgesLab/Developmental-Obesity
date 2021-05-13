@@ -50,7 +50,7 @@ MRI.raw.data<-read_csv(MRI.data.file,
   values = col_double(),
   assay = col_factor(levels = NULL),
   experiment.date = col_date(format = ""),
-  treatment = col_factor(levels = c("AL","eTRF")),
+  treatment = col_factor(levels = c("eTRF","AL")),
   dam = col_factor(levels = NULL),
   cohort = col_factor(levels = NULL),
   gram.values = col_double()))
@@ -71,7 +71,7 @@ MRI.raw.data %>%
   kable(caption="Animals in each group of this cohort")
 #Body Weight data table
 BW.data<-filter(MRI.raw.data, assay=="Body Weight")%>%
-  filter(age<70)%>%
+  filter()%>%
   group_by(age, treatment, sex)%>%
   summarize_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
 ##Body Weight plot
@@ -81,7 +81,7 @@ ggplot(BW.data,aes(age, gram.values_mean, col = treatment))+
   facet_grid(.~sex)+
   scale_color_manual(values = color.scheme)+
   labs(title = "Offspring Body Weight", y = "Body weight (grams)",x="Age (days)")+
-  theme(text = element_text(size=16),legend.position = c(0.9,0.19))
+  theme(text = element_text(size=18),legend.position = c(0.9,0.19))
 
 #all
 BW.data.all<-MRI.raw.data%>%
@@ -96,8 +96,8 @@ diet.bw.lme<-lmer(gram.values ~ treatment+age +age:treatment + (1|MouseID) + (1|
 sex.bw.lme<-lmer(gram.values~ age + treatment*sex +(1|MouseID) + (1|dam), data = BW.data.all) 
 anova(sex.bw.lme, diet.bw.lme)#p<0.0001
 Anova(sex.bw.lme)%>%tidy()%>%kable()
-anova(age.bw.lme, diet.bw.lme)%>%tidy()%>%kable()
-#anova(diet.bw.lme.f)%>%tidy%>%filter(term =="age:treatment")%>%pull(p.value)
+anova(age.bw.lme, diet.bw.lme)%>%tidy()%>%kable()#p=0.042
+anova(diet.bw.lme)%>%tidy%>%filter(term =="age:treatment")%>%pull(p.value)
 ```
 There is a significant interaction of age and treatment in females where age-matched AL female have a ,p-value.
 
@@ -114,7 +114,7 @@ ggplot(LM.data,aes(age, gram.values_mean, col = treatment))+
   facet_grid(.~sex)+
   scale_color_manual(values = color.scheme)+
   labs(title = "Offspring Lean Mass", y = "Lean Mass (grams)",x="Age (days)")+
-  theme(text = element_text(size=16),legend.position = c(0.9,0.80))
+  theme(text = element_text(size=18),legend.position = c(0.9,0.80))
 
 #stats
 LM.data.all<-MRI.raw.data%>%
@@ -144,7 +144,7 @@ ggplot(FM.data,aes(age, gram.values_mean, col = treatment))+
   facet_grid(.~sex)+
   scale_color_manual(values = color.scheme)+
   labs(title = "Offspring Fat Mass", y = "Fat Mass (grams)",x="Age (days)")+
-  theme(text = element_text(size=16),legend.position = c(0.9,0.80))
+  theme(text = element_text(size=18),legend.position = c(0.9,0.80))
 #Stats
 FM.data.all<-MRI.raw.data%>%
   filter(assay=="Total Fat Mass")%>%
@@ -192,7 +192,7 @@ intake.data %>%
 
 #make averaged dataset
 average.intake<-intake.data%>%
-   filter(!(week=="5"&cage=="2031"))%>%
+   filter(!(week=="5"&cage=="2031"))%>%#cage 2031 shredded diet these weeks and estimates of intake are unreliable
    filter(!(week=="6"&cage=="2031"))%>%
    filter(!(week=="7"&cage=="2031"))%>%
   group_by(week, diet, treatment, sex)%>%
@@ -213,7 +213,7 @@ ggplot(Pre.HFD.data, aes(week, kcals.consumed_mean,col = treatment))+
   facet_grid(.~sex)+
   labs(title="Weekly Food Intake", y = "Food Intake (kcals)", x="Week")+
   scale_color_manual(values = color.scheme)+
-   theme(text = element_text(size=16),legend.position = c(0.1,0.80))
+   theme(text = element_text(size=18),legend.position = c(0.1,0.80))
 
 ##all
 
@@ -256,7 +256,7 @@ ggplot(Pre.HFD.data, aes(week, food.cumulative_mean, col = treatment))+
   labs(x="Week",y="Cumulative Food Intake (kcals)")+
   ggtitle("Cumulative Food Intake")+
   scale_color_manual(values = color.scheme)+
-  theme(text = element_text(size=16),legend.position = c(0.1,0.80))
+  theme(text = element_text(size=18),legend.position = c(0.1,0.80))
 
 #statistics for cumulative food intake
 null.cumu.food.lme<-lmer(food.cumulative ~ 1 + (1|cage), intake.data.NCD)
@@ -300,7 +300,7 @@ ggplot(summary.ITT, aes(time, glucose_mean))+
   facet_grid(.~sex)+
   scale_color_manual(values = color.scheme )+
   labs(title = "Insulin Tolerance Test", y = "Blood Glucose (mg/dL)", x = "Time (minutes)")+
-   theme(text = element_text(size=16),legend.position = c(0.9,0.80))
+   theme(text = element_text(size=18),legend.position = c(0.9,0.80))
 
 #Stats
 
@@ -328,7 +328,7 @@ ggplot(AUC.NCD.ITT.summary, aes(treatment,AUC_mean))+
   facet_grid(.~sex)+
   scale_fill_manual(values = color.scheme )+
   labs(title = "ITT Area Under the Curve", y = "Avg AUC (mg/dL)")+
-   theme(text = element_text(size=16),legend.position = c(0.9,0.20))
+   theme(text = element_text(size=18),legend.position = c(0.9,0.20))
 #AUC stats
 ITT.AUC.NCD.aov<-aov(AUC ~treatment + sex , NCD.ITT.raw.data)# no interaction
 Anova(ITT.AUC.NCD.aov)
@@ -347,7 +347,7 @@ Anova(ITT.AUC.NCD.aov)
     geom_errorbar(aes(ymin = glucose_mean -glucose_se, ymax = glucose_mean + glucose_se), width = 0.3)+
     scale_fill_manual(values = color.scheme)+
     labs(title = "Fasting Blood Glucose", y = "Blood Glucose (mg/dL)")+
-   theme(text = element_text(size=16),legend.position = c(0.9,0.20))
+   theme(text = element_text(size=18),legend.position = c(0.9,0.20))
   
   #stats
   
@@ -392,11 +392,11 @@ NCD.GTT.raw.data %>%
 ggplot(summary.GTT, aes(time, glucose_mean))+
   geom_point(aes(col = treatment))+
   geom_smooth(aes(col = treatment), se = FALSE)+
-  geom_errorbar(aes(ymin = glucose_mean -glucose_se, ymax = glucose_mean + glucose_se))+
+  geom_errorbar(aes(ymin = glucose_mean -glucose_se, ymax = glucose_mean + glucose_se),)+
   facet_grid(.~sex)+
   scale_color_manual(values = color.scheme )+
   labs(title = "Glucose Tolerance Test", y = "Blood Glucose (mg/dL)", x = "Time (minutes)")+
-   theme(text = element_text(size=16),legend.position = c(0.4,0.80))
+   theme(text = element_text(size=18),legend.position = c(0.4,0.80))
 
 #Stats
 ##ALl
@@ -423,7 +423,7 @@ ggplot(AUC.NCD.GTT.summary, aes(treatment, AUC_mean))+
   facet_grid(.~sex)+
   scale_fill_manual(values = color.scheme )+
   labs(title = "GTT Area Under the Curve", y = "Avg AUC (mg/dL)")+
-   theme(text = element_text(size=16),legend.position = c(0.9,0.20))
+   theme(text = element_text(size=18),legend.position = c(0.9,0.20))
 #AUC stats
 GTT.AUC.NCD.aov<-aov(AUC ~treatment * sex , NCD.GTT.raw.data)# significant interaction
 Anova(GTT.AUC.NCD.aov)
@@ -443,9 +443,9 @@ ggplot(BW.data.HFD,aes(age, gram.values_mean, col = treatment))+
   geom_point(aes(col = treatment))+
   geom_smooth(span = 0.7,aes(col = treatment), se = FALSE)+
   facet_grid(.~sex)+
-  scale_color_manual(values = c("gray36", "gray69"))+
+  scale_color_manual(values = color.scheme)+
   labs(title = "Offspring Body Weight", y = "Body weight (grams)",x="Age (days)")+
-  theme(text = element_text(size=16),legend.position = c(0.9,0.19))
+  theme(text = element_text(size=18),legend.position = c(0.9,0.19))
 
 #ALL
 HFD.BW.data<-MRI.raw.data%>%
@@ -479,9 +479,9 @@ ggplot(FM.data.HFD,aes(age, gram.values_mean, col = treatment))+
   geom_point(aes(col = treatment))+
   geom_smooth(span = 0.7,aes(col = treatment), se = FALSE)+
   facet_grid(.~sex)+
-  scale_color_manual(values = c("gray36", "gray69"))+
+  scale_color_manual(values =color.scheme)+
   labs(title = "Offspring Fat Mass", y = "Fat Mass (grams)",x="Age (days)")+
-  theme(text = element_text(size=16),legend.position = c(0.9,0.19))
+  theme(text = element_text(size=18),legend.position = c(0.9,0.19))
 
 #All
 HFD.FM.data<-MRI.raw.data%>%
@@ -511,9 +511,9 @@ ggplot(LM.data.HFD,aes(age, gram.values_mean, col = treatment))+
   geom_point(aes(col = treatment))+
   geom_smooth(span = 0.7,aes(col = treatment), se = FALSE)+
   facet_grid(.~sex)+
-  scale_color_manual(values = c("gray36", "gray69"))+
+  scale_color_manual(values = color.scheme)+
   labs(title = "Offspring Lean Mass", y = "Lean Mass (grams)",x="Age (days)")+
-  theme(text = element_text(size=16),legend.position = c(0.9,0.19))
+  theme(text = element_text(size=18),legend.position = c(0.9,0.19))
 #stats
 HFD.LM.data<-MRI.raw.data%>%
   filter(age>=70)%>%
@@ -545,7 +545,7 @@ ggplot(HFD.data, aes(week, kcals.consumed_mean,col = treatment))+
   facet_grid(.~sex)+
   labs(title="Weekly Food Intake", y = "Food Intake (kcals)", x="Week")+
   scale_color_manual(values = color.scheme)+
-   theme(text = element_text(size=16),legend.position = c(0.9,0.80))
+   theme(text = element_text(size=18),legend.position = c(0.9,0.80))
 
 #stats
 intake.data.HFD.F<-intake.data.HFD%>%
@@ -582,7 +582,7 @@ ggplot(HFD.data.filtered, aes(week, food.cumulative_mean,col = treatment))+
   facet_grid(.~sex)+
   labs(title="Cumulative Food Intake", y = "Cumulative Food Intake (kcals)", x="Week")+
   scale_color_manual(values = color.scheme)+
-   theme(text = element_text(size=16),legend.position = c(0.1,0.80))
+   theme(text = element_text(size=18),legend.position = c(0.1,0.80))
 
 #statistics
 ##ALL
@@ -638,7 +638,7 @@ ggplot(summary.HFD.ITT, aes(time, glucose_mean))+
   facet_grid(.~sex)+
   scale_color_manual(values = color.scheme )+
   labs(title = "Insulin Tolerance Test", y = "Blood Glucose (mg/dL)", x = "Time (minutes)")+
-   theme(text = element_text(size=16),legend.position = c(0.4,0.80))
+   theme(text = element_text(size=18),legend.position = c(0.4,0.80))
 
 #Stats
 ##all
@@ -683,8 +683,8 @@ ggplot( AUC.ITT.HFD.summary,aes(treatment, AUC_mean))+
   geom_errorbar(aes(ymin = AUC_mean - AUC_se, ymax = AUC_mean + AUC_se), width = 0.3)+
   facet_grid(.~sex)+
   scale_fill_manual(values = color.scheme )+
-  labs(title = "Glucose Area Under the Curve", y = " Avg Blood Glucose (mg/dL)")+
-   theme(text = element_text(size=16),legend.position = c(0.4,0.80))
+  labs(title = "ITT Area Under the Curve", y = " Avg Blood Glucose (mg/dL)")+
+   theme(text = element_text(size=18),legend.position = c(0.4,0.80))
 
 ##stats
 HFD.ITT.AUC.aov<-aov(AUC~sex*treatment, HFD.ITT.raw.data)# effect of interaction
@@ -726,7 +726,7 @@ ggplot(summary.HFD.FBG,  aes(treatment, glucose_mean, fill = treatment))+
   scale_fill_manual(values = color.scheme)+
   geom_errorbar(aes(ymin = glucose_mean - glucose_se, ymax = glucose_mean + glucose_se), width = 0.3)+
   labs(title = "Fasting Blood Glucose", y = "Blood Glucose (mg/dL)")+
-   theme(text = element_text(size=16),legend.position = c(0.9,0.20))
+   theme(text = element_text(size=18),legend.position = c(0.9,0.20))
 
  #stats
 
@@ -765,7 +765,7 @@ ggplot(summary.HFD.GTT, aes(time, glucose_mean, col = treatment))+
   facet_grid(.~sex)+
   scale_color_manual(values = color.scheme )+
   labs(title = "Glucose Tolerance Test", y = "Blood Glucose (mg/dL)", x = "Time (minutes)")+
-   theme(text = element_text(size=16),legend.position = c(0.4,0.80))
+   theme(text = element_text(size=18),legend.position = c(0.4,0.80))
 
 #Stats
 ##ALL
@@ -811,7 +811,7 @@ ggplot( AUC.GTT.HFD.summary,aes(treatment, AUC_mean))+
   facet_grid(.~sex)+
   scale_fill_manual(values = color.scheme )+
   labs(title = "GTT Area Under the Curve", y = " Avg Blood Glucose (mg/dL)")+
-   theme(text = element_text(size=16),legend.position = c(0.8,0.19))
+   theme(text = element_text(size=18),legend.position = c(0.8,0.19))
 
 ##stats
 HFD.GTT.AUC.aov<-aov(AUC~sex*treatment, HFD.GTT.raw.data)# effect of interaction
@@ -868,7 +868,7 @@ ggplot(summary.GSIS, aes(time,full.conc_mean))+
   geom_errorbar(aes(ymin = full.conc_mean-full.conc_se, ymax = full.conc_mean+full.conc_se), position = position_dodge2())+
    scale_fill_manual(values = c('gray69','gray36'))+
   labs(title = "Glucose Stimulated Insulin Secretion", y = "Insulin (ng/mL)", x = "Time (minutes)")+
-   theme(text = element_text(size=16),legend.position = c(0.1,0.8))
+   theme(text = element_text(size=18),legend.position = c(0.1,0.8))
 ##Stats
 null.GSIS.lme<-lmer(full.conc~ 1 + (1|ID), GSIS.data.raw)
 time.GSIS.lme<-lmer(full.conc~ time + (1|ID), GSIS.data.raw)
