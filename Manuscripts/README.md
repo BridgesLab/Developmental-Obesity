@@ -6,19 +6,22 @@ figure. Anything pulled from DB->csv->reload to do the plots. When we put it in 
 | Figure | Script | File |
 ----------------------------
 |1 A and B | adobe | originates on adobe file|
-|2A |eTRF_offspring_paper.RMD | chunk Figure2A|
-|2B |eTRF_offspring_paper.RMD |chunk Figure2B|
-|2C|eTRF_offspring_paper.RMD | chunk Figure2C|
-|2D|eTRF_offspring_paper.RMD | chunk Figure2D|
-|2E|eTRF_offspring_paper.RMD | chunk Figure2E|
-|2F|eTRF_offspring_paper.RMD | chunk Figure2F|
-|2G|eTRF_offspring_paper.RMD | chunk Figure2G|
-|2H|eTRF_offspring_paper.RMD | chunk Figure2H|
-|3A|eTRF_offspring_paper.RMD | chunk Figure3A|
-|3B|eTRF_offspring_paper.RMD | chunk Figure3B|
-|3C|eTRF_offspring_paper.RMD | chunk Figure3C|
-|3D|eTRF_offspring_paper.RMD | chunk Figure3D|
-|3E|eTRF_offspring_paper.RMD | chunk Figure3E|
-|3F|eTRF_offspring_paper.RMD | chunk Figure3F|
-|3G|eTRF_offspring_paper.RMD | chunk Figure3G|
-|3H|eTRF_offspring_paper.RMD | chunk Figure3H|
+|2A |Body_Compositioon.rmd | chunk Fig2A|
+|2B |Body_Compositioon.rmd |chunk Fig2B|
+|2C|Body_Compositioon.rmd| chunk Fig2C|
+|2D|Food_Intake.rmd | chunk Fig2D|
+|2E|Glucose_Homeostasis.rmd | chunk Fig2E|
+|2F|Glucose_Homeostasis.rmd| chunk Fig2F|
+|2G|Glucose_Homeostasis.rmd | chunk Fig2G|
+|2H|Glucose_Homeostasis.rmd| chunk Fig2H|
+|2I|Glucose_Homeostasis.rmd|chunk Fig2I|
+|3A|Body_Compositioon.rmd | chunk Fig3A|
+|3B|Body_Compositioon.rmd | chunk Fig3B|
+|3C|Body_Compositioon.rmd | chunk Fig3C|
+|3D|Food_Intake.rmd | chunk Fig3D|
+|3E|Glucose_Homeostasis.rmd|chunk Fig3E|
+|3F|Glucose_Homeostasis.rmd| chunk Fig3F|
+|3G|Glucose_Homeostasis.rmd| chunk Fig3G|
+|3H|Glucose_Homeostasis.rmd|chunk Fig3H|
+|3I|Glucose_Homeostasis.rmd|chunk Fig3I|
+|3J|Glucose_Homeostasis.rmd|chunk Fig3J|

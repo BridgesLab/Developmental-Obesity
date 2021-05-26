@@ -1,0 +1,581 @@
+---
+title: "Glucose_Homeostasis"
+author: "Molly C. Mulcahy"
+date: "5/25/2021"
+output: html_document
+---
+#Setup Chunk
+```{r setup, include=FALSE}
+library(processx)
+library(devtools)
+library(dplyr)
+library(readr)
+library(car)
+library(knitr)
+library(tidyr)
+library(lme4)
+library(broom)
+library(RCurl)
+library(ggplot2)
+
+#figures made will go to directory called figures, will make them as both png and pdf files 
+opts_chunk$set(fig.path='figures/',
+               echo=FALSE, warning=FALSE, message=FALSE,dev=c('png','pdf'))
+options(scipen = 2, digits = 3)
+# set echo and message to TRUE if you want to display code blocks and code output respectively
+knitr::knit_hooks$set(inline = function(x) {
+  knitr:::format_sci(x, 'md')
+})
+#write standard error function for later use
+se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
+# sets color scheme for plots
+color.scheme <- c('gray69','gray36')
+```
+
+#Pre HFD ITT
+```{r Fig2E}
+NCD.ITT.raw.data<-read_csv("NCD.ITT.Offspring.csv",
+                           col_types = cols(
+                             ID = col_factor(levels = NULL),
+                             cage = col_factor(levels = NULL),
+                             time = col_integer(),
+                             glucose = col_double(),
+                             treatment = col_factor(levels = c("eTRF","AL")),
+                             sex = col_factor(levels = c("female","male")),
+                             cohort = col_factor(levels = NULL),
+                             dam = col_factor(levels = NULL),
+                             rel.glucose = col_double()
+                           ))
+
+NCD.ITT.raw.data<-NCD.ITT.raw.data%>%
+  group_by(ID)%>%
+  mutate(AUC = sum(glucose))
+
+summary.ITT<-NCD.ITT.raw.data%>%
+  group_by(sex, time, treatment)%>%
+  summarise_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+#plot, time course
+ggplot(summary.ITT, aes(time, glucose_mean, col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_line(aes(col = treatment))+
+  geom_errorbar(aes(ymin = glucose_mean -glucose_se, ymax = glucose_mean + glucose_se))+
+  facet_grid(.~sex)+
+  scale_color_manual(values = color.scheme )+
+  labs(title = "Insulin Tolerance Test", y = "Blood Glucose (mg/dL)", x = "Time (minutes)")+
+   theme(text = element_text(size=18),legend.position = c(0.9,0.80), legend.background = element_rect(fill = "transparent"))
+
+#Stats
+
+##all
+
+null.NCDITT.lme<-lmer(glucose ~ 1 + (1|ID) + (1|dam), data = NCD.ITT.raw.data)
+age.NCDITT.lme <-lmer(glucose ~ time + (1|ID) + (1|dam), data = NCD.ITT.raw.data)
+anova(null.NCDITT.lme, age.NCDITT.lme)#significant, p<0.0001
+diet.NCDITT.lme<-lmer(glucose ~ time + treatment + time:treatment + (1|ID) + (1|dam), data = NCD.ITT.raw.data)
+anova(age.NCDITT.lme, diet.NCDITT.lme)# p=0.015
+sex.NCDITT.lme<-lmer(glucose ~ time +  sex*treatment + (1|ID) + (1|dam), data = NCD.ITT.raw.data)
+anova(diet.NCDITT.lme, sex.NCDITT.lme)#significant
+Anova(sex.NCDITT.lme)
+fixef(sex.NCDITT.lme)
+```
+#Pre-HFD ITT AUC
+```{r Fig3F}
+#plot AUC
+AUC.NCD.ITT.summary<-NCD.ITT.raw.data%>%
+  group_by(treatment, sex)%>%
+   summarise_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+ggplot(AUC.NCD.ITT.summary, aes(treatment,AUC_mean))+
+  geom_col(aes(fill = treatment))+
+  geom_errorbar(aes(ymin = AUC_mean -AUC_se, ymax = AUC_mean + AUC_se), width = 0.3)+
+  facet_grid(.~sex)+
+  scale_fill_manual(values = color.scheme )+
+  labs(title = "ITT Area Under the Curve", y = "Avg AUC (mg/dL)")+
+   theme(text = element_text(size=18),legend.position = 'none')
+#AUC stats
+ITT.AUC.NCD.aov<-aov(AUC ~treatment + sex , NCD.ITT.raw.data)# no interaction
+Anova(ITT.AUC.NCD.aov)
+```
+# Pre-HFD Rate of drop for ITT
+```{r Rate-Of-Drop-NCD}
+##building model manually
+models<-NCD.ITT.raw.data%>%
+  filter(time<60)%>%
+  group_by(ID, sex, treatment)%>%
+  mutate(l.glucose = log(glucose))%>%
+  do(fitted.model= lm(l.glucose~ time, data =.))%>%
+  mutate(rate =coef(fitted.model)["time"],
+          max = coef(fitted.model)["(Intercept)"],
+         rsq = summary(fitted.model)$r.squared)%>%
+  mutate(max.exp = exp(max))%>%
+  mutate( slope= max.exp*rate)
+summary.models<-models%>%
+  group_by(sex,treatment)%>%
+summarise_at(.var ="slope", .funs = funs(mean, se))
+
+
+
+ggplot(summary.models, aes(treatment, mean, fill = treatment))+
+  geom_col(aes(fill = treatment))+
+  facet_grid(.~sex)+
+  geom_errorbar(aes(ymin = mean-se, ymax = mean + se), width = 0.3)+
+  scale_fill_manual(values = color.scheme)+
+  labs(title = "Rate of Drop, NCD ITT",y="mg/dL per minute")
+
+rate.aov<-aov(slope ~ sex + treatment, data = models)#no interaction, p=0.39, so removed
+anova(rate.aov)%>%kable# no effect of sex (p=0.10)or treatment(p=0.83)
+NCD.ITT.raw.data%>%
+  filter(ID =="466"|ID=="471")%>%
+  ggplot(aes(time, glucose, col = ID))+
+  geom_point()
+
+NCD.ITT.raw.data%>%
+  filter(ID =="466"|ID=="471")%>%
+  ggplot(aes(time, glucose, col = ID))+
+  geom_point()
+summary(models$slope)
+```
+#Pre-HFD FBG
+```{r Fig2I}
+   #FBG
+  FBG.data<- NCD.ITT.raw.data%>%
+     filter(time=="0")%>%
+    group_by(sex, treatment)%>%
+    summarise_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+  #FBG plot
+  ggplot(FBG.data, aes(treatment, glucose_mean, fill = treatment))+
+    geom_col(aes(fill = treatment))+
+    facet_grid(.~sex)+
+    geom_errorbar(aes(ymin = glucose_mean -glucose_se, ymax = glucose_mean + glucose_se), width = 0.3)+
+    scale_fill_manual(values = color.scheme)+
+    labs(title = "Fasting Blood Glucose", y = "Blood Glucose (mg/dL)")+
+   theme(text = element_text(size=18),legend.position = 'none')
+  
+  #stats
+  
+  ##ALL
+  FBG.stats<-NCD.ITT.raw.data%>%
+     filter(time=="0")
+  
+  FBG.ITT.NCD.aov<-aov(glucose~ treatment+sex, FBG.stats)#no interaction
+  anova(FBG.ITT.NCD.aov)
+coefficients(FBG.ITT.NCD.aov)
+```
+# Pre-HFD GTT
+```{r Fig2H}
+NCD.GTT.data.file<-"NCD.GTT.Offspring.csv"
+NCD.GTT.raw.data<-read_csv(NCD.GTT.data.file,
+    col_types = cols(
+  ID = col_factor(levels = NULL),
+  time = col_integer(),
+  glucose = col_double(),
+  cage = col_factor(levels = NULL),
+  dam = col_factor(levels = NULL),
+  sex = col_factor(levels = NULL),
+  treatment = col_factor(levels = c("eTRF","AL")),
+  cohort = col_factor(levels = NULL)
+  ))
+
+NCD.GTT.raw.data<-NCD.GTT.raw.data%>%
+  group_by(ID)%>%
+  mutate(AUC = sum(glucose))
+#Summary data set
+summary.GTT<-NCD.GTT.raw.data%>%
+  group_by(sex, time, treatment)%>%
+  summarise_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+NCD.GTT.raw.data %>%
+  group_by(sex,treatment) %>%
+  distinct(ID, .keep_all = T) %>%
+  count %>%
+  kable(caption="IDS in each group")
+
+#plot, time course
+ggplot(summary.GTT, aes(time, glucose_mean, col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_line(aes(col = treatment))+
+  geom_errorbar(aes(ymin = glucose_mean -glucose_se, ymax = glucose_mean + glucose_se),)+
+  facet_grid(.~sex)+
+  scale_color_manual(values = color.scheme )+
+  labs(title = "Glucose Tolerance Test", y = "Blood Glucose (mg/dL)", x = "Time (minutes)")+
+   theme(text = element_text(size=18),legend.position = c(0.4,0.80), legend.background = element_rect(fill = "transparent"))
+
+#Stats
+##ALl
+null.NCDGTT.lme<-lmer(glucose ~ 1 + (1|ID) + (1|dam), data = NCD.GTT.raw.data)
+age.NCDGTT.lme <-lmer(glucose ~ time + (1|ID) + (1|dam), data = NCD.GTT.raw.data)
+anova(null.NCDGTT.lme, age.NCDGTT.lme)#significant effect of time, p<0.0001
+diet.NCDGTT.lme<-lmer(glucose ~ time + treatment  + (1|ID) + (1|dam), data = NCD.GTT.raw.data)
+anova(age.NCDGTT.lme, diet.NCDGTT.lme)# p=0.22, no effect of treatment
+sex.NCDGTT.lme<-lmer(glucose ~ time +  sex*treatment + (1|ID) + (1|dam), data = NCD.GTT.raw.data)
+anova(diet.NCDGTT.lme, sex.NCDGTT.lme)#p=0.32
+Anova(sex.NCDGTT.lme)
+fixef(diet.NCDGTT.lme)
+```
+#Pre-HFD GTT AUC
+```{r Fig2H}
+#plot AUC
+AUC.NCD.GTT.summary<-NCD.GTT.raw.data%>%
+  group_by(treatment, sex)%>%
+   summarise_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+ggplot(AUC.NCD.GTT.summary, aes(treatment, AUC_mean))+
+  geom_col(aes(fill = treatment))+
+  geom_errorbar(aes(ymin = AUC_mean -AUC_se, ymax = AUC_mean + AUC_se), width = 0.3)+
+  facet_grid(.~sex)+
+  scale_fill_manual(values = color.scheme )+
+  labs(title = "GTT Area Under the Curve", y = "Avg AUC (mg/dL)")+
+   theme(text = element_text(size=18),legend.position = 'none')
+#AUC stats
+GTT.AUC.NCD.aov<-aov(AUC ~treatment * sex , NCD.GTT.raw.data)# significant interaction, sex-stratified analysis below
+Anova(GTT.AUC.NCD.aov)
+
+#males
+NCD.GTT.raw.data.m<-NCD.GTT.raw.data%>%
+  filter(sex=="male")
+
+shapiro.test(NCD.GTT.raw.data.m$AUC[NCD.GTT.raw.data.m$treatment =="eTRF"])#not normal
+shapiro.test(NCD.GTT.raw.data.m$AUC[NCD.GTT.raw.data.m$treatment =="AL"])#not normal
+leveneTest(AUC~treatment, NCD.GTT.raw.data.m)#non-equivalent variance
+#Mann-Whitney U test
+wilcox.test(AUC~treatment, NCD.GTT.raw.data.m)#p<0.0001
+#females
+NCD.GTT.raw.data.f<-NCD.GTT.raw.data%>%
+  filter(sex=="female") 
+shapiro.test(NCD.GTT.raw.data.f$AUC[NCD.GTT.raw.data.f$treatment =="eTRF"])#not normal
+shapiro.test(NCD.GTT.raw.data.f$AUC[NCD.GTT.raw.data.f$treatment =="AL"])#not normal
+leveneTest(AUC~treatment, NCD.GTT.raw.data.f)#equivalent variance
+#Mann-Whitney U test
+wilcox.test(AUC~treatment, NCD.GTT.raw.data.f)#p=0.99
+```
+
+#HFD ITT
+```{r Fig3E}
+#High fat diet Insulin tolerance test
+HFD.ITT.file <-"HFD.ITT.Offspring.csv"
+HFD.ITT.raw.data<-read_csv(HFD.ITT.file,
+                           col_types = cols(
+                             cage = col_factor(levels = NULL),
+                               ID = col_factor(levels = NULL),
+                               time = col_integer(),
+                               glucose = col_double(),
+                               crash = col_factor(levels = NULL),
+                               dam = col_factor(levels = NULL),
+                               cohort = col_factor(levels = NULL),
+                               treatment = col_factor(levels = c("eTRF","AL")),
+                               sex = col_factor(levels = c("female","male")),
+                               rel.glucose = col_double()
+                           ))
+HFD.ITT.raw.data<-HFD.ITT.raw.data%>%
+  group_by(ID)%>%
+  mutate(AUC = sum(glucose))
+
+#Summary data set
+summary.HFD.ITT<-HFD.ITT.raw.data%>%
+  group_by(sex, time, treatment)%>%
+  summarise_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+HFD.ITT.raw.data %>%
+  group_by(sex,treatment) %>%
+  distinct(ID, .keep_all = T) %>%
+  count %>%
+  kable(caption="IDS in each group")
+
+#plot, time course
+ggplot(summary.HFD.ITT, aes(time, glucose_mean, col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_line(aes(col = treatment))+
+  geom_errorbar(aes(ymin = glucose_mean - glucose_se, ymax = glucose_mean + glucose_se))+
+  facet_grid(.~sex)+
+  scale_color_manual(values = color.scheme )+
+  labs(title = "Insulin Tolerance Test", y = "Blood Glucose (mg/dL)", x = "Time (minutes)")+
+   theme(text = element_text(size=18),legend.position = c(0.4,0.80), legend.background = element_rect(fill = "transparent"))
+
+#Stats
+##all
+null.HFD.ITT.lme<-lmer(glucose ~ 1 + (1|ID) + (1|dam), data = HFD.ITT.raw.data)
+age.HFD.ITT.lme <-lmer(glucose ~ time + (1|ID) + (1|dam), data = HFD.ITT.raw.data)
+#anova(null.HFD.ITT., age.HFD.ITT.lme)#significant effect of time, p<0.0001
+diet.HFD.ITT.lme<-lmer(glucose ~ time + treatment  + (1|ID) + (1|dam), data = HFD.ITT.raw.data)
+anova(age.HFD.ITT.lme, diet.HFD.ITT.lme)# p=0.068, no effect of treatment
+sex.HFD.ITT.lme<-lmer(glucose ~ time +  sex*treatment + (1|ID) + (1|dam), data = HFD.ITT.raw.data)
+anova(diet.HFD.ITT.lme, sex.HFD.ITT.lme)#significant
+Anova(sex.HFD.ITT.lme)
+fixef(diet.HFD.ITT.lme)
+
+#significant interaction, analyze by each sex
+##Males
+HFD.ITT.M<-HFD.ITT.raw.data%>%
+  filter(sex == "male")
+
+null.HFD.ITT.lme.m<-lmer(glucose ~ 1 + (1|ID) + (1|dam), data = HFD.ITT.M)
+age.HFD.ITT.lme.m <-lmer(glucose ~ time + (1|ID) + (1|dam), data = HFD.ITT.M)
+anova(null.HFD.ITT.lme.m, age.HFD.ITT.lme.m)#significant, p=0.0062
+diet.HFD.ITT.lme.m<-lmer(glucose ~ time + treatment + time:treatment + (1|ID) + (1|dam), data = HFD.ITT.M)
+anova(age.HFD.ITT.lme.m, diet.HFD.ITT.lme.m)# p=0.17
+fixef(diet.HFD.ITT.lme.m)
+##females
+HFD.ITT.F<-HFD.ITT.raw.data%>%
+  filter(sex == "female")
+null.HFD.ITT.lme.f<-lmer(glucose ~ 1 + (1|ID) + (1|dam), data = HFD.ITT.F)
+age.HFD.ITT.lme.f <-lmer(glucose ~ time + (1|ID) + (1|dam), data = HFD.ITT.F)
+anova(null.HFD.ITT.lme.f, age.HFD.ITT.lme.f)#significant, p=0.0062
+diet.HFD.ITT.lme.f<-lmer(glucose ~ time + treatment + time:treatment + (1|ID) + (1|dam), data = HFD.ITT.F)
+anova(age.HFD.ITT.lme.f, diet.HFD.ITT.lme.f)# p=0.85
+fixef(diet.HFD.ITT.lme.f)
+```
+#HFD ITT AUC
+```{r Fig3F}
+AUC.ITT.HFD.summary<-HFD.ITT.raw.data%>%
+  group_by(treatment, sex)%>%
+  summarise_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+ggplot( AUC.ITT.HFD.summary,aes(treatment, AUC_mean))+
+  geom_col(aes(fill = treatment))+
+  geom_errorbar(aes(ymin = AUC_mean - AUC_se, ymax = AUC_mean + AUC_se), width = 0.3)+
+  facet_grid(.~sex)+
+  scale_fill_manual(values = color.scheme )+
+  labs(title = "ITT Area Under the Curve", y = " Avg Blood Glucose (mg/dL)")+
+   theme(text = element_text(size=18),legend.position = 'none')
+
+##stats
+HFD.ITT.AUC.aov<-aov(AUC~sex*treatment, HFD.ITT.raw.data)# effect of interaction
+anova(HFD.ITT.AUC.aov)#significant interaction, sex specific needed
+
+#females
+HFD.ITT.raw.data.F<-HFD.ITT.raw.data%>%
+  filter(sex =="female")
+
+shapiro.test(HFD.ITT.raw.data.F$AUC[HFD.ITT.raw.data.F$treatment =="eTRF"])#not normal
+shapiro.test(HFD.ITT.raw.data.F$AUC[HFD.ITT.raw.data.F$treatment =="AL"])#not normal
+leveneTest(AUC~treatment, HFD.ITT.raw.data.F)#non-equivalent variance
+#Mann-Whitney U test
+wilcox.test(AUC~treatment, HFD.ITT.raw.data.F)#p=0.2
+#males
+HFD.ITT.raw.data.M<-HFD.ITT.raw.data%>%
+  filter(sex =="male")
+
+shapiro.test(HFD.ITT.raw.data.M$AUC[HFD.ITT.raw.data.M$treatment =="eTRF"])#not normal
+shapiro.test(HFD.ITT.raw.data.M$AUC[HFD.ITT.raw.data.M$treatment =="AL"])#not normal
+leveneTest(AUC~treatment, HFD.ITT.raw.data.M)#equivalent variance
+#Mann-Whitney U test
+wilcox.test(AUC~treatment, HFD.ITT.raw.data.M)$p.value#p=0.000000016
+```
+#HFD Rate of Drop
+```{r rate-of-drop-HFD}
+##building model manually
+models.HFD<-HFD.ITT.raw.data%>%
+  filter(time<60)%>%
+  filter(!(glucose=="0"))%>%
+  group_by(ID, sex, treatment)%>%
+  mutate(l.glucose = log(glucose))%>%
+  do(fitted.model= lm(l.glucose ~ time, data =.))%>%
+  mutate(rate =coef(fitted.model)["time"],
+          max = coef(fitted.model)["(Intercept)"],
+         rsq = summary(fitted.model)$r.squared)%>%
+  mutate(max.exp = exp(max))%>%
+  mutate( slope= max.exp*rate)
+summary.models.HFD<-models%>%
+  group_by(sex, treatment)%>%
+summarise_at(.var ="slope", .funs = funs(mean, se))
+
+
+
+ggplot(summary.models.HFD, aes(treatment, mean, fill = treatment))+
+  geom_col(aes(fill = treatment))+
+  facet_grid(.~sex)+
+  geom_errorbar(aes(ymin = mean-se, ymax = mean + se), width = 0.3)+
+  scale_fill_manual(values = color.scheme)+
+  labs(title = "Rate of Drop, HFD ITT",y="mg/dL per minute")
+
+rate.aov<-aov(slope ~ sex + treatment, data = models.HFD)#no interaction, p=0.39, so removed
+anova(rate.aov)%>%kable# effect of sex (p=0.029)or treatment(p=0.23)
+```
+#HFD FBG
+```{r Fig3I}
+#generate HFD ITT data set
+HFD.FBG.data<-HFD.ITT.raw.data%>%
+  filter(time=="0")
+#HFD ITT summary data set
+summary.HFD.FBG<-HFD.FBG.data%>%
+  group_by(sex, treatment)%>%
+  summarise_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+#plot
+ggplot(summary.HFD.FBG,  aes(treatment, glucose_mean, fill = treatment))+
+  geom_col(aes(fill = treatment))+
+  facet_grid(.~sex)+
+  scale_fill_manual(values = color.scheme)+
+  geom_errorbar(aes(ymin = glucose_mean - glucose_se, ymax = glucose_mean + glucose_se), width = 0.3)+
+  labs(title = "Fasting Blood Glucose", y = "Blood Glucose (mg/dL)")+
+   theme(text = element_text(size=18),legend.position = 'none')
+
+ #stats
+
+HFD.FBG.aov<-aov(glucose~ sex+treatment,HFD.FBG.data)#no interaction
+anova(HFD.FBG.aov)#sig of sex, not treatment 
+```
+# HFD GTT
+```{r Fig3G}
+#Glucose tolerance test
+HFD.GTT.file<-"HFD.GTT.Offspring.csv"
+HFD.GTT.raw.data<-read_csv(HFD.GTT.file,
+                           col_types = cols(
+                             cage = col_factor(levels = NULL),
+                               ID = col_factor(levels = NULL),
+                               time = col_integer(),
+                               glucose = col_double(),
+                               dam = col_factor(levels = NULL),
+                               cohort = col_factor(levels = NULL),
+                               treatment = col_factor(levels = c("eTRF","AL")),
+                               sex = col_factor(levels = c("female","male")),
+                               rel.glucose = col_double()
+                           ))
+HFD.GTT.raw.data<-HFD.GTT.raw.data%>%
+  group_by(ID)%>%
+  mutate(AUC = sum(glucose))
+
+##summary dataset
+summary.HFD.GTT<-HFD.GTT.raw.data%>%
+  group_by(sex, treatment, time)%>%
+  summarise_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+#Plot
+ggplot(summary.HFD.GTT, aes(time, glucose_mean, col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_line(aes(col = treatment))+
+  geom_errorbar(aes(ymin = glucose_mean - glucose_se, ymax = glucose_mean + glucose_se))+
+  facet_grid(.~sex)+
+  scale_color_manual(values = color.scheme )+
+  labs(title = "Glucose Tolerance Test", y = "Blood Glucose (mg/dL)", x = "Time (minutes)")+
+   theme(text = element_text(size=18),legend.position = c(0.4,0.80), legend.background = element_rect(fill = "transparent"))
+
+#Stats
+##ALL
+
+null.HFD.GTT.lme<-lmer(glucose ~ 1 + (1|ID) + (1|dam), data = HFD.GTT.raw.data)
+age.HFD.GTT.lme <-lmer(glucose ~ time + (1|ID) + (1|dam), data = HFD.GTT.raw.data)
+anova(null.HFD.GTT.lme, age.HFD.GTT.lme)#significant effect of time, p=0.0062
+diet.HFD.GTT.lme<-lmer(glucose ~ time + treatment + time:treatment + (1|ID) + (1|dam), data = HFD.GTT.raw.data)
+anova(age.HFD.GTT.lme, diet.HFD.GTT.lme)# p=0.87 no effect of treatment
+sex.HFD.GTT.lme<-lmer(glucose ~ time + treatment*sex + (1|ID) + (1|dam), data = HFD.GTT.raw.data)
+anova(diet.HFD.GTT.lme, sex.HFD.GTT.lme)#significant 
+Anova(sex.HFD.GTT.lme)#significant sex:treatment interaction, p=0.011
+
+
+##Males
+HFD.GTT.M<-HFD.GTT.raw.data%>%
+  filter(sex == "male")
+null.HFD.GTT.lme.m<-lmer(glucose ~ 1 + (1|ID) + (1|dam), data = HFD.GTT.M)
+age.HFD.GTT.lme.m <-lmer(glucose ~ time + (1|ID) + (1|dam), data = HFD.GTT.M)
+anova(null.HFD.GTT.lme.m, age.HFD.GTT.lme.m)#significant, p=0.0062
+diet.HFD.GTT.lme.m<-lmer(glucose ~ time + treatment + time:treatment + (1|ID) + (1|dam), data = HFD.GTT.M)
+anova(age.HFD.GTT.lme.m, diet.HFD.GTT.lme.m)# p=0.14
+fixef(diet.HFD.GTT.lme.m)
+##females
+HFD.GTT.F<-HFD.GTT.raw.data%>%
+  filter(sex == "female")
+null.HFD.GTT.lme.f<-lmer(glucose ~ 1 + (1|ID) + (1|dam), data = HFD.GTT.F)
+age.HFD.GTT.lme.f <-lmer(glucose ~ time + (1|ID) + (1|dam), data = HFD.GTT.F)
+anova(null.HFD.GTT.lme.f, age.HFD.GTT.lme.f)#significant, p=0.0062
+diet.HFD.GTT.lme.f<-lmer(glucose ~ time + treatment + time:treatment + (1|ID) + (1|dam), data = HFD.GTT.F)
+anova(age.HFD.GTT.lme.f, diet.HFD.GTT.lme.f)# p=0.61
+fixef(diet.HFD.GTT.lme.f)
+```
+#HFD GTT AUC
+```{r Fig3H}
+AUC.GTT.HFD.summary<-HFD.GTT.raw.data%>%
+  group_by(treatment, sex)%>%
+  summarise_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+ggplot( AUC.GTT.HFD.summary,aes(treatment, AUC_mean))+
+  geom_col(aes(fill = treatment))+
+  geom_errorbar(aes(ymin = AUC_mean - AUC_se, ymax = AUC_mean + AUC_se), width = 0.3)+
+  facet_grid(.~sex)+
+  scale_fill_manual(values = color.scheme )+
+  labs(title = "GTT Area Under the Curve", y = " Avg Blood Glucose (mg/dL)")+
+   theme(text = element_text(size=18),legend.position = 'none')
+
+##stats
+HFD.GTT.AUC.aov<-aov(AUC~sex*treatment, HFD.GTT.raw.data)# effect of interaction
+anova(HFD.GTT.AUC.aov)#significant interaction, sex specific needed
+
+#females
+HFD.GTT.raw.data.F<-HFD.GTT.raw.data%>%
+  filter(sex =="female")
+
+shapiro.test(HFD.GTT.raw.data.F$AUC[HFD.GTT.raw.data.F$treatment =="eTRF"])#not normal
+shapiro.test(HFD.GTT.raw.data.F$AUC[HFD.GTT.raw.data.F$treatment =="AL"])#not normal
+leveneTest(AUC~treatment, HFD.GTT.raw.data.F)#non-equivalent variance
+#Mann-Whitney U test
+wilcox.test(AUC~treatment, HFD.GTT.raw.data.F)#p=0.07
+#males
+HFD.GTT.raw.data.M<-HFD.GTT.raw.data%>%
+  filter(sex =="male")%>%
+  group_by(treatment)%>%
+  summarize(avg = mean(AUC))
+
+shapiro.test(HFD.GTT.raw.data.M$AUC[HFD.GTT.raw.data.M$treatment =="eTRF"])#not normal
+shapiro.test(HFD.GTT.raw.data.M$AUC[HFD.GTT.raw.data.M$treatment =="AL"])#not normal
+leveneTest(AUC~treatment, HFD.GTT.raw.data.M)#equivalent variance
+#Mann-Whitney U test
+wilcox.test(AUC~treatment, HFD.GTT.raw.data.M)$p.value#p=0.000000096
+```
+
+#HFD GSIS
+```{r Fig3J}
+#Offspring GSIS data
+GSIS.file<-"OFF_IV_GSIS.csv"
+GSIS.data.raw<-read_csv(GSIS.file,
+  col_types = cols(
+    Wells = col_factor(levels = NULL),
+    ID = col_factor(levels = NULL),
+    time = col_integer(),
+    diet = col_factor(levels = c("eTRF", "AL")),
+    sex  = col_factor(levels = c("female", "male")),
+    Raw = col_double(),
+    Corrected = col_double(),
+    Concs. = col_double(),
+    full.conc. = col_double()))
+
+#summary
+summary.GSIS<-GSIS.data.raw%>%
+  na.omit%>%
+  group_by(sex, time, diet)%>%
+  summarize_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+#Plot
+color.scheme <- c('gray69','gray36')
+ggplot(summary.GSIS, aes(time, full.conc_mean))+
+  geom_col(aes(fill = diet), position = position_dodge2())+
+  facet_grid(.~sex)+
+  geom_errorbar(aes(ymin = full.conc_mean-full.conc_se, ymax = full.conc_mean+full.conc_se), position = position_dodge2())+
+   scale_fill_manual(values = c('gray69','gray36'))+
+  labs(title = "Glucose Stimulated Insulin Secretion", y = "Insulin (ng/mL)", x = "Time (minutes)")+
+theme(text = element_text(size=18),legend.position = c(0.1,0.8), legend.background = element_rect(fill = "transparent"))
+##Stats
+null.GSIS.lme<-lmer(full.conc~ 1 + (1|ID), GSIS.data.raw)
+time.GSIS.lme<-lmer(full.conc~ time + (1|ID), GSIS.data.raw)
+anova(null.GSIS.lme, time.GSIS.lme)#sig effect of time p=0.00092
+diet.GSIS.lme<- lmer(full.conc~ time + diet + (1|ID), GSIS.data.raw)
+sex.null.GSIS.lme<- lmer(full.conc~ time + sex + (1|ID), GSIS.data.raw)
+anova(time.GSIS.lme, sex.null.GSIS.lme)#sig
+anova(time.GSIS.lme, diet.GSIS.lme)# not different with diet, p=0.3
+sex.GSIS.lme<-lmer(full.conc~ time + diet+sex + (1|ID), GSIS.data.raw)
+anova(sex.null.GSIS.lme, sex.GSIS.lme)#0.064
+diet.sex.iint.GSIS<-lmer(full.conc~ time + diet+sex + diet:sex +(1|ID), GSIS.data.raw)
+anova(diet.sex.iint.GSIS, sex.null.GSIS.lme)#0.082
+anova(diet.sex.iint.GSIS, sex.GSIS.lme)#no interaction - use 0.064
+Anova(sex.GSIS.lme)# no interaction, effect of time and sex
+
+summary(sex.GSIS.lme)
+
+##
+sex.time.null.GSIS.lme<- lmer(full.conc~ time + sex+sex:time + (1|ID), GSIS.data.raw)
+anova(sex.time.null.GSIS.lme, sex.null.GSIS.lme)#no effect of sex on time
+diet.time.GSIS.lme<- lmer(full.conc~ time + diet +diet:time +(1|ID), GSIS.data.raw)
+anova(diet.time.GSIS.lme, diet.GSIS.lme)#0.11 almost sig diet:time interaction
+anova(time.GSIS.lme, sex.null.GSIS.lme)#sig
+anova(time.GSIS.lme, diet.GSIS.lme)# not different with diet, p=0.3
+Full.GSIS.lme<-lmer(full.conc~ time*sex*diet + (1|ID), GSIS.data.raw)
+summary(Full.GSIS.lme)# rule out interactions
+```

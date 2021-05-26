@@ -1,0 +1,324 @@
+---
+title: "eTRF offspring body composition analysis"
+author: "Molly C. Mulcahy"
+date: "2/25/2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+#This document contains primary data and analysis for the dissertation work involving early time-restricted feeding during gestation effect on mouse offspring
+
+#setup chunk
+```{r setup, include=FALSE}
+library(processx)
+library(devtools)
+library(dplyr)
+library(readr)
+library(car)
+library(knitr)
+library(tidyr)
+library(lme4)
+library(broom)
+library(RCurl)
+library(ggplot2)
+
+#figures made will go to directory called figures, will make them as both png and pdf files 
+opts_chunk$set(fig.path='figures/',
+               echo=FALSE, warning=FALSE, message=FALSE,dev=c('png','pdf'))
+options(scipen = 2, digits = 3)
+# set echo and message to TRUE if you want to display code blocks and code output respectively
+knitr::knit_hooks$set(inline = function(x) {
+  knitr:::format_sci(x, 'md')
+})
+#write standard error function for later use
+se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
+# sets color scheme for plots
+color.scheme <- c('gray69','gray36')
+```
+
+#Data Entry
+```{r data-entry-MRI}
+MRI.data.file<-"MRI.Off.data.csv"
+MRI.raw.data<-read_csv(MRI.data.file,
+                       col_types = cols(
+  ID = col_factor(levels = NULL),
+  age = col_double(),
+  animal.id = col_factor(levels = NULL),
+  MouseID = col_factor(levels = NULL),
+  Sex = col_factor(levels = c("M","F")),
+  Genotype = col_factor(levels = NULL),
+  values = col_double(),
+  assay = col_factor(levels = NULL),
+  experiment.date = col_date(format = ""),
+  treatment = col_factor(levels = c("eTRF","AL")),
+  dam = col_factor(levels = NULL),
+  cohort = col_factor(levels = NULL),
+  gram.values = col_double()))
+
+MRI.raw.data<-MRI.raw.data%>%
+  mutate(sex = case_when(
+    Sex=="F"~"female",
+    Sex =="M"~"male"))
+
+cage.file<-"cage_mapping_offspring.csv"
+cage.data<-read_csv(cage.file,
+                    col_types = cols(
+                      ID = col_factor(levels = NULL),
+                      treatment = col_factor(levels = c("eTRF", "AL")),
+                      dam = col_factor(levels = NULL),
+                      cohort = col_factor(levels = NULL),
+                      cage = col_factor(levels = NULL)
+                    ))
+
+MRI.raw.data<-full_join(cage.data, MRI.raw.data, by = c("ID", "treatment","dam","cohort"))
+```
+#Pre-HFD analysis (PND 21- PND 70)
+#Body Composition
+```{r Figure2A}
+#table of unique animals for body composition numbers
+MRI.raw.data %>%
+  group_by(sex,treatment) %>%
+  distinct(ID, .keep_all = T) %>%
+  count %>%
+  kable(caption="Animals in each group of this cohort")
+
+#Body Weight data table
+early.HFD<-c("8673","8674","8688")
+BW.data<-filter(MRI.raw.data, assay=="Body Weight")%>%
+  filter(age<70)%>%
+  filter(!(age>=67&ID%in%early.HFD))%>%
+  group_by(age, treatment, sex)%>%
+  summarize_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+##Body Weight plot
+ggplot(BW.data,aes(age, gram.values_mean, col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(span = 0.7,aes(col = treatment), se = FALSE)+
+  facet_grid(.~sex)+
+  scale_color_manual(values = color.scheme)+
+  labs(title = "Offspring Body Weight", y = "Body weight (grams)",x="Age (days)")+
+  theme(text = element_text(size=18),legend.position = c(0.9,0.19), legend.background = element_rect(fill = "transparent"))
+
+#all
+BW.data.all<-MRI.raw.data%>%
+  filter(assay=="Body Weight")%>%
+   filter(age<70)%>%
+  filter(!(age>=67&ID%in%early.HFD))
+
+null.bw.lme<-lmer(gram.values ~ 1 + (1|MouseID) + (1|dam), data = BW.data.all)
+age.bw.lme<-lmer(gram.values ~ age + (1|MouseID) + (1|dam), data = BW.data.all)
+anova(null.bw.lme, age.bw.lme)#significant effect of age
+diet.bw.lme<-lmer(gram.values ~ treatment+age +age:treatment + (1|MouseID) + (1|dam), data = BW.data.all)
+
+sex.bw.lme<-lmer(gram.values~ age + treatment*sex +(1|MouseID) + (1|dam), data = BW.data.all) 
+anova(sex.bw.lme, diet.bw.lme)#p<0.0001
+Anova(sex.bw.lme)%>%tidy()%>%kable()
+anova(age.bw.lme, diet.bw.lme)%>%tidy()%>%kable()#p=0.471
+#anova(diet.bw.lme)%>%tidy%>%filter(term =="age:treatment")%>%pull(p.value)
+```
+There is a significant interaction of age and treatment in females where age-matched AL female have a ,p-value.
+
+```{r Fig2C}
+#Lean Mass data table
+LM.data<-filter(MRI.raw.data, assay=="Lean Mass")%>%
+  filter(age<70)%>%
+  filter(!(age>=67&ID%in%early.HFD))%>%
+  group_by(age, treatment, sex)%>%
+  summarize_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+#Lean Mass Plot
+ggplot(LM.data,aes(age, gram.values_mean, col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(span = 0.7,aes(col = treatment), se = FALSE)+
+  facet_grid(.~sex)+
+  scale_color_manual(values = color.scheme)+
+  labs(title = "Offspring Lean Mass", y = "Lean Mass (grams)",x="Age (days)")+
+  theme(text = element_text(size=18),legend.position = c(0.88,0.20), legend.background = element_rect(fill = "transparent"))
+
+#stats
+LM.data.all<-MRI.raw.data%>%
+  filter(assay=="Lean Mass")%>%
+    filter(age<70)%>%
+  filter(!(age>=67&ID%in%early.HFD))
+
+null.lm.lme<-lmer(gram.values ~ 1 + (1|MouseID) + (1|dam), data = LM.data.all)
+age.lm.lme<-lmer(gram.values ~ age + (1|MouseID) + (1|dam), data = LM.data.all)
+anova(null.lm.lme, age.lm.lme)#significant effect of age
+diet.lm.lme<-lmer(gram.values ~ treatment+age +age:treatment + (1|MouseID) + (1|dam), data = LM.data.all)
+anova(age.lm.lme, diet.lm.lme)%>%tidy()%>%kable()#p=0.09
+sex.lm.lme<-lmer(gram.values~ age + treatment*sex +(1|MouseID) + (1|dam), data = LM.data.all)
+anova(sex.lm.lme, diet.lm.lme)#p<0.0001
+Anova(sex.lm.lme)%>%tidy()%>%kable()#p=0.448
+```
+
+```{r Fig2B}
+#Body Fat Data table
+FM.data<-filter(MRI.raw.data, assay=="Total Fat Mass")%>%
+  filter(age<70)%>%
+  filter(!(age>=67&ID%in%early.HFD))%>%
+  group_by(age, treatment, sex)%>%
+  summarize_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+#Body Fat Plot
+ggplot(FM.data,aes(age, gram.values_mean, col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(span = 1,aes(col = treatment), se = FALSE)+
+  facet_grid(.~sex)+
+  scale_color_manual(values = color.scheme)+
+  labs(title = "Offspring Fat Mass", y = "Fat Mass (grams)",x="Age (days)")+
+  theme(text = element_text(size=18),legend.position = c(0.9,0.80), legend.background = element_rect(fill = "transparent"))
+#Stats
+FM.data.all<-MRI.raw.data%>%
+  filter(assay=="Total Fat Mass")%>%
+    filter(age<70)%>%
+  filter(!(age>=67&ID%in%early.HFD))
+
+null.fm.lme<-lmer(gram.values ~ 1 + (1|MouseID) + (1|dam), data = FM.data.all)
+age.fm.lme<-lmer(gram.values ~ age + (1|MouseID) + (1|dam), data = FM.data.all)
+anova(null.fm.lme, age.fm.lme)#significant effect of age
+sex.fm.lme<-lmer(gram.values~ age + treatment*sex +(1|MouseID) + (1|dam), data = FM.data.all)
+diet.fm.lme<-lmer(gram.values ~ treatment +age +treatment:age+ (1|MouseID) + (1|dam), data = FM.data.all)
+anova(sex.fm.lme, diet.fm.lme)#p=0.0000089
+Anova(sex.bw.lme)%>%tidy()%>%kable()
+```
+#Post HFD analysis(PND 70-sacrifice)
+```{r Fig3A}
+#Body Weight data table
+BW.data.HFD<-filter(MRI.raw.data, assay=="Body Weight")%>%
+  filter(age>=70)%>%
+  group_by(age, treatment, sex)%>%
+  summarize_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+##Body Weight plot
+ggplot(BW.data.HFD,aes(age, gram.values_mean, col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(span = 0.7,aes(col = treatment), se = FALSE)+
+  facet_grid(.~sex)+
+  scale_color_manual(values = color.scheme)+
+  labs(title = "Offspring Body Weight", y = "Body weight (grams)",x="Age (days)")+
+  theme(text = element_text(size=18),legend.position = c(0.9,0.19), legend.background = element_rect(fill = "transparent"))
+
+#ALL
+HFD.BW.data<-MRI.raw.data%>%
+  filter(age>=70)%>%
+  filter(assay=="Body Weight")
+
+
+#mixed linear models
+HFD.null.bw.lme<-lmer(gram.values ~ 1 + (1|MouseID) + (1|dam), data = HFD.BW.data)
+HFD.age.bw.lme <-lmer(gram.values ~ age + (1|MouseID) + (1|dam), data = HFD.BW.data)
+anova(HFD.null.bw.lme, HFD.age.bw.lme)#significant effect of age
+HFD.diet.bw.lme<-lmer(gram.values ~ treatment+age +age:treatment + (1|MouseID) + (1|dam), data = HFD.BW.data)
+anova(HFD.age.bw.lme, HFD.diet.bw.lme)#sig with interaction
+Anova(HFD.diet.bw.lme)
+HFD.sex.bw.lme<-lmer(gram.values ~ age +sex +treatment + (1|MouseID) + (1|dam), data = HFD.BW.data)
+anova(HFD.diet.bw.lme, HFD.sex.bw.lme)#significant, but no interaction between sex and treatment
+Anova(HFD.sex.bw.lme)# no interaction of sex and treatment, so removed, 
+```
+
+
+```{r Fig3B}
+#Fat Mass data table
+FM.data.HFD<-filter(MRI.raw.data, assay=="Total Fat Mass")%>%
+  filter(age>=70)%>%
+  group_by(age, treatment, sex)%>%
+  summarize_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+##Fat Mass plot
+ggplot(FM.data.HFD,aes(age, gram.values_mean, col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(span = 0.7,aes(col = treatment), se = FALSE)+
+  facet_grid(.~sex)+
+  scale_color_manual(values =color.scheme)+
+  labs(title = "Offspring Fat Mass", y = "Fat Mass (grams)",x="Age (days)")+
+  theme(text = element_text(size=18),legend.position = c(0.9,0.19), legend.background = element_rect(fill = "transparent"))
+
+#All
+HFD.FM.data<-MRI.raw.data%>%
+  filter(age>=70)%>%
+  filter(assay=="Total Fat Mass")
+
+HFD.null.fm.lme<-lmer(gram.values ~ 1 + (1|MouseID) + (1|dam), data = HFD.FM.data)
+HFD.age.fm.lme <-lmer(gram.values ~ age + (1|MouseID) + (1|dam), data = HFD.FM.data)
+anova(HFD.null.fm.lme, HFD.age.fm.lme)#significant effect of age
+HFD.diet.fm.lme<-lmer(gram.values ~ treatment+age +age:treatment + (1|MouseID) + (1|dam), data = HFD.FM.data)
+anova(HFD.age.fm.lme, HFD.diet.fm.lme)#sig with interaction, p=0.00011
+Anova(HFD.diet.fm.lme)
+HFD.sex.fm.lme<-lmer(gram.values ~ age +sex*treatment + (1|MouseID) + (1|dam), data = HFD.FM.data)
+anova(HFD.diet.fm.lme, HFD.sex.fm.lme)#significant, but no interaction between sex and treatment
+Anova(HFD.sex.fm.lme)# no interaction of sex and treatment, so removed, 
+```
+
+```{r Fig3C}
+#Lean Mass data table
+LM.data.HFD<-filter(MRI.raw.data, assay=="Lean Mass")%>%
+  filter(age>=70)%>%
+  group_by(age, treatment, sex)%>%
+  summarize_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+##Lean Mass plot
+ggplot(LM.data.HFD,aes(age, gram.values_mean, col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(span = 0.7,aes(col = treatment), se = FALSE)+
+  facet_grid(.~sex)+
+  scale_color_manual(values = color.scheme)+
+  labs(title = "Offspring Lean Mass", y = "Lean Mass (grams)",x="Age (days)")+
+  theme(text = element_text(size=18),legend.position = c(0.9,0.19), legend.background = element_rect(fill = "transparent"))
+#stats
+HFD.LM.data<-MRI.raw.data%>%
+  filter(age>=70)%>%
+  filter(assay=="Lean Mass")
+
+HFD.null.lm.lme<-lmer(gram.values ~ 1 + (1|MouseID) + (1|dam), data = HFD.LM.data)
+HFD.age.lm.lme <-lmer(gram.values ~ age + (1|MouseID) + (1|dam), data = HFD.LM.data)
+anova(HFD.null.lm.lme, HFD.age.lm.lme)#significant effect of age
+HFD.diet.lm.lme<-lmer(gram.values ~ treatment+age +age:treatment + (1|MouseID) + (1|dam), data = HFD.LM.data)
+anova(HFD.age.lm.lme, HFD.diet.lm.lme)# not sig with interaction, p=0.13
+HFD.sex.lm.lme<-lmer(gram.values ~ age +sex*treatment + (1|MouseID) + (1|dam), data = HFD.LM.data)
+anova(HFD.diet.lm.lme, HFD.sex.lm.lme)#significant, but no interaction between sex and treatment
+Anova(HFD.sex.lm.lme)# no interaction of sex and treatment, so removed, 
+```
+
+```{r feed-eff}
+Feed.Eff.Data<-MRI.raw.data%>%
+  filter(!(cage=="2032"))%>%
+  group_by(ID, sex, cage, treatment, cohort)%>%
+  dplyr::select(ID, cage, treatment, assay, gram.values, age, cohort)%>%
+  pivot_wider(names_from = assay, values_from = gram.values, values_fn = mean)%>%
+  group_by(ID, sex, cage, treatment, cohort)%>%
+  mutate(week = case_when(
+    age>19&age<25 ~ 1, 
+    age>"62"&age<"70" ~ 8,
+    age>"160"&age<"168"~20
+  ))%>%
+ # group_by(week, ID, cage, treatment, assay, cohort)%>%
+  #if_else()
+  filter(!(is.na(week)))
+
+
+
+keep<-c("1","8","20")
+
+intake.eff.NCD<-intake.data.NCD%>%
+  filter(week<9)
+
+NCD.Feed.eff.data<-full_join( intake.eff.NCD, Feed.Eff.Data, by = c("week", "cohort", "cage","treatment","sex"))
+
+Feed.data<-NCD.Feed.eff.data%>%
+  filter(!(ID %in%c("8690","8590")))%>%
+   group_by(ID)%>%
+   mutate(fat.gained.NCD= `Total Fat Mass`[week=="1"])
+
+        
+
+#
+HFD.Feed.eff.data<-full_join( intake.eff.HFD, Feed.Eff.Data, by = c("week", "cohort", "cage","treatment","sex"))%>%
+  na.omit()
+         kcals.gained.HFD = (`Body Weight`[HFD.Feed.eff.data$week==20]-`Body Weight`[HFD.Feed.eff.data$week==8]))
+```
+#maternal counts
+```{r maternal-info}
+MRI.raw.data %>%
+  group_by(dam,treatment) %>%
+    distinct(dam) %>%
+  group_by(treatment)%>%
+  count(treatment) %>%
+  kable(caption="Dams per feeding group")
+```

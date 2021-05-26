@@ -1,0 +1,217 @@
+---
+title: "Food Intake Script"
+author: "Molly C. Mulcahy"
+date: "5/25/2021"
+output: html_document
+---
+#Setup Chunk
+```{r setup, include=FALSE}
+library(processx)
+library(devtools)
+library(dplyr)
+library(readr)
+library(car)
+library(knitr)
+library(tidyr)
+library(lme4)
+library(broom)
+library(RCurl)
+library(ggplot2)
+
+#figures made will go to directory called figures, will make them as both png and pdf files 
+opts_chunk$set(fig.path='figures/',
+               echo=FALSE, warning=FALSE, message=FALSE,dev=c('png','pdf'))
+options(scipen = 2, digits = 3)
+# set echo and message to TRUE if you want to display code blocks and code output respectively
+knitr::knit_hooks$set(inline = function(x) {
+  knitr:::format_sci(x, 'md')
+})
+#write standard error function for later use
+se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
+# sets color scheme for plots
+color.scheme <- c('gray69','gray36')
+```
+
+#Food Intake Data
+```{r data-entry-intake}
+intake.data.raw<-("Intake.Off.data.csv")
+intake.data<-read_csv(intake.data.raw,
+                      col_types = cols(
+                        cage = col_factor(levels = NULL),
+                        "# in cage" = col_double(),
+                        week = col_integer(),
+                        "IDs" = col_factor(levels = NULL),
+                        start = col_double(),
+                        end=col_double(),
+                        date = col_character(),
+                        notes = col_factor(levels=NULL),
+                        diet = col_factor(levels = NULL),
+                        cohort = col_factor(levels = NULL),
+                        food.consumed = col_double(),
+                        kcals.consumed = col_double(),
+                        food.cumulative = col_double(),
+                        treatment = col_factor(levels = c("eTRF","AL")),
+                        sex = col_factor(levels = c("female","male"))
+                        ))
+```
+
+# Pre-HFD Weekly Food Intake
+```{r weekly-intake}
+#Table of Cages in Food Intake Analyses
+intake.data %>%
+  group_by(sex,treatment) %>%
+  distinct(cage, .keep_all = T) %>%
+  count %>%
+  kable(caption="Cages in each group")
+
+#make averaged dataset
+average.intake<-intake.data%>%
+   filter(!(week=="5"&cage=="2031"))%>%#cage 2031 shredded diet these weeks and estimates of intake are unreliable
+   filter(!(week=="6"&cage=="2031"))%>%
+   filter(!(week=="7"&cage=="2031"))%>%
+  group_by(week, diet, treatment, sex)%>%
+  summarize_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+#Filter out HFD from dataset
+Pre.HFD.data<-average.intake%>%
+  filter(diet=="NCD")
+
+intake.data.NCD<-intake.data%>%
+  filter(diet=="NCD")
+
+#Plot of averaged.intake
+ggplot(Pre.HFD.data, aes(week, kcals.consumed_mean,col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(aes(col = treatment), se=FALSE, span =0.7)+
+  geom_errorbar(aes(ymin = kcals.consumed_mean -kcals.consumed_se, ymax = kcals.consumed_mean +kcals.consumed_se), width = 0.3)+
+  facet_grid(.~sex)+
+  labs(title="Weekly Food Intake", y = "Food Intake (kcals)", x="Week")+
+  scale_color_manual(values = color.scheme)+
+   theme(text = element_text(size=18),legend.position = c(0.1,0.80), legend.background = element_rect(fill = "transparent"))
+
+##all
+
+null.week.food.lme<-lmer(kcals.consumed ~ 1 + (1|cage), intake.data.NCD)
+age.week.food.lme<-lmer(kcals.consumed ~ week + (1|cage), intake.data.NCD)
+anova(null.week.food.lme, age.week.food.lme)# age p=0.0001
+group.week.food.lme<-lmer(kcals.consumed~ week*treatment +(1|cage), intake.data.NCD)
+anova(age.week.food.lme, group.week.food.lme)# effect of group in female(p=0.049)
+
+##Female
+intake.data.NCD.F<-intake.data.NCD%>%
+  filter(sex=="female")
+
+null.week.food.lme.F<-lmer(kcals.consumed ~ 1 + (1|cage), intake.data.NCD.F)
+age.week.food.lme.F<-lmer(kcals.consumed ~ week + (1|cage), intake.data.NCD.F)
+anova(null.week.food.lme.F, age.week.food.lme.F)# no effect of age,p= 0.068
+group.week.food.lme.F<-lmer(kcals.consumed~ week*treatment +(1|cage), intake.data.NCD.F)
+anova(age.week.food.lme.F, group.week.food.lme.F)# effect of group in female(p=0.049)
+fixef(group.week.food.lme.F)
+##Male
+intake.data.NCD.M<-intake.data.NCD%>%
+  filter(sex=="male")
+
+null.week.food.lme.M<-lmer(kcals.consumed ~ 1 + (1|cage), intake.data.NCD.M)
+age.week.food.lme.M<-lmer(kcals.consumed ~ week + (1|cage), intake.data.NCD.M)
+anova(null.week.food.lme.M, age.week.food.lme.M)# effect of age,p= 0.00079
+group.week.food.lme.M<-lmer(kcals.consumed~ week*treatment +(1|cage), intake.data.NCD.M)
+anova(age.week.food.lme.M, group.week.food.lme.M)# no effect of group in male(p=0.60)
+fixef(group.week.food.lme.M)
+```
+
+#Pre-HFD Cumulative Intake
+```{r fig2D}
+#cumulative intake plot
+ggplot(Pre.HFD.data, aes(week, food.cumulative_mean, col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(aes(col = treatment), se=FALSE)+
+  geom_errorbar(aes(ymin = food.cumulative_mean -food.cumulative_se, ymax = food.cumulative_mean +food.cumulative_se), width = 0.3)+
+  facet_grid(.~sex)+
+  labs(x="Week",y="Cumulative Food Intake (kcals)")+
+  ggtitle("Cumulative Food Intake")+
+  scale_color_manual(values = color.scheme)+
+  theme(text = element_text(size=18),legend.position = c(0.1,0.80), legend.background = element_rect(fill = "transparent"))
+
+#statistics for cumulative food intake
+null.cumu.food.lme<-lmer(food.cumulative ~ 1 + (1|cage), intake.data.NCD)
+age.cumu.food.lme<-lmer(food.cumulative~ week + (1|cage), intake.data.NCD)
+anova(null.cumu.food.lme, age.cumu.food.lme)# effect of age,p< 0.0001
+group.cumu.food.lme<-lmer(food.cumulative~ week+ treatment +(1|cage), intake.data.NCD)
+sex.cumu.food.lme<-lmer(food.cumulative~ week+ treatment*sex +(1|cage), intake.data.NCD)
+anova(group.cumu.food.lme, sex.cumu.food.lme)#p=0.065
+Anova(sex.cumu.food.lme)
+Anova(group.cumu.food.lme)$p.value
+fixef(group.cumu.food.lme)
+```
+
+#Post HFD transition
+
+# HFD Weekly Food Intake
+```{r weekly-HFD}
+#Filter out NCD from dataset
+HFD.data<-average.intake%>%
+  filter(diet=="HFD")
+
+intake.data.HFD<-intake.data%>%
+  filter(diet=="HFD")
+
+#Plot of averaged.intake
+ggplot(HFD.data, aes(week, kcals.consumed_mean,col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(aes(col = treatment), se=FALSE, span =0.7)+
+  geom_errorbar(aes(ymin = kcals.consumed_mean -kcals.consumed_se, ymax = kcals.consumed_mean +kcals.consumed_se), width = 0.3)+
+  facet_grid(.~sex)+
+  labs(title="Weekly Food Intake", y = "Food Intake (kcals)", x="Week")+
+  scale_color_manual(values = color.scheme)+
+   theme(text = element_text(size=18),legend.position = c(0.9,0.80), legend.background = element_rect(fill = "transparent"))
+
+#stats
+intake.data.HFD.F<-intake.data.HFD%>%
+  filter(sex=="female")
+
+null.week.HFD.food.lme.F<-lmer(kcals.consumed ~ 1 + (1|cage), intake.data.HFD.F)
+age.week.HFD.food.lme.F<-lmer(kcals.consumed ~ week + (1|cage), intake.data.HFD.F)
+#anova(null.week.HFD.food.lme.F, age.week.HFD.food.lme.F)# no effect of age,p= 0.068
+group.week.HFD.food.lme.F<-lmer(kcals.consumed~ week*treatment +(1|cage), intake.data.HFD.F)
+anova(age.week.HFD.food.lme.F, group.week.HFD.food.lme.F)# no effect of group in female(p=0.76)
+fixef(group.week.HFD.food.lme.F)
+##Male
+intake.data.HFD.M<-intake.data.HFD%>%
+  filter(sex=="male")
+
+null.week.HFD.food.lme.M<-lmer(kcals.consumed ~ 1 + (1|cage), intake.data.HFD.M)
+age.week.HFD.food.lme.M<-lmer(kcals.consumed ~ week + (1|cage), intake.data.HFD.M)
+#anova(null.week.HFD.food.lme.M, age.week.HFD.food.lme.M)# no effect of age,p= 0.068
+group.week.HFD.food.lme.M<-lmer(kcals.consumed~ week*treatment +(1|cage), intake.data.HFD.M)
+anova(age.week.HFD.food.lme.M, group.week.HFD.food.lme.M)# no effect of group in female(p=0.57)
+fixef(group.week.HFD.food.lme.M)
+```
+
+# HFD Cumulative Intake
+```{r Fig3D}
+
+HFD.data.filtered<-HFD.data%>%
+  filter(!(week == 15))
+#Plot of  cumulative intake
+ggplot(HFD.data.filtered, aes(week, food.cumulative_mean,col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_smooth(aes(col = treatment), se=FALSE, span =0.7)+
+  geom_errorbar(aes(ymin = food.cumulative_mean -food.cumulative_se, ymax = food.cumulative_mean +food.cumulative_se), width = 0.3)+
+  facet_grid(.~sex)+
+  labs(title="Cumulative Food Intake", y = "Cumulative Food Intake (kcals)", x="Week")+
+  scale_color_manual(values = color.scheme)+
+   theme(text = element_text(size=18),legend.position = c(0.1,0.80), legend.background = element_rect(fill = "transparent"))
+
+#statistics
+##ALL
+
+#statistics for cumulative food intake
+null.cumu.HFD.food.lme<-lmer(food.cumulative ~ 1 + (1|cage), intake.data.HFD)
+age.cumu.HFD.food.lme<-lmer(food.cumulative ~ week + (1|cage), intake.data.HFD)
+#anova(null.cumu.HFD.food.lme, age.cumu.HFD.food.lme)# effect of age,p< 0.0001
+group.cumu.HFD.food.lme<-lmer(food.cumulative~ week+ treatment +(1|cage), intake.data.HFD)
+anova(age.cumu.HFD.food.lme, group.cumu.HFD.food.lme)#p=0.5
+sex.cumu.HFD.food.lme<-lmer(food.cumulative~ week+ treatment*sex +(1|cage), intake.data.HFD)
+anova(group.cumu.HFD.food.lme, sex.cumu.HFD.food.lme)#p=0.91, no interaction
+Anova(sex.cumu.food.lme)
+```
