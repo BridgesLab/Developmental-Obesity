@@ -204,6 +204,7 @@ ggplot(summary.GTT, aes(time, glucose_mean, col = treatment))+
 #Stats
 ##ALl
 null.NCDGTT.lme<-lmer(glucose ~ 1 + (1|ID) + (1|dam), data = NCD.GTT.raw.data)
+
 age.NCDGTT.lme <-lmer(glucose ~ time + (1|ID) + (1|dam), data = NCD.GTT.raw.data)
 anova(null.NCDGTT.lme, age.NCDGTT.lme)#significant effect of time, p<0.0001
 diet.NCDGTT.lme<-lmer(glucose ~ time + treatment  + (1|ID) + (1|dam), data = NCD.GTT.raw.data)
@@ -514,11 +515,11 @@ HFD.GTT.raw.data.M<-HFD.GTT.raw.data%>%
   group_by(treatment)%>%
   summarize(avg = mean(AUC))
 
-shapiro.test(HFD.GTT.raw.data.M$AUC[HFD.GTT.raw.data.M$treatment =="eTRF"])#not normal
-shapiro.test(HFD.GTT.raw.data.M$AUC[HFD.GTT.raw.data.M$treatment =="AL"])#not normal
-leveneTest(AUC~treatment, HFD.GTT.raw.data.M)#equivalent variance
+#shapiro.test(HFD.GTT.raw.data.M$AUC[HFD.GTT.raw.data.M$treatment =="eTRF"])#not normal
+#shapiro.test(HFD.GTT.raw.data.M$AUC[HFD.GTT.raw.data.M$treatment =="AL"])#not normal
+#leveneTest(AUC~treatment, HFD.GTT.raw.data.M)#equivalent variance
 #Mann-Whitney U test
-wilcox.test(AUC~treatment, HFD.GTT.raw.data.M)$p.value#p=0.000000096
+#wilcox.test(AUC~treatment, HFD.GTT.raw.data.M)$p.value#p=0.000000096
 ```
 
 #HFD GSIS
