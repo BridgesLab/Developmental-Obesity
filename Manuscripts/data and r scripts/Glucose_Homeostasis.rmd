@@ -80,7 +80,7 @@ Anova(sex.NCDITT.lme)
 fixef(sex.NCDITT.lme)
 ```
 #Pre-HFD ITT AUC
-```{r Fig3F}
+```{r Fig2F}
 #plot AUC
 AUC.NCD.ITT.summary<-NCD.ITT.raw.data%>%
   group_by(treatment, sex)%>%
@@ -163,7 +163,7 @@ summary(models$slope)
 coefficients(FBG.ITT.NCD.aov)
 ```
 # Pre-HFD GTT
-```{r Fig2H}
+```{r Fig2G}
 NCD.GTT.data.file<-"NCD.GTT.Offspring.csv"
 NCD.GTT.raw.data<-read_csv(NCD.GTT.data.file,
     col_types = cols(
@@ -546,10 +546,11 @@ summary.GSIS<-GSIS.data.raw%>%
 
 #Plot
 color.scheme <- c('gray69','gray36')
-ggplot(summary.GSIS, aes(time, full.conc_mean))+
-  geom_col(aes(fill = diet), position = position_dodge2())+
+dodge <- position_dodge(width=1)
+ggplot(summary.GSIS, aes(as.factor(time), full.conc_mean, fill = diet))+
+  geom_bar(aes(fill = diet), stat = "identity", position = position_dodge(0.75), width = 0.75)+
   facet_grid(.~sex)+
-  geom_errorbar(aes(ymin = full.conc_mean-full.conc_se, ymax = full.conc_mean+full.conc_se), position = position_dodge2())+
+  geom_errorbar(aes(ymin = full.conc_mean-full.conc_se, ymax = full.conc_mean+full.conc_se, group = diet),width = .3, position = position_dodge(0.75))+
    scale_fill_manual(values = c('gray69','gray36'))+
   labs(title = "Glucose Stimulated Insulin Secretion", y = "Insulin (ng/mL)", x = "Time (minutes)")+
 theme(text = element_text(size=18),legend.position = c(0.1,0.8), legend.background = element_rect(fill = "transparent"))
