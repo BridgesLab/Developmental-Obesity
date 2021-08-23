@@ -1,0 +1,156 @@
+---
+title: "Feeding_Efficiency.rmd"
+author: "Molly C. Mulcahy"
+date: "8/16/2021"
+output: html_document
+---
+
+#Setup Chunk
+```{r setup, include=FALSE}
+library(processx)
+library(devtools)
+library(dplyr)
+library(readr)
+library(car)
+library(knitr)
+library(tidyr)
+library(lme4)
+library(broom)
+library(RCurl)
+library(ggplot2)
+
+#figures made will go to directory called figures, will make them as both png and pdf files 
+opts_chunk$set(fig.path='figures/',
+               echo=FALSE, warning=FALSE, message=FALSE,dev=c('png','pdf'))
+options(scipen = 2, digits = 3)
+# set echo and message to TRUE if you want to display code blocks and code output respectively
+knitr::knit_hooks$set(inline = function(x) {
+  knitr:::format_sci(x, 'md')
+})
+#write standard error function for later use
+se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
+# sets color scheme for plots
+color.scheme <- c('gray69','gray36')
+```
+
+## R Markdown
+
+```{r data-entry-intake}
+intake.data.raw<-("Intake.Off.data.csv")
+intake.data<-read_csv(intake.data.raw,
+                      col_types = cols(
+                        cage = col_factor(levels = NULL),
+                        "# in cage" = col_double(),
+                        week = col_integer(),
+                        "IDs" = col_factor(levels = NULL),
+                        start = col_double(),
+                        end=col_double(),
+                        date = col_character(),
+                        notes = col_factor(levels=NULL),
+                        diet = col_factor(levels = NULL),
+                        cohort = col_factor(levels = NULL),
+                        food.consumed = col_double(),
+                        kcals.consumed = col_double(),
+                        food.cumulative = col_double(),
+                        treatment = col_factor(levels = c("eTRF","AL")),
+                        sex = col_factor(levels = c("female","male"))
+                        ))
+```
+
+
+```{r data-entry-body}
+
+keep<-c("1","8","20")
+Feed.eff.file<-"Feed.Efficiency.Data.csv"
+Early.life.data<-read_csv(Feed.eff.file,
+                          col_types = cols(
+  sex = col_factor(levels = c("female","male")),
+  ID = col_factor(levels = NULL),
+  cage = col_factor(levels = NULL),
+  treatment = col_factor(levels = c("eTRF","AL")),
+  cohort = col_factor(levels = NULL),
+  week = col_double(),
+  `Body Weight` = col_double(),
+  `Total Fat Mass` = col_double(),
+  `Lean Mass` = col_double(),
+  `Free Water` = col_double()))
+
+#filter intake to only be the observations I need
+intake.eff<-intake.data%>%
+  filter(week%in%keep)
+#merge together into one dataset
+NCD.Feed.eff.data<-merge(intake.eff, Early.life.data, by = c("week", "cohort", "cage","treatment","sex"))
+
+```
+
+```{r data-manipulation}
+Feed.data<-NCD.Feed.eff.data%>%
+ filter(!(ID %in%c("8671","460","461","462","463")))%>%
+   group_by(ID)%>%
+   mutate(fat.start.NCD = `Total Fat Mass`[week==1],
+          fat.end.NCD = `Total Fat Mass`[week==8],
+          lean.start.NCD = `Lean Mass`[week==1],
+          lean.end.NCD = `Lean Mass`[week ==8],
+          fat.end.HFD = `Total Fat Mass`[week==20],
+          lean.end.HFD = `Lean Mass`[week==20],
+          delta.lean.NCD = (lean.end.NCD-lean.start.NCD),
+          delta.fat.NCD = (fat.end.NCD -fat.start.NCD),
+          delta.lean.HFD = (lean.end.HFD - lean.end.NCD),
+          delta.fat.HFD = (fat.end.HFD -fat.end.NCD),
+          delta.lean.kcals = delta.lean.NCD*4, 
+          delta.fat.kcals = delta.fat.NCD*9,
+          delta.lean.kcals.HFD = delta.lean.HFD*4,
+          delta.fat.kcals.HFD = delta.fat.HFD*9,
+          delta.kcals = delta.lean.kcals + delta.fat.kcals,
+          delta.kcals.HFD = delta.fat.kcals.HFD + delta.lean.kcals.HFD)%>%
+  mutate(kcal.eaten.NCD = food.cumulative[week==8],
+         kcal.eaten.HFD = (food.cumulative[week==20]-food.cumulative[week==8]))%>%
+  mutate(FE.NCD = (delta.kcals/kcal.eaten.NCD)*100,
+         FE.HFD = (delta.kcals.HFD/kcal.eaten.HFD)*100)
+
+
+#make summary set to graph feeding efficiency
+summary.FE<-Feed.data%>%
+  group_by(treatment, sex, diet, FE.NCD, FE.HFD)%>%
+   distinct(ID)%>%
+  filter(!is.na(FE.HFD))%>%
+  filter(!is.na(FE.NCD))
+```
+
+```{r SuppFig-1A}  
+#NCD
+
+summary.FE%>%
+  group_by(sex, treatment)%>%
+  summarise_at(c("FE.NCD", "FE.HFD"),.funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))%>%
+  ggplot(aes( treatment,FE.NCD_mean, fill = treatment))+
+  geom_col(aes(fill = treatment))+
+  geom_errorbar(aes(ymin = FE.NCD_mean -FE.NCD_se, ymax = FE.NCD_mean + FE.NCD_se), width =0.3)+
+  facet_grid(.~sex)+
+  scale_fill_manual(values = color.scheme)+
+   theme(text = element_text(size=18), legend.position = "none", axis.title.x = element_blank())+
+  labs(title = "Feeding efficiency during NCD treatment", y="percent (%)")
+#NCD stats
+FE.NCD.aov<-aov(FE.NCD ~ sex + treatment, summary.FE)# no interaction, remove interaction term
+anova(FE.NCD.aov)#sig effect of sex(p=0.0000095) and treatment (p=0.002)
+```
+
+
+```{r SuppFig-1B}
+#HFD 
+summary.FE%>%
+  group_by(sex, treatment)%>%
+  summarise_at(c("FE.NCD", "FE.HFD"),.funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))%>%
+  ggplot(aes( treatment,FE.HFD_mean, fill = treatment))+
+  geom_col(aes(fill = treatment))+
+  geom_errorbar(aes(ymin = FE.HFD_mean -FE.HFD_se, ymax = FE.HFD_mean + FE.HFD_se), width =0.3)+
+  facet_grid(.~sex)+
+  scale_fill_manual(values = color.scheme)+
+  theme(text = element_text(size=18), legend.position = "none", axis.title.x = element_blank())+
+  labs(title = "Feeding efficiency during HFD treatment", y="percent (%)")
+
+#stats
+FE.HFD.aov<-aov(FE.HFD ~ sex + treatment, summary.FE)#no interaction, remove interaction term
+Anova(FE.HFD.aov)#sig effect of sex (p=0.00023)  and not treatment (p=0.093)
+```
+
