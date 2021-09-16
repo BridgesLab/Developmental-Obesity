@@ -5,3 +5,8 @@ remember to make things larger in font
 Font used in regular times (12-16 point font)
 fix m/f and facet to be consistent btw graphs
 
+Add authors
+Add keywords
+General reference in introduction on TRF
+Prevalence estimates
+Model for centrfuge
