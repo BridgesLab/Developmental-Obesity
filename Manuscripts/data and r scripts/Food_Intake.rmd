@@ -106,17 +106,19 @@ Anova(group.cumu.food.lme)
 fixef(group.cumu.food.lme)
 ```
 
-```{r final-cumulative-NCD}
+```{ final-cumulative-NCD}
 
 #cumulative intake plot, week 8 only
-filter(Pre.HFD.data, week == 8)%>%View
+filter(Pre.HFD.data, week == 8)%>%
   ggplot(aes(x=treatment, y = food.cumulative_mean))+
 geom_col(aes(x= treatment, y = food.cumulative_mean, fill = treatment))+
   geom_errorbar(aes(ymin = food.cumulative_mean -food.cumulative_se, ymax = food.cumulative_mean + food.cumulative_se), width =0.2)+
   facet_grid(.~ sex)+
   scale_fill_manual(values = color.scheme)
   
-shapiro.test(Pre.HF)  
+shapiro.test(Pre.HFD.data$food.cumulative_mean[Pre.HFD.data$treatment=="AL"])  #0.40
+shapiro.test(Pre.HFD.data$food.cumulative_mean[Pre.HFD.data$treatment=="eTRF"])#0.30
+leveneTest(food.cumulative_mean~treatment, data = Pre.HFD.data)#0.85
 cumulative.aov<-aov(food.cumulative ~ treatment * sex, data = filter(intake.data.NCD, week == 8))
 anova(cumulative.aov)
 coefficients(cumulative.aov)
@@ -139,7 +141,8 @@ intake.data.HFD<-intake.data%>%
 ```{r Fig3D}
 
 HFD.data.filtered<-HFD.data%>%
-  filter(!(week == 15))
+  filter(!(week == 15))%>%
+  filter(week<21)
 #Plot of  cumulative intake
 ggplot(HFD.data.filtered, aes(week, food.cumulative_mean,col = treatment))+
   geom_point(aes(col = treatment))+
@@ -154,12 +157,34 @@ ggplot(HFD.data.filtered, aes(week, food.cumulative_mean,col = treatment))+
 ##ALL
 
 #statistics for cumulative food intake
-null.cumu.HFD.food.lme<-lmer(food.cumulative ~ 1 + (1|cage), intake.data.HFD)
-age.cumu.HFD.food.lme<-lmer(food.cumulative ~ week + (1|cage), intake.data.HFD)
-#anova(null.cumu.HFD.food.lme, age.cumu.HFD.food.lme)# effect of age,p< 0.0001
-group.cumu.HFD.food.lme<-lmer(food.cumulative~ week+ treatment +(1|cage), intake.data.HFD)
-anova(age.cumu.HFD.food.lme, group.cumu.HFD.food.lme)#p=0.5
-sex.cumu.HFD.food.lme<-lmer(food.cumulative~ week+ treatment*sex +(1|cage), intake.data.HFD)
+#restrict to week 20
+HFD.food.intake<-intake.data.HFD%>%
+  filter(week<21)
+
+null.cumu.HFD.food.lme<-lmer(food.cumulative ~ 1 + (1|cage), HFD.food.intake)
+age.cumu.HFD.food.lme<-lmer(food.cumulative ~ week + (1|cage), HFD.food.intake)
+anova(null.cumu.HFD.food.lme, age.cumu.HFD.food.lme)# effect of age,p< 0.0001
+group.cumu.HFD.food.lme<-lmer(food.cumulative~ week+ treatment +(1|cage),HFD.food.intake)
+anova(age.cumu.HFD.food.lme, group.cumu.HFD.food.lme)#p=0.49
+sex.cumu.HFD.food.lme<-lmer(food.cumulative~ week+ treatment*sex +(1|cage), HFD.food.intake)
 anova(group.cumu.HFD.food.lme, sex.cumu.HFD.food.lme)#p=0.91, no interaction
 Anova(sex.cumu.food.lme)
+```
+
+
+
+```{r Fig3D-bar}
+filter(HFD.data, week == 20)%>%
+  ggplot(aes(x=treatment, y = food.cumulative_mean))+
+geom_col(aes(x= treatment, y = food.cumulative_mean, fill = treatment))+
+  geom_errorbar(aes(ymin = food.cumulative_mean -food.cumulative_se, ymax = food.cumulative_mean + food.cumulative_se), width =0.2)+
+  facet_grid(.~ sex)+
+  scale_fill_manual(values = color.scheme)
+  
+shapiro.test(Pre.HFD.data$food.cumulative_mean[HFD.data$treatment=="AL"])  #0.40
+shapiro.test(Pre.HFD.data$food.cumulative_mean[HFD.data$treatment=="eTRF"])#0.30
+leveneTest(food.cumulative_mean~treatment, data = Pre.HFD.data)#0.85
+cumulative.aov<-aov(food.cumulative ~ treatment + sex, data = filter(intake.data.HFD, week == 20))#interaction removed
+anova(cumulative.aov)
+coefficients(cumulative.aov)
 ```
