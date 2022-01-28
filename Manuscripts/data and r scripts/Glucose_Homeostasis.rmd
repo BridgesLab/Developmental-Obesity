@@ -581,3 +581,31 @@ anova(time.GSIS.lme, diet.GSIS.lme)# not different with diet, p=0.3
 Full.GSIS.lme<-lmer(full.conc~ time*sex*diet + (1|ID), GSIS.data.raw)
 summary(Full.GSIS.lme)# rule out interactions
 ```
+
+```{r Fig3k}
+low.range<-c("H4","G4","G3")
+#calculate fold change, omit  observations outside of detectable range, n=3
+fold.change.data<-GSIS.data.raw%>%
+  filter(!(Wells %in%low.range))%>%
+group_by(ID)%>%
+ mutate(FC = max(Concs.)/min(Concs.))%>%
+  group_by(sex, diet,ID)%>%
+  mutate(ind.FC.avg = mean(FC))
+#create averaged dataset for plot
+fold.change.avg<-fold.change.data%>%
+  group_by(sex, diet)%>%
+   summarize(avg.FC = mean(FC),
+            error.FC = se(FC))
+ #Plot
+ ggplot(fold.change.avg, aes(diet, avg.FC, fill = diet))+
+  geom_bar(aes(fill = diet), stat = "identity")+
+  facet_grid(.~sex)+
+  scale_fill_manual(values = color.scheme)+
+  labs(title = "Fold Change Insulin Secretion", y = "Fold Change", x = "treatment")+
+  geom_errorbar(aes(ymin = avg.FC - error.FC, ymax = avg.FC + error.FC), width = 0.3)+
+  theme(text = element_text(size=18),legend.position = "none") 
+ 
+ #stats
+ FC.aov<-aov(ind.FC.avg ~ sex+ diet, data = fold.change.data)#interaction =0.73, therefore omited
+ Anova(FC.aov)
+```
