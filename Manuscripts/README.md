@@ -1,27 +1,13 @@
-Figure Key - For each figure, on the table I'll say what script and which output file. 
-In illustrator, don't embed - just link it- it'll upload the most updated version on the 
-figure. Anything pulled from DB->csv->reload to do the plots. When we put it in the repository, get rid of update.data. Put effect sizes and p-values in the text (method result, figure legend/figure)- at the end do the intro and discussion.  
+Code and Raw Data for early Time-Restricted Feeding studies in maternal and child health
 
+This repository contains raw data from studies done by the Bridges lab and collaborators on the effects of eTRF in the context of Gestation. 
+The tag column refers the state of the dataset at the indicated time of the manuscript's publishing.
 
-| Figure | Script | File |
-----------------------------
-|1 A and B | adobe | originates on adobe file|
-|2A |Body_Composition.rmd | chunk Fig2A|
-|2B |Body_Composition.rmd |chunk Fig2B|
-|2C|Body_Composition.rmd| chunk Fig2C|
-|2D|Food_Intake.rmd | chunk Fig2D|
-|2E|Glucose_Homeostasis.rmd | chunk Fig2E|
-|2F|Glucose_Homeostasis.rmd| chunk Fig2F|
-|2G|Glucose_Homeostasis.rmd | chunk Fig2G|
-|2H|Glucose_Homeostasis.rmd| chunk Fig2H|
-|2I|Glucose_Homeostasis.rmd|chunk Fig2I|
-|3A|Body_Composition.rmd | chunk Fig3A|
-|3B|Body_Composition.rmd | chunk Fig3B|
-|3C|Body_Composition.rmd | chunk Fig3C|
-|3D|Food_Intake.rmd | chunk Fig3D|
-|3E|Glucose_Homeostasis.rmd|chunk Fig3E|
-|3F|Glucose_Homeostasis.rmd| chunk Fig3F|
-|3G|Glucose_Homeostasis.rmd| chunk Fig3G|
-|3H|Glucose_Homeostasis.rmd|chunk Fig3H|
-|3I|Glucose_Homeostasis.rmd|chunk Fig3I|
-|3J|Glucose_Homeostasis.rmd|chunk Fig3J|
+Structure of this repository
+Our data are provided in raw form (csv) with a R script (rmd file) that analyzes the data, generating html and md outputs along with figures. 
+Manuscripts: contains all text and image files for the manuscirpt. See the TODO file in each to identify location of the underlying files and scripts.
+
+Data and R scripts: contains all r scripts, raw data files, and figures
+
+License
+This developmental obesity data is made available under the open data commons attribuition license:
