@@ -276,43 +276,6 @@ anova(HFD.diet.lm.lme, HFD.sex.lm.lme)#significant, but no interaction between s
 Anova(HFD.sex.lm.lme)# no interaction of sex and treatment, so removed, 
 ```
 
-```{r feed-eff}
-Feed.Eff.Data<-MRI.raw.data%>%
-  filter(!(cage=="2032"))%>%
-  group_by(ID, sex, cage, treatment, cohort)%>%
-  dplyr::select(ID, cage, treatment, assay, gram.values, age, cohort)%>%
-  pivot_wider(names_from = assay, values_from = gram.values, values_fn = mean)%>%
-  group_by(ID, sex, cage, treatment, cohort)%>%
-  mutate(week = case_when(
-    age>19&age<25 ~ 1, 
-    age>"62"&age<"70" ~ 8,
-    age>"160"&age<"168"~20
-  ))%>%
- # group_by(week, ID, cage, treatment, assay, cohort)%>%
-  #if_else()
-  filter(!(is.na(week)))
-
-
-
-keep<-c("1","8","20")
-
-intake.eff.NCD<-intake.data.NCD%>%
-  filter(week<9)
-
-NCD.Feed.eff.data<-full_join( intake.eff.NCD, Feed.Eff.Data, by = c("week", "cohort", "cage","treatment","sex"))
-
-Feed.data<-NCD.Feed.eff.data%>%
-  filter(!(ID %in%c("8690","8590")))%>%
-   group_by(ID)%>%
-   mutate(fat.gained.NCD= `Total Fat Mass`[week=="1"])
-
-        
-
-#
-HFD.Feed.eff.data<-full_join( intake.eff.HFD, Feed.Eff.Data, by = c("week", "cohort", "cage","treatment","sex"))%>%
-  na.omit()
-         kcals.gained.HFD = (`Body Weight`[HFD.Feed.eff.data$week==20]-`Body Weight`[HFD.Feed.eff.data$week==8]))
-```
 #maternal counts
 ```{r maternal-info}
 MRI.raw.data %>%
