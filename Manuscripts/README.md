@@ -1,4 +1,5 @@
 | Figure | Script | File |
+|---------|-------|-------|
 |1 A and B | adobe | originates on adobe file| 
 |2A |Body_Composition.rmd| Fig2A| 
 |2B |Body_Composition.rmd| Fig2B| 
