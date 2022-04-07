@@ -10,4 +10,4 @@ Manuscripts: contains all text and image files for the manuscirpt. See the TODO 
 Data and R scripts: contains all r scripts, raw data files, and figures
 
 License
-This developmental obesity data is made available under the open data commons attribuition license:
+This developmental obesity data is made available under the open data commons attribution license:
