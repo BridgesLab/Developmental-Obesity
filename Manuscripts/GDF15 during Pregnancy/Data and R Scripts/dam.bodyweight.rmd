@@ -1,0 +1,42 @@
+---
+title: "Dam Weight"
+author: "Molly C. Mulcahy"
+date: '2022-05-05'
+output: html_document
+---
+
+```{r setup}
+se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
+
+#load commonly needed packages
+library(processx)
+library(devtools)
+library(tidyr)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(knitr)
+library(car)
+library(lme4)
+library(forcats)
+
+#set plot color scheme
+color.scheme = c("turquoise3","darkorchid2")
+```
+
+```{r data-entry}
+dam.bodyweight.file<-"dambodyweight.csv"
+
+bw.data<-read_csv(dam.bodyweight.file)#, 
+         col_types = cols(
+          age = 
+          animal.id = 
+          MouseID = 
+          Genotype = 
+          assay = 
+          gam.values = 
+          gest.age = 
+          postnatal = col_  
+         ))
+
+```
