@@ -1,0 +1,49 @@
+---
+title: "dam.foodintake"
+author: "Molly C. Mulcahy"
+date: '2022-05-25'
+output: html_document
+---
+
+```{r setup}
+se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
+
+#load commonly needed packages
+library(processx)
+library(devtools)
+library(tidyr)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(knitr)
+library(car)
+library(lme4)
+library(forcats)
+
+#set plot color scheme
+color.scheme = c("turquoise3","darkorchid2")
+```
+
+
+```{r data-entry}
+dam.foodintake.file<-"dam_foodintake.csv"
+
+intake.data<-read_csv(dam.foodintake.file, 
+  col_types = cols(
+  MouseID = col_factor(levels = NULL),
+  "food start" = col_double(),
+  "food end" = col_double(),
+  "number in cage" = col_double(),
+  kcals.consumed = col_double(),
+  food.cumulative = col_double(),
+  Genotype = col_factor(levels = c("+/+","-/-")),
+  gest.age = col_double(),
+  postnatal = col_factor(levels = c("n","y"))
+  ))
+          
+intake.data.cleaned<-intake.data%>%
+  filter(postnatal == "n")
+
+ggplot(intake.data.cleaned, aes(gest.age, food.cumulative, col = Genotype))+
+  geom_point(aes(col = Genotype))
+```

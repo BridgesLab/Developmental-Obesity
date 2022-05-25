@@ -25,18 +25,42 @@ color.scheme = c("turquoise3","darkorchid2")
 ```
 
 ```{r data-entry}
-dam.bodyweight.file<-"dambodyweight.csv"
+dam.bodyweight.file<-"dam_bodyweight.csv"
 
-bw.data<-read_csv(dam.bodyweight.file)#, 
+bw.data<-read_csv(dam.bodyweight.file, 
          col_types = cols(
-          age = 
-          animal.id = 
-          MouseID = 
-          Genotype = 
-          assay = 
-          gam.values = 
-          gest.age = 
-          postnatal = col_  
+          MouseID = col_factor(levels = NULL),
+          Genotype = col_factor(levels = c("+/+","-/-")),
+          gram.values = col_double(),
+          gest.age = col_double(),
+          postnatal = col_factor(levels = c("n","y"))  
          ))
-
 ```
+
+#Analysis
+```{r bodyweight-prenatal}
+#plot, all values
+ggplot(bw.data, aes(gest.age, gram.values, col = Genotype, label = MouseID))+
+  geom_point(aes(col = Genotype))+
+  geom_smooth(aes(col = Genotype), se= FALSE)+
+  geom_text()
+
+#plot averaged values
+avg.bw.data<-bw.data%>%
+  filter(postnatal=="n")%>%
+  group_by(Genotype, gest.age)%>%
+  summarize(avg.bw = mean(gram.values),
+            error.bw = se(gram.values))
+  ggplot(avg.bw.data, aes(gest.age, avg.bw, col = Genotype))+
+  geom_point(aes(col = Genotype))+
+  geom_errorbar(aes(ymin = avg.bw - error.bw, ymax = avg.bw + error.bw))+
+  scale_color_manual(values = color.scheme)+
+  geom_smooth(aes(col = Genotype),se = FALSE)+
+  labs(title = "Maternal Perinatal Body Weight", y = "grams",x= "Gestational Day")+
+  theme(legend.position = c(0.1, 0.865))
+  ```
+  
+  ```{r stats}
+  
+  
+  ```
