@@ -21,7 +21,7 @@ library(lme4)
 library(forcats)
 
 #set plot color scheme
-color.scheme = c("turquoise3","darkorchid2")
+color.scheme = c("#333333","#CCCCCC")
 ```
 
 
@@ -35,15 +35,31 @@ intake.data<-read_csv(dam.foodintake.file,
   "food end" = col_double(),
   "number in cage" = col_double(),
   kcals.consumed = col_double(),
-  food.cumulative = col_double(),
   Genotype = col_factor(levels = c("+/+","-/-")),
   gest.age = col_double(),
-  postnatal = col_factor(levels = c("n","y"))
+  postnatal = col_factor(levels = c("n","y")),
+  food.cumulative = col_double()
   ))
           
 intake.data.cleaned<-intake.data%>%
-  filter(postnatal == "n")
+mutate( week = cut(gest.age, breaks = c(-7.5,0,7.5, 14.5, 21.5, 28.5, 35.5,42.5)))%>%
+  mutate(as.numeric(week))
+  
+ #Daily Food 
+ggplot(intake.data.cleaned, aes(week, kcals.consumed, col = Genotype))+
+  geom_point(aes(col = Genotype))+
+  geom_smooth(aes(col = Genotype), se = FALSE, span =0.5)+
+  scale_color_manual(values = color.scheme)+
+  labs(title = "Maternal Food Intake", y= "Kcal/mouse/day",x="Gestational Age")+
+  theme(legend.position = c(0.1,0.85))
 
-ggplot(intake.data.cleaned, aes(gest.age, food.cumulative, col = Genotype))+
-  geom_point(aes(col = Genotype))
+
+#Cumulative Food Intake
+ intake.data.cleaned%>%
+   ggplot(aes(gest.age, food.cumulative, col = Genotype))+
+   geom_point(aes(col = Genotype))+
+    scale_color_manual(values = color.scheme)+
+   geom_smooth(aes(col = Genotype),se=FALSE)+
+  labs(title = "Maternal Cumulative Food Intake", y= "Kcals",x="Gestational Age")+
+  theme(legend.position = c(0.1,0.85))
 ```

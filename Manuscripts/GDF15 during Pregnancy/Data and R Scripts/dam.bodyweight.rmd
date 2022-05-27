@@ -21,7 +21,7 @@ library(lme4)
 library(forcats)
 
 #set plot color scheme
-color.scheme = c("turquoise3","darkorchid2")
+color.scheme = c("#333333","#CCCCCC")
 ```
 
 ```{r data-entry}
@@ -34,33 +34,78 @@ bw.data<-read_csv(dam.bodyweight.file,
           gram.values = col_double(),
           gest.age = col_double(),
           postnatal = col_factor(levels = c("n","y"))  
-         ))
+         ))%>%
+mutate( week = cut(gest.age, breaks = c(-7.5,0,7.5, 14.5, 21.5, 28.5, 35.5,42.5)))%>%
+  mutate(Week = as.numeric(week))
+
+avg.bw.data<-bw.data%>%
+  group_by(Genotype, week)%>%
+  summarise_at(vars(gram.values), funs(mean, se))
 ```
 
 #Analysis
 ```{r bodyweight-prenatal}
 #plot, all values
-ggplot(bw.data, aes(gest.age, gram.values, col = Genotype, label = MouseID))+
+ggplot(bw.data, aes(gest.age, gram.values, col = Genotype))+
   geom_point(aes(col = Genotype))+
-  geom_smooth(aes(col = Genotype), se= FALSE)+
-  geom_text()
-
-#plot averaged values
-avg.bw.data<-bw.data%>%
-  filter(postnatal=="n")%>%
-  group_by(Genotype, gest.age)%>%
-  summarize(avg.bw = mean(gram.values),
-            error.bw = se(gram.values))
-  ggplot(avg.bw.data, aes(gest.age, avg.bw, col = Genotype))+
-  geom_point(aes(col = Genotype))+
-  geom_errorbar(aes(ymin = avg.bw - error.bw, ymax = avg.bw + error.bw))+
+  geom_smooth(aes(col = Genotype), se= FALSE, span =0.4)+
   scale_color_manual(values = color.scheme)+
-  geom_smooth(aes(col = Genotype),se = FALSE)+
   labs(title = "Maternal Perinatal Body Weight", y = "grams",x= "Gestational Day")+
-  theme(legend.position = c(0.1, 0.865))
-  ```
+  theme_bw()+
+  theme(legend.position = c(0.1, 0.865), legend.background = element_blank())
   
-  ```{r stats}
+#plot averaged values
+ avg.bw.data%>%
+   ggplot(aes(week, mean, col = Genotype))+
+   geom_point(aes(col = Genotype))+
+   geom_errorbar(aes(ymin = mean - se, ymax = mean + se), width =0.3)+
+   scale_color_manual(values = color.scheme)+
+   geom_smooth(aes(col = Genotype))+
+  labs(title = "Maternal Perinatal Body Weight", y = "grams",x= "Gestational Day")+
+  theme_bw()+
+  theme(legend.position = c(0.1, 0.865), legend.background = element_blank()) 
+ 
+ #plot postnatal bodyweight
+ bw.data%>%
+   filter(postnatal == "y")%>%
+   ggplot(aes(gest.age, gram.values, col = Genotype))+
+  geom_point(aes(col = Genotype))+
+  geom_smooth(aes(col = Genotype), se= FALSE, span =0.7)+
+  scale_color_manual(values = color.scheme)+
+  labs(title = "Maternal Perinatal Body Weight", y = "grams",x= "Gestational Day")+
+  theme_bw()+
+  theme(legend.position = c(0.1, 0.865), legend.background = element_blank())
+```
   
-  
-  ```
+```{r stats}
+# pre birth
+bw.data.pre<-bw.data%>%
+  filter(postnatal=="n")
+#linear mixed effect Models
+base.model<-lmer(gram.values ~ 1+ (1|MouseID), data = bw.data.pre)
+time.model<-lmer(gram.values ~ gest.age + (1|MouseID), data = bw.data.pre)
+anova(base.model, time.model)#significant effect of gestational age
+geno.model<-lmer(gram.values ~ gest.age + Genotype + (1|MouseID), data = bw.data.pre)
+anova(time.model, geno.model)#no independent effect of genotype
+geno.int.model<-lmer(gram.values ~ gest.age*Genotype +(1|MouseID), data = bw.data.pre)
+anova(geno.model,geno.int.model)# no differnece between simple and interaction model
+Anova(geno.int.model)#no interaction effect
+fixef(geno.model)
+Anova(geno.model)
+
+#post birth
+bw.data.post<-bw.data%>%
+  filter(postnatal=="y")
+
+#linear mixed effect models
+base.post<-lmer(gram.values ~ 1 + (1|MouseID) ,data = bw.data.post)
+time.post<-lmer(gram.values ~ gest.age + (1|MouseID), data = bw.data.post)
+anova(base.post, time.post)#significant effect of time
+geno.post<-lmer(gram.values ~ gest.age + Genotype + (1|MouseID), data = bw.data.post)
+anova(time.post, geno.post)# no independent effect of genotype
+geno.int.post<-lmer(gram.values ~ gest.age*Genotype + (1|MouseID), data = bw.data.post)
+anova(geno.int.post, geno.post)
+Anova(geno.int.post)#no interaction
+fixef(geno.post)
+Anova(geno.post)
+```
