@@ -145,7 +145,7 @@ t.test(AUC ~ Genotype, data = AUC.data,var.equal = FALSE)$p.value#0.7
 #calculate rate of drop
 models<-ITT.data%>%
   filter(time<60)%>%
-  group_by(Genotype)%>%
+  group_by(MouseID,Genotype)%>%
   mutate(l.glucose = log(glucose))%>%
   do(fitted.model= lm(l.glucose~ time, data =.))%>%
   mutate(rate =coef(fitted.model)["time"],
@@ -163,7 +163,7 @@ ggplot(summary.models, aes(Genotype, mean, fill = Genotype))+
   geom_col(aes(fill = Genotype))+
   geom_errorbar(aes(ymin = mean-se, ymax = mean + se), width = 0.3)+
   scale_fill_manual(values = color.scheme)+
-  labs(title = "Rate of Drop",y="mg/dL per minute")+
+  labs(title = "Rate of Drop",y="rate of glucose disposal")+
   theme(legend.position = "none")
  
 #stats

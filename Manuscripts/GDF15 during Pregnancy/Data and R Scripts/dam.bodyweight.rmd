@@ -35,8 +35,7 @@ bw.data<-read_csv(dam.bodyweight.file,
           gest.age = col_double(),
           postnatal = col_factor(levels = c("n","y"))  
          ))%>%
-mutate( week = cut(gest.age, breaks = c(-7.5,0,7.5, 14.5, 21.5, 28.5, 35.5,42.5)))%>%
-  mutate(Week = as.numeric(week))
+mutate( week = cut(gest.age, breaks = c(-7.5,0,7.5, 14.5, 21.5, 28.5, 35.5,42.5), labels = c("pre-pregnancy","E0.5","E7.5","E14.5","E21.5","PND7.5","PND14.5")))
 
 avg.bw.data<-bw.data%>%
   group_by(Genotype, week)%>%
@@ -56,25 +55,15 @@ ggplot(bw.data, aes(gest.age, gram.values, col = Genotype))+
   
 #plot averaged values
  avg.bw.data%>%
-   ggplot(aes(week, mean, col = Genotype))+
+   ggplot(aes(as.numeric(week), mean, col = Genotype))+
    geom_point(aes(col = Genotype))+
    geom_errorbar(aes(ymin = mean - se, ymax = mean + se), width =0.3)+
    scale_color_manual(values = color.scheme)+
-   geom_smooth(aes(col = Genotype))+
-  labs(title = "Maternal Perinatal Body Weight", y = "grams",x= "Gestational Day")+
-  theme_bw()+
+   geom_smooth(aes(col = Genotype),se=FALSE)+
+  labs(title = "Maternal Perinatal Body Weight", y = "body weight(grams)",x= "Gestational Day")+
   theme(legend.position = c(0.1, 0.865), legend.background = element_blank()) 
  
- #plot postnatal bodyweight
- bw.data%>%
-   filter(postnatal == "y")%>%
-   ggplot(aes(gest.age, gram.values, col = Genotype))+
-  geom_point(aes(col = Genotype))+
-  geom_smooth(aes(col = Genotype), se= FALSE, span =0.7)+
-  scale_color_manual(values = color.scheme)+
-  labs(title = "Maternal Perinatal Body Weight", y = "grams",x= "Gestational Day")+
-  theme_bw()+
-  theme(legend.position = c(0.1, 0.865), legend.background = element_blank())
+
 ```
   
 ```{r stats}
