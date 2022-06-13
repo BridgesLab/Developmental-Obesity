@@ -24,7 +24,7 @@ library(forcats)
 color.scheme = c("#333333","#CCCCCC")
 ```
 
-
+#data entry
 ```{r data-entry}
 dam.foodintake.file<-"dam_foodintake.csv"
 
@@ -42,13 +42,14 @@ intake.data<-read_csv(dam.foodintake.file,
   ))
           
 intake.data.cleaned<-intake.data%>%
-mutate( week = cut(gest.age, breaks = c(-7.5,0,7.5, 14.5, 21.5, 28.5, 35.5,42.5), labels = c("pre-pregnancy","E0.5","E7.5","E14.5","E21.5","PND7.5","PND14.5")))#%>%
- # mutate(as.numeric(week))
+mutate( week = cut(gest.age, breaks = c(-7.5,0,7.5, 14.5, 21.5, 28.5, 35.5,42.5), labels = c("-1","0","1","2","3","4","5")))%>%
+  mutate(week=as.numeric(week))
   
  #Daily Food 
-ggplot(intake.data.cleaned, aes(week, kcals.consumed, col = Genotype))+
+ggplot(intake.data.cleaned, aes(as.integer(week), kcals.consumed, col = Genotype))+
   geom_point(aes(col = Genotype))+
   geom_smooth(aes(col = Genotype), se = FALSE, span =0.5)+
+  scale_x_continuous(breaks=c(1,2,3,4,5,6,7),labels = c("pre","0","1","2","3","4","5"))+
   scale_color_manual(values = color.scheme)+
   labs(title = "Maternal Food Intake", y= "kcal/mouse/day",x="Gestational Age")+
   theme(legend.position = c(0.1,0.85))

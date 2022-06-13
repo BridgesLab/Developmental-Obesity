@@ -19,6 +19,7 @@ library(ggplot2)
 library(knitr)
 library(car)
 library(lme4)
+library(broom)
 library(forcats)
 
 #set plot color scheme
@@ -137,7 +138,7 @@ AUC.data%>%
 shapiro.test(AUC.data$"AUC"[AUC.data$Genotype=="+/+"])#normal
 shapiro.test(AUC.data$"AUC"[AUC.data$Genotype=="-/-"])#normal
 leveneTest(AUC ~ Genotype, data = AUC.data)#not equal variance
-t.test(AUC ~ Genotype, data = AUC.data,var.equal = FALSE)$p.value#0.7
+t.test(AUC ~ Genotype, data = AUC.data,var.equal = FALSE)$p.value%>%tidy%>%kable#0.7
 ```
 
 
@@ -167,7 +168,9 @@ ggplot(summary.models, aes(Genotype, mean, fill = Genotype))+
   theme(legend.position = "none")
  
 #stats
-t.test(slope ~ Genotype, data = models)
-anova(drop.aov)
+shapiro.test(models$slope[models$Genotype=="-/-"])#normal
+shapiro.test(models$slope[models$Genotype=="+/+"])#normal
+leveneTest(slope~Genotype, data = models)#not equal variance
+t.test(slope~Genotype, data = models,var.equal = FALSE)
 ```
            
