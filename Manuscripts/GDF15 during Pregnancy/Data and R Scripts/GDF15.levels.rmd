@@ -1,0 +1,121 @@
+---
+title: "GDF15_ELISA.RMD"
+author: "Molly C. Mulcahy"
+date: '2022-07-01'
+output: html_document
+---
+
+
+```{r global_options, include=FALSE}
+library(knitr)
+library(survival)
+#library("car")
+#library("zip")
+#figures made will go to directory called figures, will make them as both png and pdf files 
+opts_chunk$set(fig.path='figures/',
+               echo=TRUE, warning=FALSE, message=FALSE,dev=c('png','pdf'))
+options(scipen = 2, digits = 3)
+# set echo and message to TRUE if you want to display code blocks and code output respectively
+
+knitr::knit_hooks$set(inline = function(x) {
+  knitr:::format_sci(x, 'md')
+})
+
+
+superpose.eb <- function (x, y, ebl, ebu = ebl, length = 0.08, ...)
+  arrows(x, y + ebu, x, y - ebl, angle = 90, code = 3,
+  length = length, ...)
+
+  
+se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
+
+#load these packages, nearly always needed
+library(tidyr)
+library(tidyverse)
+library(dplyr)
+library(broom)
+library(readr)
+library(forcats)
+library(car)
+library(ggpubr)
+```
+
+
+```{r data-entry}
+
+time.course<-"time.course.csv"
+GDF15.plate<-"GDF15.ELISA.csv"
+
+data.1<-read_csv(time.course,
+                 col_types = cols(
+                   ID =col_factor(levels = NULL),
+                   Well = col_factor(),
+                   study = col_factor(),
+                   time = col_double(),
+                   diet = col_factor(),
+                   Conc. = col_double(),
+                   Raw = col_double(),
+                 ))
+data.2<-read_csv(GDF15.plate,
+                 col_types = cols(
+                   ID =col_factor(levels = NULL),
+                   well = col_factor(),
+                   study = col_factor(),
+                   time = col_double(),
+                   pregnancy = col_factor(),
+                   trimester = col_factor(),
+                   sex = col_factor(),
+                   genotype = col_factor(),
+                   dex = col_factor(),
+                   diet = col_factor(),
+                   Conc. = col_double(),
+                   raw = col_double()))
+
+joined.data<-full_join(data.1, data.2, by = c( "Conc."="conc.", "study"="study", "ID"="ID", "Well" = "well", "diet"="diet"))%>%
+  rename(concentration = "Conc.")
+```
+
+```{R data-visualization}
+library(ggpubr)
+joined.data%>%
+  filter(sex == "female"|study=="MG")%>%
+ggplot(aes(study, concentration))+
+  geom_point(aes())+
+  facet_grid(pregnancy~diet)
+
+#effect of pregnancy
+pg<-joined.data%>%
+  filter(sex=="female"& diet=="NCD")%>%
+ggplot(aes(pregnancy, concentration))+
+  geom_boxplot(aes())+
+   theme(axis.text.x = element_text(angle = 45), axis.title.x = element_blank())+
+   labs(title = "Effect of pregnancy")
+
+#effect of metformin
+met<-joined.data%>%
+  filter(study=="MG")%>%
+  ggplot(aes(diet, concentration))+
+  geom_boxplot(aes())+
+  theme(axis.text.x = element_text(angle = 45), axis.title.x = element_blank())+
+  labs(title = "Effect of metformin and HFD")
+
+TRF<-joined.data%>%
+  filter(study=="TRF")%>%
+   ggplot(aes(diet, concentration))+
+  geom_boxplot(aes())+
+  facet_grid(.~time.y)+
+   theme(axis.text.x = element_text(angle = 45), axis.title.x = element_blank())+
+   labs(title = "Effect of eTRF during gestation")
+
+IR<-joined.data%>%
+filter(study=="IR")%>%
+  ggplot(aes(dex, concentration))+
+  geom_boxplot(aes())+
+   theme(axis.text.x = element_text(angle = 45), axis.title.x = element_blank())+
+   labs(title = "Effect of dexamethasone during gestation")
+
+ggarrange(pg, IR, met,TRF,
+          labels = c("A", "B", "C","D"),
+          ncol = 2, nrow = 2)
+```
+
