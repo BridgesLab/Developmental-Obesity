@@ -188,3 +188,17 @@ cumulative.aov<-aov(food.cumulative ~ treatment + sex, data = filter(intake.data
 anova(cumulative.aov)
 coefficients(cumulative.aov)
 ```
+
+
+```{r compare}
+HFD.summary<-HFD.data.filtered%>%
+  group_by(treatment)%>%
+  summarize(avg.HFD = mean(kcals.consumed_mean),
+            error.HFD = se(kcals.consumed_mean))
+
+NCD.summary<-Pre.HFD.data%>%
+  group_by(treatment)%>%
+  summarize(avg.NCD = mean(kcals.consumed_mean),
+            error.NCD = se(kcals.consumed_mean))
+
+```
