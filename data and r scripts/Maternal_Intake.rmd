@@ -54,7 +54,7 @@ mat.food.data%>%
   ggplot(aes(gest.day, kcals.consumed, col = treatment))+
   geom_point()+
   geom_smooth(aes(col = treatment))+
-  labs(title = "Maternal Food Intake", subtitle = "24 hour intake")+
+  labs(title = "Maternal Food Intake")+
   scale_color_manual(values = color.scheme)+ 
   labs(y = "daily kcal intake", x = "gestational age (days)")+
   theme(text = element_text(size=18),legend.position = c(0.9,0.80), legend.background = element_rect(fill = "transparent"))
@@ -62,8 +62,26 @@ mat.food.data%>%
 
 
 ```{r maternal-body-weight}
-mat.bw.file <-""
+mat.bw.file <-"maternal.bw.csv"
 
-mat.bw.data<-read_csv(mat.bw.file)
-
+mat.bw.data<-read_csv(mat.bw.file,
+  col_types = cols(
+    ID = col_factor(levels = NULL),
+    cohort = col_factor(levels = NULL),
+    treatment = col_factor(levels = c("eTRF","AL")),
+    pregnancy = col_factor(levels = NULL),
+    body.weight = col_double(),
+    date = col_date(),
+    gest.age = col_double(),
+    week = col_double()
+  ))
+#plot
+mat.bw.data%>%
+  ggplot(aes(gest.age, body.weight, col = treatment))+
+  geom_point()+
+  geom_smooth(aes(col = treatment))+
+  labs(title = "Maternal Body Weight")+
+  scale_color_manual(values = color.scheme)+ 
+  labs(y = "body weight (g)", x = "gestational age (days)")+
+  theme(text = element_text(size=18),legend.position = c(0.15,0.80), legend.background = element_rect(fill = "transparent"))
 ```
