@@ -58,6 +58,19 @@ mat.food.data%>%
   scale_color_manual(values = color.scheme)+ 
   labs(y = "daily kcal intake", x = "gestational age (days)")+
   theme(text = element_text(size=18),legend.position = c(0.9,0.80), legend.background = element_rect(fill = "transparent"))
+
+#stats
+null.mom.fi<-lmer(kcals.consumed ~ 1 + (1|ID),data = mat.food.data)
+gest.mom.fi<-lmer(kcals.consumed ~ gest.day + (1|ID),data = mat.food.data)
+anova(null.mom.fi, gest.mom.fi)%>%kable
+group.int.fi<-lmer(kcals.consumed ~ gest.day*treatment + (1|ID),data = mat.food.data)
+anova(gest.mom.fi, group.int.fi)%>%kable
+Anova(group.int.fi)
+fixef(group.int.fi)%>%kable(caption = "fixed effects of gestational age, treatment, and interaction")
+group.simple.fi<-lmer(kcals.consumed ~ gest.day+treatment + (1|ID),data = mat.food.data)
+anova(gest.mom.fi, group.simple.fi)%>%kable
+Anova(group.simple.fi)#p=0.093 for treatment
+fixef(group.simple.fi)#12.78eTRF kcals vs 14.20 AL kcals
 ```
 
 
@@ -84,4 +97,16 @@ mat.bw.data%>%
   scale_color_manual(values = color.scheme)+ 
   labs(y = "body weight (g)", x = "gestational age (days)")+
   theme(text = element_text(size=18),legend.position = c(0.15,0.80), legend.background = element_rect(fill = "transparent"))
+
+#stats
+null.mat.bw<-lmer(body.weight~ 1+(1|ID),data = mat.bw.data)
+gest.mat.bw<-lmer(body.weight~ gest.age + (1|ID),data = mat.bw.data)
+anova(null.mat.bw, gest.mat.bw)%>%kable
+group.int.bw<-lmer(body.weight~ gest.age*treatment + (1|ID),data = mat.bw.data)
+anova(gest.mat.bw, group.int.bw)
+Anova(group.int.bw)# no evidence of interaction
+group.simple.bw<-lmer(body.weight~ gest.age +treatment + (1|ID),data = mat.bw.data)
+anova(gest.mat.bw, group.simple.bw)
+Anova(group.simple.bw)
+fixef(group.simple.bw)
 ```
