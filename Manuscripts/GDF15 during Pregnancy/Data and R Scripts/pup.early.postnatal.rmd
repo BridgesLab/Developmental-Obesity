@@ -34,11 +34,11 @@ pup.data<-read_csv(pup.file,
                    col_types = cols(
                      MouseID = col_factor(levels = NULL),
                      birth.weight = col_double(),
-                     alive.at.birth = col_logical(),
+                     alive.at.birth = col_factor(levels =c("yes","no")),
                      gest.age = col_double(),
                      sex = col_factor(levels = c("male","female")),
-                     survival = col_logical(),
-                     culled = col_logical(),
+                     survival = col_factor(levels =c("yes","no")),
+                     culled = col_factor(levels =c("yes","no")),
                      Genotype = col_factor(levels = c("+/+","-/-"))
                    ))
 
@@ -48,14 +48,43 @@ pup.data<-read_csv(pup.file,
 ```{r birth-weight}
 #birth weight
 birth.weight.data <-pup.data%>%
-  filter(!(alive.at.birth =="no"))%>%#take out those that were dead at birth
+  filter(!(alive.at.birth =="no"))%>%
   group_by(MouseID, Genotype)%>%
-  summarize(avg.bw =  mean(birth.weight))#%>%
+  summarize(avg.bw =  mean(birth.weight))%>%
   group_by(Genotype)%>%
   summarize_at("avg.bw", funs(mean, se))
 
 #plot
 ggplot(birth.weight.data, aes(Genotype, mean, fill = Genotype))+
-  geom_col(aes(fill = Genotype))
+  geom_col(aes(fill = Genotype))+
+  geom_errorbar(aes(ymin = mean -se, ymax = mean + se), width = 0.3)+
+  scale_fill_manual(values = color.scheme)+
+  labs(title = "Pup birth weight", y = "birth weight (grams)")+
+  theme(legend.position = "none")
+
+```
+
+
+```{r gest-age}
+#GA dataset 
+GA.data<-pup.data%>%
+  group_by(MouseID)%>%
+  select(MouseID, Genotype, gest.age)%>%
+  unique()%>%
+  group_by(Genotype)%>%
+  summarise_at(.var ="gest.age", .funs = funs(mean, se))
+#plot
+ggplot(GA.data, aes(Genotype, mean,fill = Genotype))+
+  geom_col (aes(fill = Genotype))+
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se), width = 0.3)+
+  scale_fill_manual(values = color.scheme)+
+  labs(title = "Gestational Age", y = "gestational age (days)")+
+  theme(legend.position = "none")
+
+```
+
+
+```{r litter-size}
+
 
 ```
