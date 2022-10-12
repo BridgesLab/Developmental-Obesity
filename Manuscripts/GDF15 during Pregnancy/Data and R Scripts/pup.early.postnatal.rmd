@@ -52,6 +52,22 @@ litter.size.data<-read_csv(litter.file,
                       latency = col_double(),
                       '3d.n.dead' = col_double()
                     ))
+
+pup.weight.file<-"pup.wt.data.csv"
+
+pup.weight.data<-read_csv(pup.weight.file,
+                    col_types = cols(
+                      birth.weight = col_double(),
+                      Genotype = col_factor(levels = c("+/+","-/-")),
+                      MouseID = col_factor(levels = NULL),
+                      pup.number = col_factor(levels = NULL),
+                      alive.at.birth = col_factor(levels = c("yes","no")),
+                      sex = col_factor(levels = c("male","female")),
+                      survival = col_factor(levels = c("yes","no")),
+                      culled = col_factor(levels = c("yes","no")),
+                      day = col_double(),
+                      weight = col_double()
+                    ))
 ```
 
 
@@ -186,4 +202,43 @@ shapiro.test(mutated.litter.data$percent.dead[mutated.litter.data$Genotype=="-/-
 shapiro.test(mutated.litter.data$percent.dead[mutated.litter.data$Genotype=="+/+"])#not normal
 leveneTest(percent.dead ~ Genotype, data = mutated.litter.data)#non-equivalent variance
 wilcox.test(percent.dead ~ Genotype, data = mutated.litter.data)
+```
+
+
+```{r pup-growth}
+pup.weight.data%>%
+  filter(!(is.na(sex)))%>%
+ggplot( aes(day, weight, col = Genotype))+
+  geom_point(aes(col = Genotype))+
+  facet_grid(.~sex)+
+  geom_smooth(aes(col = Genotype))
+
+#stats
+full.sex.data<-pup.weight.data%>%
+  filter(!(is.na(sex)))
+null.lme<-lmer(weight ~ 1 +  (1|MouseID), data = full.sex.data)
+day.lme <-lmer(weight~ day +  (1|MouseID), data = full.sex.data)
+anova(null.lme, day.lme)
+Geno.simple.lme <-lmer(weight~ day + Genotype+ (1|MouseID), data = full.sex.data)
+anova(day.lme, Geno.simple.lme)
+sex.simple.lme <-lmer(weight~ day + Genotype + sex + (1|MouseID), data = full.sex.data)
+anova(Geno.simple.lme, sex.simple.lme)
+sex.int.lme <-lmer(weight~ day + Genotype*sex + (1|MouseID), data = full.sex.data)
+anova(sex.simple.lme, sex.int.lme)
+Anova(sex.int.lme)
+Anova(sex.simple.lme)
+#females
+female.pups<-pup.weight.data%>%
+  filter(sex == "female")%>%
+  filter(day>13)%>%
+  group_by(MouseID,Genotype)%>%
+  summarize(avg.wt = mean(weight))%>%
+  group_by(Genotype)%>%
+  summarize(final.avg = mean(avg.wt),
+            error.avg = se(avg.wt))
+
+null.female<-lmer(weight~1+(1|MouseID), data = female.pups)
+day.female<-lmer(weight~1+(1|MouseID), data = female.pups)
+
+
 ```
