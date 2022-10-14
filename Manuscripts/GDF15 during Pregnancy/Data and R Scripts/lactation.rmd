@@ -1,0 +1,138 @@
+---
+title: "lactation"
+author: "Molly C. Mulcahy"
+date: "2022-10-12"
+output: html_document
+---
+
+```{r setup}
+
+se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
+
+#load commonly needed packages
+library(processx)
+library(devtools)
+library(tidyr)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(knitr)
+library(car)
+library(lme4)
+library(broom)
+library(forcats)
+
+#set plot color scheme
+color.scheme = c("#333333","#CCCCCC")
+```
+
+```{r data-input}
+wsw.file<-"wsw.csv"
+
+wsw.data<-read_csv(wsw.file,
+                   col_types = cols(
+                     MouseID = col_factor(levels = NULL),
+                     Genotype = col_factor(levels = c("+/+","-/-")),
+                     DamWeight = col_double(),
+                     DamWeightSeparated = col_double(),
+                     DamWeightNursing = col_double(),
+                     LitterSize = col_double(),
+                     PupWeight = col_double(),
+                     PupWeightSeparated = col_double(),
+                     PupWeightNursing = col_double()
+                   ))
+
+milk.file<-"milkfat.csv"
+
+milk.data<-read_csv(milk.file,
+  col_types = cols(
+    replicate = col_factor(levels = c("1","2","3","4")),
+    MouseID = col_factor(levels = NULL),
+    Genotype = col_factor(levels = c("+/+","-/-")),
+    Fat.inches = col_double(),
+    Aqueous.inches.1 = col_double(),
+    Aqueous.inches.2 = col_double()
+  ))
+```
+
+```{r wsw}
+
+milk.weights <- wsw.data %>%
+  mutate(Pup.Gained.Weight= PupWeightNursing - PupWeightSeparated,
+         Dam.Lost.Weight = DamWeightSeparated - DamWeightNursing) %>%
+  mutate(Dam.Lost.Weight.norm = Dam.Lost.Weight/LitterSize,
+         Pup.Gained.Weight.norm = Pup.Gained.Weight/LitterSize) 
+
+#average weight lost by dams
+ avg.wsw<-milk.weights%>%
+   group_by(Genotype)%>%
+   summarize(avg.dam.loss = mean(Dam.Lost.Weight.norm),
+             error.dam.loss = se(Dam.Lost.Weight.norm))
+ggplot(avg.wsw, aes(Genotype, avg.dam.loss, fill = Genotype))+
+  geom_col(aes(fill = Genotype))+
+  geom_errorbar(aes(ymin = avg.dam.loss - error.dam.loss, ymax = avg.dam.loss + error.dam.loss), width =0.3)+
+  scale_fill_manual(values = color.scheme)+
+  labs(title = "Mass Lost by Dam", y = "Mass lost after suckling (grams)")+
+  theme(legend.position = "none")
+
+#stats
+shapiro.test(milk.weights$Dam.Lost.Weight.norm[milk.weights$Genotype=="+/+"])#normal
+shapiro.test(milk.weights$Dam.Lost.Weight.norm[milk.weights$Genotype=="-/-"])#normal
+leveneTest(Dam.Lost.Weight.norm ~ Genotype, data = milk.weights)#equivalent variance
+t.test(Dam.Lost.Weight.norm ~ Genotype, data = milk.weights)
+
+#average weight gained by pups
+ avg.wsw.pup<-milk.weights%>%
+   group_by(Genotype)%>%
+   summarize(avg.pup.gain = mean(Pup.Gained.Weight.norm),
+             error.pup.gain = se(Pup.Gained.Weight.norm))
+ggplot(avg.wsw.pup, aes(Genotype, avg.pup.gain, fill = Genotype))+
+  geom_col(aes(fill = Genotype))+
+  geom_errorbar(aes(ymin = avg.pup.gain - error.pup.gain , ymax = avg.pup.gain  + error.pup.gain ), width =0.3)+
+  scale_fill_manual(values = color.scheme)+
+  labs(title = "Mass Gained by Pup", y = "Mass gained after suckling (grams)")+
+  theme(legend.position = "none")
+
+#stats
+shapiro.test(milk.weights$Pup.Gained.Weight.norm[milk.weights$Genotype=="+/+"])#not normal
+shapiro.test(milk.weights$Pup.Gained.Weight.norm[milk.weights$Genotype=="-/-"])#normal
+wilcox.test(Pup.Gained.Weight.norm ~ Genotype, data = milk.weights, paired = FALSE)
+```
+
+
+```{r milk-fat}
+mutated.milk.data<-milk.data%>%
+  group_by(replicate, MouseID, Genotype)%>%
+  mutate(fat = Fat.inches*25.4,
+         water = (Aqueous.inches.1 + Aqueous.inches.2)*25.4)%>%
+  mutate(water.corrected = water/4)%>%
+  mutate(total.volume = water.corrected+fat)%>%
+  mutate(fat.percent = (fat/total.volume)*100)
+
+summary.milk.data<-mutated.milk.data%>%
+  group_by(MouseID)%>%
+  mutate(avg.milkfat = mean(fat.percent))%>%
+  group_by(Genotype)%>%
+  summarise(milk.fat = mean(avg.milkfat),se.milk.fat=se(avg.milkfat))
+#plot
+summary.milk.data%>%
+  ggplot(aes(Genotype,milk.fat, fill = Genotype))+
+           geom_col()+
+  geom_errorbar(aes(ymin = milk.fat - se.milk.fat, ymax = milk.fat + se.milk.fat), width =0.3)+
+  scale_fill_manual(values = color.scheme)+
+  theme(legend.position = "none")+
+  labs(title = "Milk Fat Percentage", y = "Percent")
+
+#stats
+milk.stats<-mutated.milk.data%>%
+  group_by(MouseID)%>%
+  mutate(avg.milkfat = mean(fat.percent))%>%
+  select(MouseID, Genotype, avg.milkfat)%>%
+  distinct()
+
+  shapiro.test(milk.stats$avg.milkfat[milk.stats$Genotype=="+/+"])#p=0.6
+  shapiro.test(milk.stats$avg.milkfat[milk.stats$Genotype=="-/-"])#p=0.4
+  leveneTest(avg.milkfat ~ Genotype, milk.stats)#p=0.75
+  t.test(avg.milkfat ~Genotype, data = milk.stats)#p=0.93
+
+```

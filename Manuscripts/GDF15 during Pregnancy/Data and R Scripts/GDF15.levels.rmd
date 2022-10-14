@@ -76,7 +76,6 @@ joined.data<-full_join(data.1, data.2, by = c( "Conc."="conc.", "study"="study",
 ```
 
 ```{R data-visualization}
-library(ggpubr)
 joined.data%>%
   filter(sex == "female"|study=="MG")%>%
 ggplot(aes(study, concentration))+
@@ -90,7 +89,13 @@ ggplot(aes(pregnancy, concentration))+
   geom_boxplot(aes())+
    theme(axis.text.x = element_text(angle = 45), axis.title.x = element_blank())+
    labs(title = "Effect of pregnancy")
-
+#stats effect of pregnancy
+pg.stats<-joined.data%>%
+  filter(sex=="female"& diet=="NCD")
+shapiro.test(pg.stats$concentration[pg.stats$dex == "yes"])
+shapiro.test(pg.stats$concentration[pg.stats$dex == "no"])
+leveneTest(concentration ~ dex, data = pg.stats)
+wilcox.test(concentration ~ dex, data = pg.stats, equal.var = FALSE)
 #effect of metformin
 met<-joined.data%>%
   filter(study=="MG")%>%

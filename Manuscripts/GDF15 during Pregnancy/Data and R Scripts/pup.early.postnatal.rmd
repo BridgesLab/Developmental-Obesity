@@ -34,21 +34,47 @@ pup.data<-read_csv(pup.file,
                    col_types = cols(
                      MouseID = col_factor(levels = NULL),
                      birth.weight = col_double(),
-                     alive.at.birth = col_factor(levels = c("yes","no")),
+                     alive.at.birth = col_factor(levels =c("yes","no")),
                      gest.age = col_double(),
                      sex = col_factor(levels = c("male","female")),
-                     survival = col_logical(),
-                     culled = col_factor(levels = c("yes","no")),
+                     survival = col_factor(levels =c("yes","no")),
+                     culled = col_factor(levels =c("yes","no")),
                      Genotype = col_factor(levels = c("+/+","-/-"))
                    ))
+litter.file<-"litter.size.csv"
 
+litter.size.data<-read_csv(litter.file,
+                    col_types = cols(
+                      MouseID = col_factor(levels = NULL),
+                      total.pups = col_double(),
+                      living.pups = col_double(),
+                      Genotype = col_factor(levels = c("+/+","-/-")),
+                      latency = col_double(),
+                      '3d.n.dead' = col_double()
+                    ))
+
+pup.weight.file<-"pup.wt.data.csv"
+
+pup.weight.data<-read_csv(pup.weight.file,
+                    col_types = cols(
+                      birth.weight = col_double(),
+                      Genotype = col_factor(levels = c("+/+","-/-")),
+                      MouseID = col_factor(levels = NULL),
+                      pup.number = col_factor(levels = NULL),
+                      alive.at.birth = col_factor(levels = c("yes","no")),
+                      sex = col_factor(levels = c("male","female")),
+                      survival = col_factor(levels = c("yes","no")),
+                      culled = col_factor(levels = c("yes","no")),
+                      day = col_double(),
+                      weight = col_double()
+                    ))
 ```
 
 
 ```{r birth-weight}
 #birth weight
 birth.weight.data <-pup.data%>%
-  filter(!(alive.at.birth =="no"))%>%#take out those that were dead at birth
+  filter(!(alive.at.birth =="no"))%>%
   group_by(MouseID, Genotype)%>%
   summarize(avg.bw =  mean(birth.weight))%>%
   group_by(Genotype)%>%
@@ -57,27 +83,186 @@ birth.weight.data <-pup.data%>%
 #plot
 ggplot(birth.weight.data, aes(Genotype, mean, fill = Genotype))+
   geom_col(aes(fill = Genotype))+
-  geom_errorbar(aes(ymin = mean - se, ymax = mean + se), width =0.3)+
+  geom_errorbar(aes(ymin = mean -se, ymax = mean + se), width = 0.3)+
   scale_fill_manual(values = color.scheme)+
-  theme(legend.position = "none")+
-  labs(title = "Pup Birthweight", y = "body weight (grams)")
+  labs(title = "Pup birth weight", y = "birth weight (grams)")+
+  theme(legend.position = "none")
 
 #stats
-bw.stats <-pup.data%>%
-  filter(!(alive.at.birth =="no"))%>%#take out those that were dead at birth
-  group_by(MouseID, Genotype)%>%
-  summarize(avg.bw =  mean(birth.weight))
-
-shapiro.test(bw.stats$avg.bw[bw.stats$Genotype=="-/-"])#normal
-shapiro.test(bw.stats$avg.bw[bw.stats$Genotype=="+/+"])#normal
-leveneTest(avg.bw~Genotype, data = bw.stats)#equal variance
-t.test(avg.bw~Genotype, data = bw.stats)
+birth.weight.stats <-pup.data%>%
+  filter(!(alive.at.birth =="no"))
+shapiro.test(birth.weight.stats$birth.weight[birth.weight.stats$Genotype=="-/-"])#normal
+shapiro.test(birth.weight.stats$birth.weight[birth.weight.stats$Genotype=="+/+"])#normal
+leveneTest(birth.weight ~ Genotype, data = birth.weight.stats)#equivalent variance
+t.test(birth.weight ~ Genotype, data = birth.weight.stats)
 ```
 
 
-```{r gest.age}
-ga.data<-pup.data%>%
-  distinct(MouseID)#
-  summarize_at("avg.bw", funs(mean, se))
+```{r gest-age}
+#GA dataset 
+GA.data<-pup.data%>%
+  group_by(MouseID)%>%
+  select(MouseID, Genotype, gest.age)%>%
+  unique()%>%
+  group_by(Genotype)%>%
+  summarise_at(.var ="gest.age", .funs = funs(mean, se))
+#plot
+ggplot(GA.data, aes(Genotype, mean,fill = Genotype))+
+  geom_col (aes(fill = Genotype))+
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se), width = 0.3)+
+  scale_fill_manual(values = color.scheme)+
+  labs(title = "Gestational Age", y = "gestational age (days)")+
+  theme(legend.position = "none")
+#stats
+GA.stat<-pup.data%>%
+  select(MouseID, Genotype, gest.age)%>%
+  group_by(MouseID)%>%
+  unique
+shapiro.test(GA.stat$gest.age[GA.stat$Genotype=="-/-"])#not normal
+shapiro.test(GA.stat$gest.age[GA.stat$Genotype=="+/+"])#not normal
+leveneTest(gest.age ~ Genotype, data = GA.stat)#equivalent variance
+wilcox.test(gest.age ~ Genotype, data = GA.stat)
+```
 
+
+```{r litter-size}
+#dataset
+avg.litter<-litter.size.data%>%
+  group_by(Genotype)%>%
+  summarise_at(vars(total.pups, living.pups), .funs = funs(mean, se))
+
+#total pups plot
+avg.litter%>%
+  ggplot(aes(Genotype, total.pups_mean))+
+   geom_col (aes(fill = Genotype))+
+  geom_errorbar(aes(ymin = total.pups_mean - total.pups_se, ymax = total.pups_mean + total.pups_se), width = 0.3)+
+  scale_fill_manual(values = color.scheme)+
+  labs(title = "Total Litter Size", y = "pups")+
+  theme(legend.position = "none")
+#stats
+shapiro.test(litter.size.data$total.pups[litter.size.data$Genotype=="-/-"])#normal
+shapiro.test(litter.size.data$total.pups[litter.size.data$Genotype=="+/+"])#normal
+leveneTest(total.pups ~Genotype, data = litter.size.data)#equivalent variance
+t.test(total.pups ~Genotype, data = litter.size.data)
+#living pups plot
+avg.litter%>%
+  ggplot(aes(Genotype, living.pups_mean))+
+   geom_col (aes(fill = Genotype))+
+  geom_errorbar(aes(ymin = living.pups_mean - living.pups_se, ymax = living.pups_mean + living.pups_se), width = 0.3)+
+  scale_fill_manual(values = color.scheme)+
+  labs(title = "Litter Size (living pups)", y = "pups")+
+  theme(legend.position = "none")
+#stats
+shapiro.test(litter.size.data$living.pups[litter.size.data$Genotype=="-/-"])#normal
+shapiro.test(litter.size.data$living.pups[litter.size.data$Genotype=="+/+"])#normal
+leveneTest(living.pups ~Genotype, data = litter.size.data)#equivalent variance
+t.test(living.pups ~Genotype, data = litter.size.data)
+```
+
+
+```{r latency}
+latency.data<-litter.size.data%>%
+  group_by(Genotype)%>%
+  summarise_at("latency", .funs = funs(mean, se))
+#plot
+latency.data%>%
+  ggplot(aes(Genotype, mean))+
+  geom_col(aes(fill = Genotype))+
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se),width =0.3)+
+  scale_fill_manual(values = color.scheme)+
+  labs(title = "Latency to Plug", y = "days")+
+  theme(legend.position = "none")
+
+#stats
+shapiro.test(litter.size.data$latency[litter.size.data$Genotype=="-/-"])#normal
+shapiro.test(litter.size.data$latency[litter.size.data$Genotype=="+/+"])#normal
+leveneTest(latency ~ Genotype, data = litter.size.data)#equivalent variance
+t.test(latency ~ Genotype, data = litter.size.data)
+```
+
+
+```{r survival}
+#calculate percent dead after 3 days
+mutated.litter.data<-litter.size.data%>%
+  mutate(percent.dead = (`3d.n.dead`/living.pups)*100)
+
+survival.data<-mutated.litter.data%>%
+  group_by(Genotype)%>%
+  summarise_at("percent.dead", .funs = funs(mean, se))
+#plot
+survival.data%>%
+  ggplot(aes(Genotype, mean))+
+  geom_col(aes(fill = Genotype))+
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se),width =0.3)+
+  scale_fill_manual(values = color.scheme)+
+  labs(title = "Pups dead by PND 3", y = "percent")+
+  theme(legend.position = "none")
+#stats
+shapiro.test(mutated.litter.data$percent.dead[mutated.litter.data$Genotype=="-/-"])#not normal
+shapiro.test(mutated.litter.data$percent.dead[mutated.litter.data$Genotype=="+/+"])#not normal
+leveneTest(percent.dead ~ Genotype, data = mutated.litter.data)#non-equivalent variance
+wilcox.test(percent.dead ~ Genotype, data = mutated.litter.data)
+```
+
+
+```{r pup-growth}
+pup.weight.data%>%
+  filter(!(is.na(sex)))%>%
+ggplot( aes(day, weight, col = Genotype, pch = sex))+
+  geom_point(aes(col = Genotype, ))+
+ # facet_grid(.~sex)+
+  geom_smooth(aes(col = Genotype))
+
+#stats
+full.sex.data<-pup.weight.data%>%
+  filter(!(is.na(sex)))
+null.lme<-lmer(weight ~ 1 +  (1|MouseID), data = full.sex.data)
+day.lme <-lmer(weight~ day +  (1|MouseID), data = full.sex.data)
+anova(null.lme, day.lme)
+Geno.simple.lme <-lmer(weight~ day + Genotype+ (1|MouseID), data = full.sex.data)
+anova(day.lme, Geno.simple.lme)
+sex.simple.lme <-lmer(weight~ day + Genotype + sex + (1|MouseID), data = full.sex.data)
+anova(Geno.simple.lme, sex.simple.lme)
+sex.int.lme <-lmer(weight~ day + Genotype*sex + (1|MouseID), data = full.sex.data)
+anova(sex.simple.lme, sex.int.lme)
+Anova(sex.int.lme)
+Anova(sex.simple.lme)
+#females
+female.pups<-pup.weight.data%>%
+  filter(sex == "female")%>%
+  filter(day>13)%>%
+  group_by(MouseID,Genotype)%>%
+  summarize(avg.wt = mean(weight))%>%
+  group_by(Genotype)%>%
+  summarize(final.avg = mean(avg.wt),
+            error.avg = se(avg.wt))
+
+null.female<-lmer(weight~1+(1|MouseID), data = female.pups)
+day.female<-lmer(weight~1+(1|MouseID), data = female.pups)
+
+##
+lmer(weight~ day +  (1|MouseID), data = full.sex.data)%>%summary
+corr.effect<-lmer(weight~ day +  (day|MouseID), data = full.sex.data)%>%ranef#slope and intercept for each, presuming they are correlated
+corr.effect$MouseID%>%
+  ggplot(aes(x=`(Intercept)`, y=`day`))+
+  geom_point()
+
+
+lmer(weight~ day +  (day|MouseID), data = full.sex.data)%>%summary
+
+
+
+non.cor.effect<-lmer(weight~ day +  (day||MouseID), data = full.sex.data)%>%ranef#group of pups have same slopes
+
+non.cor.effect$MouseID%>%
+  ggplot(aes(x=`(Intercept)`, y=`day`))+
+  geom_point()
+
+lmer(weight~ day +  (day||MouseID), data = full.sex.data)%>%summary
+#do (day||UniquepupID)
+#which model is best
+anova(lmer(weight~ day +  (day||MouseID), data = full.sex.data),lmer(weight~ day +  (day|MouseID), data = full.sex.data))
+
+
+anova(lmer(weight~ day + sex:day + sex + Genotype + Genotype:day + Genotype:sex:day+  (day||MouseID), data = full.sex.data),lmer(weight~ day + sex:day + sex  +  (day||MouseID), data = full.sex.data))
 ```

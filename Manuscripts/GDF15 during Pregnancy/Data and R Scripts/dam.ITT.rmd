@@ -1,0 +1,177 @@
+---
+title: "dam ITT"
+author: "Molly C. Mulcahy"
+date: '2022-05-31'
+output: html_document
+---
+
+```{r setup}
+
+se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
+
+#load commonly needed packages
+library(processx)
+library(devtools)
+library(tidyr)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(knitr)
+library(car)
+library(lme4)
+library(broom)
+library(forcats)
+
+#set plot color scheme
+color.scheme = c("#333333","#CCCCCC")
+```
+
+
+```{r data-entry}
+ITT.file<-"dam.ITT.csv"
+
+ITT.data<-read_csv(ITT.file,
+    col_types = cols(
+    MouseID = col_factor(levels = NULL),
+    time = col_double(),
+    glucose = col_double(),
+    Genotype = col_factor(levels = c("+/+","-/-")),
+    AUC = col_double(),
+    rel.glucose = col_double(),
+    rel.auc = col_double()))
+
+avg.data<- ITT.data%>%
+  group_by(time, Genotype)%>%
+  summarize_at("glucose", funs(mean, se))
+```
+
+```{r time-course}
+ ITT.data%>%
+  group_by(time, Genotype)%>%
+  summarize_at("glucose", funs(mean, se))%>%
+  ggplot(aes(time, mean, col = Genotype))+
+  geom_point(aes(col = Genotype))+
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se, col = Genotype), width =0.3)+
+  scale_color_manual(values = color.scheme)+
+  geom_line(aes(col = Genotype))+
+  labs(title = "Insulin tolerance test", y= "mg/dL")+
+  theme_bw()+
+  theme(legend.position = c(0.85, 0.85))
+
+#stat
+null.glu<-lmer(glucose ~ 1+(1|MouseID), data = ITT.data)
+time.glu<-lmer(glucose ~ time + (1|MouseID), data = ITT.data)
+anova(null.glu, time.glu)#significant effect of time
+geno.glu<-lmer(glucose ~ time + Genotype +(1|MouseID), data = ITT.data)
+anova(time.glu, geno.glu)#no effect of genotype
+geno.int.glu<-lmer(glucose ~  time*Genotype+(1|MouseID), data = ITT.data)
+Anova(geno.int.glu)#no genotype effect, p=0.071
+anova(geno.glu, geno.int.glu)#0.07
+Anova(geno.glu)
+fixef(geno.glu)
+```
+
+
+```{r rel-timecourse}
+ITT.data%>%
+  group_by(time, Genotype)%>%
+  summarize_at("rel.glucose", funs(mean, se))%>%
+ggplot(aes(time, mean, col = Genotype))+
+  geom_point(aes(col = Genotype))+
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se, col = Genotype), width =0.3)+
+  scale_color_manual(values = color.scheme)+
+  geom_line(aes(col = Genotype))+
+  labs(title = "Insulin tolerance test", y= "mg/dL")+
+  theme(legend.position = c(0.85, 0.85))
+
+#stats
+null.rel <- lmer(glucose ~ 1 + (1|MouseID), ITT.data)
+time.rel <- lmer(glucose ~ time + (1|MouseID), ITT.data)
+anova(null.rel, time.rel)#significant effect of time
+geno.rel<- lmer(glucose ~ time + Genotype + (1|MouseID), ITT.data)
+anova(time.rel, geno.rel)#p=0.68
+geno.int.rel<-lmer(glucose ~ time*Genotype + (1|MouseID), ITT.data)
+anova(geno.rel, geno.int.rel)#p=0.07
+Anova(geno.int.rel)
+Anova(geno.rel)
+```
+
+
+```{r FBG}
+ITT.data%>%
+  filter(time == "0")%>%
+  group_by(Genotype)%>%
+  summarize_at("glucose", funs(mean, se))%>%
+  ggplot(aes(Genotype, mean, fill = Genotype))+
+  geom_col(aes(fill = Genotype))+
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se), width =0.3)+
+  scale_fill_manual(values = color.scheme)+
+  theme(legend.position = "none")+
+  labs(title = "Fasting Blood Glucose", y = "mg/dL")
+#stats
+FBG.data <-ITT.data%>%
+  filter(time == "0")
+shapiro.test(FBG.data$glucose[FBG.data$Genotype=="-/-"])#normal
+shapiro.test(FBG.data$glucose[FBG.data$Genotype=="+/+"])#normal
+leveneTest(glucose ~ Genotype, data = FBG.data)#equal variance
+t.test(glucose ~ Genotype, data = FBG.data)#p=0.20
+```
+
+
+```{r AUC}
+AUC.data<-ITT.data%>%
+  select(MouseID, Genotype, AUC)%>%
+  group_by(MouseID)%>%
+  unique
+
+AUC.data%>%
+  group_by(Genotype)%>%
+  summarize_at("AUC", funs(mean, se))%>%
+  ggplot(aes(Genotype, mean, fill = Genotype))+
+  geom_col(aes(fill = Genotype))+
+  geom_errorbar(aes(ymax = mean + se, ymin = mean - se), width =0.3)+
+  scale_fill_manual(values = color.scheme)+
+  theme(legend.position = "none")+
+  labs(title = "Area Under the Curve", y = "mg/dL")
+
+
+#stats
+shapiro.test(AUC.data$"AUC"[AUC.data$Genotype=="+/+"])#normal
+shapiro.test(AUC.data$"AUC"[AUC.data$Genotype=="-/-"])#normal
+leveneTest(AUC ~ Genotype, data = AUC.data)#not equal variance
+t.test(AUC ~ Genotype, data = AUC.data,var.equal = FALSE)$p.value%>%tidy%>%kable#0.7
+```
+
+
+```{r rate-of-drop}
+#calculate rate of drop
+models<-ITT.data%>%
+  filter(time<60)%>%
+  group_by(MouseID,Genotype)%>%
+  mutate(l.glucose = log(glucose))%>%
+  do(fitted.model= lm(l.glucose~ time, data =.))%>%
+  mutate(rate =coef(fitted.model)["time"],
+          max = coef(fitted.model)["(Intercept)"],
+         rsq = summary(fitted.model)$r.squared)%>%
+  mutate(max.exp = exp(max))%>%
+  mutate( slope= max.exp*rate)
+summary.models<-models%>%
+  group_by(Genotype)%>%
+summarise_at("slope",  funs(mean, se))
+
+
+#plot
+ggplot(summary.models, aes(Genotype, mean, fill = Genotype))+
+  geom_col(aes(fill = Genotype))+
+  geom_errorbar(aes(ymin = mean-se, ymax = mean + se), width = 0.3)+
+  scale_fill_manual(values = color.scheme)+
+  labs(title = "Rate of Drop",y="rate of glucose disposal")+
+  theme(legend.position = "none")
+ 
+#stats
+shapiro.test(models$slope[models$Genotype=="-/-"])#normal
+shapiro.test(models$slope[models$Genotype=="+/+"])#normal
+leveneTest(slope~Genotype, data = models)#not equal variance
+t.test(slope~Genotype, data = models,var.equal = FALSE)
+```
+           
