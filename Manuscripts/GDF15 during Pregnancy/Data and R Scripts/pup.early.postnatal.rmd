@@ -208,9 +208,9 @@ wilcox.test(percent.dead ~ Genotype, data = mutated.litter.data)
 ```{r pup-growth}
 pup.weight.data%>%
   filter(!(is.na(sex)))%>%
-ggplot( aes(day, weight, col = Genotype))+
-  geom_point(aes(col = Genotype))+
-  facet_grid(.~sex)+
+ggplot( aes(day, weight, col = Genotype, pch = sex))+
+  geom_point(aes(col = Genotype, ))+
+ # facet_grid(.~sex)+
   geom_smooth(aes(col = Genotype))
 
 #stats
@@ -240,5 +240,29 @@ female.pups<-pup.weight.data%>%
 null.female<-lmer(weight~1+(1|MouseID), data = female.pups)
 day.female<-lmer(weight~1+(1|MouseID), data = female.pups)
 
+##
+lmer(weight~ day +  (1|MouseID), data = full.sex.data)%>%summary
+corr.effect<-lmer(weight~ day +  (day|MouseID), data = full.sex.data)%>%ranef#slope and intercept for each, presuming they are correlated
+corr.effect$MouseID%>%
+  ggplot(aes(x=`(Intercept)`, y=`day`))+
+  geom_point()
 
+
+lmer(weight~ day +  (day|MouseID), data = full.sex.data)%>%summary
+
+
+
+non.cor.effect<-lmer(weight~ day +  (day||MouseID), data = full.sex.data)%>%ranef#group of pups have same slopes
+
+non.cor.effect$MouseID%>%
+  ggplot(aes(x=`(Intercept)`, y=`day`))+
+  geom_point()
+
+lmer(weight~ day +  (day||MouseID), data = full.sex.data)%>%summary
+#do (day||UniquepupID)
+#which model is best
+anova(lmer(weight~ day +  (day||MouseID), data = full.sex.data),lmer(weight~ day +  (day|MouseID), data = full.sex.data))
+
+
+anova(lmer(weight~ day + sex:day + sex + Genotype + Genotype:day + Genotype:sex:day+  (day||MouseID), data = full.sex.data),lmer(weight~ day + sex:day + sex  +  (day||MouseID), data = full.sex.data))
 ```
