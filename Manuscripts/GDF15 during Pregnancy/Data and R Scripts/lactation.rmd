@@ -5,10 +5,7 @@ date: "2022-10-12"
 output: html_document
 ---
 
-```{r setup}
-
-se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
-
+```{r setup, include=FALSE}
 #load commonly needed packages
 library(processx)
 library(devtools)
@@ -21,6 +18,18 @@ library(car)
 library(lme4)
 library(broom)
 library(forcats)
+#figures made will go to directory called figures, will make them as both png and pdf files 
+opts_chunk$set(fig.path='figures/',
+               echo=FALSE, warning=FALSE, message=FALSE,dev=c('png','pdf'))
+options(scipen = 2, digits = 3)
+# set echo and message to TRUE if you want to display code blocks and code output respectively
+knitr::knit_hooks$set(inline = function(x) {
+  knitr:::format_sci(x, 'md')
+})
+se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
+
+
+
 
 #set plot color scheme
 color.scheme = c("#333333","#CCCCCC")
