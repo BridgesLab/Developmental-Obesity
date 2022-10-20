@@ -229,15 +229,15 @@ ggplot(avg.wt.data, aes(day, avg.wt))+
 #stats
 full.sex.data<-pup.weight.data%>%
   filter(!(is.na(sex)))
-null.lme<-lmer(weight ~ 1 +  (1|MouseID) + (day||pup.number)+(1|pup.number), data = full.sex.data)
+null.lme<-lmer(weight ~ 1 +  (1|MouseID) + (day||pup.number)+(1|pup.number)+(day||MouseID), data = full.sex.data)
 
-day.lme<-lmer(weight ~ day +  (1|MouseID) + (day||pup.number)+(1|pup.number), data = full.sex.data)
+day.lme<-lmer(weight ~ day +  (1|MouseID) + (day||pup.number)+(1|pup.number)+(day||MouseID), data = full.sex.data)
 anova(null.lme, day.lme)
 day.lme%>%summary
-sex.lme<-lmer(weight ~ day + sex  +(1|MouseID) + (day||pup.number)+(1|pup.number), data = full.sex.data)
+sex.lme<-lmer(weight ~ day + sex  +(1|MouseID) + (day||pup.number)+(1|pup.number)+(day||MouseID), data = full.sex.data)
 anova(sex.lme, day.lme)
 sex.lme%>%summary
-geno.lme<-lmer(weight ~ day + sex + Genotype +  (1|MouseID) + (day||pup.number)+(1|pup.number), data = full.sex.data)
+geno.lme<-lmer(weight ~ day + sex + Genotype +  (1|MouseID) + (day||pup.number)+(1|pup.number)+(day||MouseID), data = full.sex.data)
 anova(sex.lme, geno.lme)
 geno.lme%>%summary
   fixef(geno.lme)            
