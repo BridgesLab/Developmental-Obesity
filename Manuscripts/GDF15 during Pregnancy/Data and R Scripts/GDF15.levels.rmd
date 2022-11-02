@@ -9,8 +9,8 @@ output: html_document
 ```{r global_options, include=FALSE}
 library(knitr)
 library(survival)
-#library("car")
-#library("zip")
+library("car")
+library("zip")
 #figures made will go to directory called figures, will make them as both png and pdf files 
 opts_chunk$set(fig.path='figures/',
                echo=TRUE, warning=FALSE, message=FALSE,dev=c('png','pdf'))
@@ -28,7 +28,7 @@ superpose.eb <- function (x, y, ebl, ebu = ebl, length = 0.08, ...)
 
   
 se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
-
+color.scheme<-c("#333333" ,"#CCCCCC")
 #load these packages, nearly always needed
 library(tidyr)
 library(tidyverse)
@@ -42,21 +42,9 @@ library(ggpubr)
 
 
 ```{r data-entry}
-
-time.course<-"time.course.csv"
 GDF15.plate<-"GDF15.ELISA.csv"
 
-data.1<-read_csv(time.course,
-                 col_types = cols(
-                   ID =col_factor(levels = NULL),
-                   Well = col_factor(),
-                   study = col_factor(),
-                   time = col_double(),
-                   diet = col_factor(),
-                   Conc. = col_double(),
-                   Raw = col_double(),
-                 ))
-data.2<-read_csv(GDF15.plate,
+data<-read_csv(GDF15.plate,
                  col_types = cols(
                    ID =col_factor(levels = NULL),
                    well = col_factor(),
@@ -68,59 +56,71 @@ data.2<-read_csv(GDF15.plate,
                    genotype = col_factor(),
                    dex = col_factor(),
                    diet = col_factor(),
-                   Conc. = col_double(),
-                   raw = col_double()))
-
-joined.data<-full_join(data.1, data.2, by = c( "Conc."="conc.", "study"="study", "ID"="ID", "Well" = "well", "diet"="diet"))%>%
-  rename(concentration = "Conc.")
+                   conc. = col_double(),
+                   raw = col_double(),
+                   dexamethasone = col_factor(levels = c("water","dex"))))
 ```
 
 ```{R data-visualization}
-joined.data%>%
-  filter(sex == "female"|study=="MG")%>%
-ggplot(aes(study, concentration))+
-  geom_point(aes())+
-  facet_grid(pregnancy~diet)
-
 #effect of pregnancy
-pg<-joined.data%>%
+pg<-data%>%
   filter(sex=="female"& diet=="NCD")%>%
-ggplot(aes(pregnancy, concentration))+
+ggplot(aes(pregnancy, conc.))+
   geom_boxplot(aes())+
    theme(axis.text.x = element_text(angle = 45), axis.title.x = element_blank())+
    labs(title = "Effect of pregnancy")
 #stats effect of pregnancy
-pg.stats<-joined.data%>%
+pg.stats<-data%>%
   filter(sex=="female"& diet=="NCD")
-shapiro.test(pg.stats$concentration[pg.stats$dex == "yes"])
-shapiro.test(pg.stats$concentration[pg.stats$dex == "no"])
-leveneTest(concentration ~ dex, data = pg.stats)
-wilcox.test(concentration ~ dex, data = pg.stats, equal.var = FALSE)
-#effect of metformin
-met<-joined.data%>%
-  filter(study=="MG")%>%
-  ggplot(aes(diet, concentration))+
-  geom_boxplot(aes())+
-  theme(axis.text.x = element_text(angle = 45), axis.title.x = element_blank())+
-  labs(title = "Effect of metformin and HFD")
 
-TRF<-joined.data%>%
+TRF<-data%>%
   filter(study=="TRF")%>%
-   ggplot(aes(diet, concentration))+
+   ggplot(aes(diet, conc.))+
   geom_boxplot(aes())+
-  facet_grid(.~time.y)+
+  facet_grid(.~time)+
    theme(axis.text.x = element_text(angle = 45), axis.title.x = element_blank())+
-   labs(title = "Effect of eTRF during gestation")
+   labs(title = "eTRF during gestation")
 
-IR<-joined.data%>%
+IR<-data%>%
 filter(study=="IR")%>%
-  ggplot(aes(dex, concentration))+
+  filter(pregnancy=="yes")%>%
+  ggplot(aes(x=dexamethasone, y=conc.))+
   geom_boxplot(aes())+
-   theme(axis.text.x = element_text(angle = 45), axis.title.x = element_blank())+
-   labs(title = "Effect of dexamethasone during gestation")
+   theme(axis.text.x = element_text(angle = 0), axis.title.x = element_blank())+
+   labs(title = "Dexamethasone during gestation")
 
-ggarrange(pg, IR, met,TRF,
-          labels = c("A", "B", "C","D"),
-          ncol = 2, nrow = 2)
+
+
+ggarrange(pg, IR,TRF,
+          labels = c("A", "B", "C"),
+          ncol = 3, nrow = 1)
+```
+
+
+```{r Knockout}
+library(readr)
+raw.data<-"GDF15_ELISA_10.28.csv"
+KO.data<-read_csv(raw.data,
+                  col_types = cols(
+                    Genotype = col_factor(levels = c("+/+","-/-")),
+                    full.conc = col_double(),
+                    MouseID = col_factor(levels = NULL),
+                    Well = col_factor(levels = NULL),
+                    Raw = col_double(),
+                    "Background Corrected"= col_double(),
+                    Conc. = col_double()
+                  ))
+
+ggplot(KO.data, aes(Genotype, full.conc, col = Genotype))+
+  geom_boxplot()+
+  geom_point()+
+  scale_color_manual(values = color.scheme)+
+  labs(title = "Gdf15 Levels in Dams", y = "Gdf15 (pg/mL)")+
+  theme(legend.position = "none")
+#stats
+shapiro.test(KO.data$full.conc[KO.data$Genotype=="+/+"])#0.08
+shapiro.test(KO.data$full.conc[KO.data$Genotype=="-/-"])#0.03
+leveneTest(full.conc ~ Genotype, KO.data)#non-equal variance
+wilcox.test(full.conc ~ Genotype, KO.data)#p=0.001
 ```
 
