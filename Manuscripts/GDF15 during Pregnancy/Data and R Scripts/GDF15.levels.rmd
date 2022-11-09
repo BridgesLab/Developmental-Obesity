@@ -111,6 +111,8 @@ KO.data<-read_csv(raw.data,
                     Conc. = col_double()
                   ))
 
+
+
 ggplot(KO.data, aes(Genotype, full.conc, col = Genotype))+
   geom_boxplot()+
   geom_point()+
@@ -123,4 +125,73 @@ shapiro.test(KO.data$full.conc[KO.data$Genotype=="-/-"])#0.03
 leveneTest(full.conc ~ Genotype, KO.data)#non-equal variance
 wilcox.test(full.conc ~ Genotype, KO.data)#p=0.001
 ```
+#test doc   
+```{r test-GDF15}
+test.doc<-"test.GDF15.csv"
 
+test.data<-read_csv(test.doc,
+                    col_types = cols(
+                      Sample = col_factor(levels = NULL),
+                      Genotype = col_factor(levels = c("WT","KO")),
+                      Study = col_factor(levels = c("GDF15","TRF","IR")),
+                      Diet = col_factor(levels = c("eTRF","AL","dex","water")),
+                      pregnancy = col_factor(levels = c("not pregnant","pregnant"))
+                    ))
+test.data%>%
+  filter(Genotype=="KO"|Genotype=="WT")%>%
+ggplot(aes(Genotype, Conc., col = Genotype))+
+  geom_boxplot()+
+  labs(title = "GDF15 maternal study", subtitle = "Dilution factor corrected")
+
+test.data%>%
+  filter(Study == "TRF")%>%
+ggplot(aes(Diet, Conc.))+
+  geom_boxplot()+
+  facet_grid(.~pregnancy)+
+  labs(title = "eTRF maternal study", subtitle = "Dilution factor corrected")
+
+test.data%>%
+  filter(Study == "IR")%>%
+ggplot(aes(Diet, Conc.))+
+  geom_boxplot()+
+  facet_grid(.~pregnancy)+
+  labs(title = "IR maternal study", subtitle = "Dilution factor corrected")
+```
+
+
+```{r yet-again}
+map<-"GDF15_ELISA_10.28.22.csv"
+map.data<-read_csv(map,
+        col_types = cols(
+          well = col_factor(levels = NULL),
+          study = col_factor(levels =c("GDF15","eTRF","IR","")),
+          treatment = col_factor(levels = c("water","eTRF","AL","dex")),
+          diet = col_factor(levels = c("NCD")),
+          pregnancy = col_factor(levels= c("yes","no")),
+          time = col_factor(levels = c("0","1","12","13")),
+          Genotype = col_factor(levels = c("KO","WT")),
+          volume = col_double()
+        ))
+
+map.reduced <-map.data%>%
+  select(well, study, treatment, diet, pregnancy, time, Genotype, volume, MouseID)
+
+volumes<-"attempted.fix.csv"
+volume.data<-read_csv(volumes,
+  col_types = cols(
+    Sample = col_factor(levels = NULL),
+    Well = col_factor(levels = NULL),
+    Raw = col_double(),
+    Conc. = col_double(),
+    volume = col_double()
+  ))
+
+volume.reduced<-volume.data%>%
+  select(well, Conc.)
+
+
+together<-merge(volume.reduced, map.reduced, by = "well")
+
+mutated.together<-together%>%
+  mutate(concentration = Conc.*50/volume)
+```
