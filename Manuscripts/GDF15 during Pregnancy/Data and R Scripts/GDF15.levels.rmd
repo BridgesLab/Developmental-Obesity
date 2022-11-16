@@ -38,6 +38,7 @@ library(readr)
 library(forcats)
 library(car)
 library(ggpubr)
+library(readr)
 ```
 
 
@@ -194,4 +195,152 @@ together<-merge(volume.reduced, map.reduced, by = "well")
 
 mutated.together<-together%>%
   mutate(concentration = Conc.*50/volume)
+
+mutated.together%>%
+  filter(study=="GDF15")%>%
+ggplot(aes(Genotype, concentration))+
+  geom_boxplot()+
+  labs(title = "plate from 2022 with 2022 std")
+
+mutated.together%>%
+  filter(study=="IR")%>%
+ggplot(aes(treatment, concentration))+
+  facet_grid(.~pregnancy)+
+  geom_boxplot()+
+  labs(title = "plate from 2022 with 2022 std")
+```
+
+
+```{r old-std}
+std.2020.file<-"2022_1dilute_with2020std.csv"
+
+values<-read_csv(std.2020.file)
+
+mutated.values<-values%>%
+  mutate(concentration = Conc.*50/volume)
+
+map.reduced <-map.data%>%
+  select(well, study, treatment, diet, pregnancy, time, Genotype, MouseID)
+
+
+fix.try<-merge(mutated.values, map.reduced, by =  "well")
+fix.try%>%
+  filter(study=="GDF15")%>%
+ggplot(aes(Genotype, concentration))+
+  geom_boxplot()+
+  labs(title = "plate from 2022 with 2020 std")
+
+fix.try%>%
+  filter(study=="IR")%>%
+ggplot(aes(treatment, concentration))+
+  facet_grid(.~pregnancy)+
+  geom_boxplot()+
+  labs(title = "plate from 2022 with 2020 std")
+
+
+std.2022.file<-"1dilute_2022_same_std.csv"
+```      
+```{r fixed}
+##old 2020 plate with 2022 standard
+reanalyzed.plate<-"2020plate2022std.csv"
+
+plate.data<-read_csv(reanalyzed.plate,
+                     col_types =cols(
+                       Sample = col_factor(levels = NULL),
+                       Well = col_factor(levels = NULL),
+                       Raw = col_double(),
+                       `Background Corrected`  = col_double(),
+                       Conc.  = col_double(),
+                       plate= col_factor(levels = NULL),
+                       volume = col_double()
+                     ))
+
+map.plate<-"GDF15_mapping.csv"
+
+map.data.plate<-read_csv(map.plate,
+                         col_types = cols(
+                           MouseID = col_factor(levels = NULL),
+                           time = col_factor(levels = NULL),
+                           pregnancy = col_factor(levels = c("yes","no")),
+                           trimester = col_factor(levels = NULL),
+                           Diet = col_factor(levels = c("NCD","KD","eTRF","AL")),
+                           sex = col_factor(levels = c("male","female")),
+                           week = col_double(),
+                           Well = col_factor(levels = NULL),
+                           Study = col_factor(levels = c("IR","TRF","AJ","TSC")),
+                           Genotype = col_factor(levels = c("WT","KO")),
+                           dex = col_factor(levels = c("yes","no"))
+                         ))
+old.plate.mapped<-merge(plate.data, map.data.plate, by = "Well")
+#Merge this with the new plate data
+old.plate.reduced<-old.plate.mapped%>%
+  select(Conc., plate, volume, MouseID, time, pregnancy, trimester, Diet, sex, week, Study, Genotype, dex)%>%
+mutate(concentration = Conc.*50/volume)
+
+##New plate read
+new.plate<-"2022plate2022std_reads.csv"
+new.plate.data<-read_csv(new.plate,
+                         col_types = cols(
+                           Sample = col_factor(levels = NULL),
+                           Well = col_factor(levels = NULL),
+                           Raw = col_double(),
+                           "Background\nCorrected" = col_double(),
+                           Conc. = col_double() 
+                           ))
+new.map<-"test.GDF15.csv"
+new.map.plate<-read_csv(new.map,
+                        col_types = cols(
+                          MouseID = col_factor(levels = NULL),
+                          Genotype = col_factor(levels=c("WT","KO")),
+                          pregnancy = col_factor(levels = c("yes","no")),
+                          volume = col_double(),
+                          Study = col_factor(levels = c("GDF15","TRF","IR")),
+                          dex = col_factor(levels = c("yes","no")),
+                          Well = col_factor(levels = NULL),
+                          Diet = col_factor(levels = c("NCD","eTRF","AL")),
+                          plate = col_factor(levels = NULL),
+                          time = col_factor(levels = c("1","13"))
+                        ))
+
+new.plate.mapped<-merge(new.plate.data, new.map.plate, by = "Well")
+
+new.plate.reduced<-new.plate.mapped%>%
+  select(Conc., plate, volume, MouseID, time, pregnancy, Diet,Study, Genotype, dex)%>%
+mutate(concentration = Conc.*50/volume)
+
+#merge the two plates
+both.plate.data<-full_join(new.plate.reduced, old.plate.reduced)
+```
+
+
+```{r plate-by-plate}
+#IR of pregnancy cohort
+both.plate.data%>%
+  filter(Study=="IR")%>%
+  ggplot(aes(dex, concentration))+
+  facet_grid(plate~pregnancy)+
+  geom_boxplot()+
+  labs(title = "IR of pregnancy study")
+#combined IR
+both.plate.data%>%
+  filter(Study=="IR")%>%
+  ggplot(aes(time, concentration))+
+  facet_grid(dex~pregnancy)+
+  geom_boxplot()+
+  labs(title = "IR study combined")
+
+#TRF
+both.plate.data%>%
+  filter(Study=="TRF")%>%
+  ggplot(aes(Diet, concentration))+
+  facet_grid(plate~pregnancy)+
+  geom_boxplot()+
+  labs(title = "TRF study")
+#combined TRF
+both.plate.data%>%
+  filter(Study=="TRF")%>%
+  ggplot(aes(Diet, concentration))+
+  facet_grid(.~pregnancy)+
+  geom_boxplot()+
+  labs(title = "TRF study combined")
 ```

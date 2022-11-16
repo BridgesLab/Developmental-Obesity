@@ -52,7 +52,7 @@ avg.bw.data<-bw.data%>%
 ```
 
 #Analysis
-```{r bodyweight-prenatal}
+```{r bodyweight-natal}
 #plot, all values
 ggplot(bw.data, aes(gest.age, gram.values, col = Genotype))+
   geom_point(aes(col = Genotype))+
@@ -73,7 +73,20 @@ ggplot(bw.data, aes(gest.age, gram.values, col = Genotype))+
  
 
 ```
-  
+```{r weight-prenatal}
+prenatal.bw.data<-bw.data%>%
+mutate(delta.bw.pn = gram.values[week=="pre-pregnancy"]-max(gram.values))
+bw.data%>%
+  filter(postnatal=="n")%>%
+ggplot(aes(gest.age, gram.values, col = Genotype))+
+  geom_point(aes(col = Genotype))+
+  geom_smooth(aes(col = Genotype), se= FALSE, span =0.4)+
+  scale_color_manual(values = color.scheme)+
+  labs(title = "Maternal Perinatal Body Weight", y = "grams",x= "Gestational Day")+
+  theme(legend.position = c(0.1, 0.865), legend.background = element_blank())
+```
+
+
 ```{r stats}
 # pre birth
 bw.data.pre<-bw.data%>%
