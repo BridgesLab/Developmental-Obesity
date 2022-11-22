@@ -1,0 +1,83 @@
+---
+title: "pup.early.postnatal"
+author: "Molly C. Mulcahy"
+date: '2022-06-13'
+output: html_document
+---
+
+```{r setup}
+
+se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
+
+#load commonly needed packages
+library(processx)
+library(devtools)
+library(tidyr)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(knitr)
+library(car)
+library(lme4)
+library(broom)
+library(forcats)
+
+#set plot color scheme
+color.scheme = c("#333333","#CCCCCC")
+```
+
+
+```{r data-entry}
+pup.file<-"birth.data.csv"
+
+pup.data<-read_csv(pup.file,
+                   col_types = cols(
+                     MouseID = col_factor(levels = NULL),
+                     birth.weight = col_double(),
+                     alive.at.birth = col_factor(levels = c("yes","no")),
+                     gest.age = col_double(),
+                     sex = col_factor(levels = c("male","female")),
+                     survival = col_logical(),
+                     culled = col_factor(levels = c("yes","no")),
+                     Genotype = col_factor(levels = c("+/+","-/-"))
+                   ))
+
+```
+
+
+```{r birth-weight}
+#birth weight
+birth.weight.data <-pup.data%>%
+  filter(!(alive.at.birth =="no"))%>%#take out those that were dead at birth
+  group_by(MouseID, Genotype)%>%
+  summarize(avg.bw =  mean(birth.weight))%>%
+  group_by(Genotype)%>%
+  summarize_at("avg.bw", funs(mean, se))
+
+#plot
+ggplot(birth.weight.data, aes(Genotype, mean, fill = Genotype))+
+  geom_col(aes(fill = Genotype))+
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se), width =0.3)+
+  scale_fill_manual(values = color.scheme)+
+  theme(legend.position = "none")+
+  labs(title = "Pup Birthweight", y = "body weight (grams)")
+
+#stats
+bw.stats <-pup.data%>%
+  filter(!(alive.at.birth =="no"))%>%#take out those that were dead at birth
+  group_by(MouseID, Genotype)%>%
+  summarize(avg.bw =  mean(birth.weight))
+
+shapiro.test(bw.stats$avg.bw[bw.stats$Genotype=="-/-"])#normal
+shapiro.test(bw.stats$avg.bw[bw.stats$Genotype=="+/+"])#normal
+leveneTest(avg.bw~Genotype, data = bw.stats)#equal variance
+t.test(avg.bw~Genotype, data = bw.stats)
+```
+
+
+```{r gest.age}
+ga.data<-pup.data%>%
+  distinct(MouseID)#
+  summarize_at("avg.bw", funs(mean, se))
+
+```

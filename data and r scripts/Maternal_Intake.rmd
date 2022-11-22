@@ -1,0 +1,112 @@
+---
+title: "Maternal_Intake.rmd"
+author: "Molly C. Mulcahy"
+date: '2022-07-27'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(processx)
+library(devtools)
+library(dplyr)
+library(readr)
+library(car)
+library(knitr)
+library(tidyr)
+library(lme4)
+library(broom)
+library(RCurl)
+library(ggplot2)
+
+#figures made will go to directory called figures, will make them as both png and pdf files 
+opts_chunk$set(fig.path='figures/',
+               echo=FALSE, warning=FALSE, message=FALSE,dev=c('png','pdf'))
+options(scipen = 2, digits = 3)
+# set echo and message to TRUE if you want to display code blocks and code output respectively
+knitr::knit_hooks$set(inline = function(x) {
+  knitr:::format_sci(x, 'md')
+})
+#write standard error function for later use
+se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
+# sets color scheme for plots
+color.scheme <- c('gray69','gray36')
+```
+
+
+```{r maternal-food-intake}
+#enter maternal food intake
+mat.food.file<-"maternal.intake.csv"
+
+mat.food.data<-read_csv(mat.food.file,
+  col_types = cols(
+    ID = col_factor(levels = NULL),
+    treatment = col_factor(levels = c("eTRF","AL")),
+    day = col_double(),
+    gest.day = col_double(),
+    pregnancy = col_factor(levels = NULL),
+    cohort = col_factor(levels = NULL),
+    food.consumed = col_double(),
+    kcals.consumed = col_double(),
+    food.cumulative = col_double()
+  ))
+#plot
+mat.food.data%>%
+  ggplot(aes(gest.day, kcals.consumed, col = treatment))+
+  geom_point()+
+  geom_smooth(aes(col = treatment))+
+  labs(title = "Maternal Food Intake")+
+  scale_color_manual(values = color.scheme)+ 
+  labs(y = "daily kcal intake", x = "gestational age (days)")+
+  theme(text = element_text(size=18),legend.position = c(0.9,0.80), legend.background = element_rect(fill = "transparent"))
+
+#stats
+null.mom.fi<-lmer(kcals.consumed ~ 1 + (1|ID),data = mat.food.data)
+gest.mom.fi<-lmer(kcals.consumed ~ gest.day + (1|ID),data = mat.food.data)
+anova(null.mom.fi, gest.mom.fi)%>%kable
+group.int.fi<-lmer(kcals.consumed ~ gest.day*treatment + (1|ID),data = mat.food.data)
+anova(gest.mom.fi, group.int.fi)%>%kable
+Anova(group.int.fi)
+fixef(group.int.fi)%>%kable(caption = "fixed effects of gestational age, treatment, and interaction")
+group.simple.fi<-lmer(kcals.consumed ~ gest.day+treatment + (1|ID),data = mat.food.data)
+anova(gest.mom.fi, group.simple.fi)%>%kable
+Anova(group.simple.fi)#p=0.093 for treatment
+fixef(group.simple.fi)#12.78eTRF kcals vs 14.20 AL kcals
+```
+
+
+```{r maternal-body-weight}
+mat.bw.file <-"maternal.bw.csv"
+
+mat.bw.data<-read_csv(mat.bw.file,
+  col_types = cols(
+    ID = col_factor(levels = NULL),
+    cohort = col_factor(levels = NULL),
+    treatment = col_factor(levels = c("eTRF","AL")),
+    pregnancy = col_factor(levels = NULL),
+    body.weight = col_double(),
+    date = col_date(),
+    gest.age = col_double(),
+    week = col_double()
+  ))
+#plot
+mat.bw.data%>%
+  ggplot(aes(gest.age, body.weight, col = treatment))+
+  geom_point()+
+  geom_smooth(aes(col = treatment))+
+  labs(title = "Maternal Body Weight")+
+  scale_color_manual(values = color.scheme)+ 
+  labs(y = "body weight (g)", x = "gestational age (days)")+
+  theme(text = element_text(size=18),legend.position = c(0.15,0.80), legend.background = element_rect(fill = "transparent"))
+
+#stats
+null.mat.bw<-lmer(body.weight~ 1+(1|ID),data = mat.bw.data)
+gest.mat.bw<-lmer(body.weight~ gest.age + (1|ID),data = mat.bw.data)
+anova(null.mat.bw, gest.mat.bw)%>%kable
+group.int.bw<-lmer(body.weight~ gest.age*treatment + (1|ID),data = mat.bw.data)
+anova(gest.mat.bw, group.int.bw)
+Anova(group.int.bw)# no evidence of interaction
+group.simple.bw<-lmer(body.weight~ gest.age +treatment + (1|ID),data = mat.bw.data)
+anova(gest.mat.bw, group.simple.bw)
+Anova(group.simple.bw)
+fixef(group.simple.bw)
+```

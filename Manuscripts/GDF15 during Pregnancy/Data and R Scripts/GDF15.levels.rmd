@@ -1,0 +1,197 @@
+---
+title: "GDF15_ELISA.RMD"
+author: "Molly C. Mulcahy"
+date: '2022-07-01'
+output: html_document
+---
+
+
+```{r global_options, include=FALSE}
+library(knitr)
+library(survival)
+library("car")
+library("zip")
+#figures made will go to directory called figures, will make them as both png and pdf files 
+opts_chunk$set(fig.path='figures/',
+               echo=TRUE, warning=FALSE, message=FALSE,dev=c('png','pdf'))
+options(scipen = 2, digits = 3)
+# set echo and message to TRUE if you want to display code blocks and code output respectively
+
+knitr::knit_hooks$set(inline = function(x) {
+  knitr:::format_sci(x, 'md')
+})
+
+
+superpose.eb <- function (x, y, ebl, ebu = ebl, length = 0.08, ...)
+  arrows(x, y + ebu, x, y - ebl, angle = 90, code = 3,
+  length = length, ...)
+
+  
+se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
+color.scheme<-c("#333333" ,"#CCCCCC")
+#load these packages, nearly always needed
+library(tidyr)
+library(tidyverse)
+library(dplyr)
+library(broom)
+library(readr)
+library(forcats)
+library(car)
+library(ggpubr)
+```
+
+
+```{r data-entry}
+GDF15.plate<-"GDF15.ELISA.csv"
+
+data<-read_csv(GDF15.plate,
+                 col_types = cols(
+                   ID =col_factor(levels = NULL),
+                   well = col_factor(),
+                   study = col_factor(),
+                   time = col_double(),
+                   pregnancy = col_factor(),
+                   trimester = col_factor(),
+                   sex = col_factor(),
+                   genotype = col_factor(),
+                   dex = col_factor(),
+                   diet = col_factor(),
+                   conc. = col_double(),
+                   raw = col_double(),
+                   dexamethasone = col_factor(levels = c("water","dex"))))
+```
+
+```{R data-visualization}
+#effect of pregnancy
+pg<-data%>%
+  filter(sex=="female"& diet=="NCD")%>%
+ggplot(aes(pregnancy, conc.))+
+  geom_boxplot(aes())+
+   theme(axis.text.x = element_text(angle = 45), axis.title.x = element_blank())+
+   labs(title = "Effect of pregnancy")
+#stats effect of pregnancy
+pg.stats<-data%>%
+  filter(sex=="female"& diet=="NCD")
+
+TRF<-data%>%
+  filter(study=="TRF")%>%
+   ggplot(aes(diet, conc.))+
+  geom_boxplot(aes())+
+  facet_grid(.~time)+
+   theme(axis.text.x = element_text(angle = 45), axis.title.x = element_blank())+
+   labs(title = "eTRF during gestation")
+
+IR<-data%>%
+filter(study=="IR")%>%
+  filter(pregnancy=="yes")%>%
+  ggplot(aes(x=dexamethasone, y=conc.))+
+  geom_boxplot(aes())+
+   theme(axis.text.x = element_text(angle = 0), axis.title.x = element_blank())+
+   labs(title = "Dexamethasone during gestation")
+
+
+
+ggarrange(pg, IR,TRF,
+          labels = c("A", "B", "C"),
+          ncol = 3, nrow = 1)
+```
+
+
+```{r Knockout}
+library(readr)
+raw.data<-"GDF15_ELISA_10.28.csv"
+KO.data<-read_csv(raw.data,
+                  col_types = cols(
+                    Genotype = col_factor(levels = c("+/+","-/-")),
+                    full.conc = col_double(),
+                    MouseID = col_factor(levels = NULL),
+                    Well = col_factor(levels = NULL),
+                    Raw = col_double(),
+                    "Background Corrected"= col_double(),
+                    Conc. = col_double()
+                  ))
+
+
+
+ggplot(KO.data, aes(Genotype, full.conc, col = Genotype))+
+  geom_boxplot()+
+  geom_point()+
+  scale_color_manual(values = color.scheme)+
+  labs(title = "Gdf15 Levels in Dams", y = "Gdf15 (pg/mL)")+
+  theme(legend.position = "none")
+#stats
+shapiro.test(KO.data$full.conc[KO.data$Genotype=="+/+"])#0.08
+shapiro.test(KO.data$full.conc[KO.data$Genotype=="-/-"])#0.03
+leveneTest(full.conc ~ Genotype, KO.data)#non-equal variance
+wilcox.test(full.conc ~ Genotype, KO.data)#p=0.001
+```
+#test doc   
+```{r test-GDF15}
+test.doc<-"test.GDF15.csv"
+
+test.data<-read_csv(test.doc,
+                    col_types = cols(
+                      Sample = col_factor(levels = NULL),
+                      Genotype = col_factor(levels = c("WT","KO")),
+                      Study = col_factor(levels = c("GDF15","TRF","IR")),
+                      Diet = col_factor(levels = c("eTRF","AL","dex","water")),
+                      pregnancy = col_factor(levels = c("not pregnant","pregnant"))
+                    ))
+test.data%>%
+  filter(Genotype=="KO"|Genotype=="WT")%>%
+ggplot(aes(Genotype, Conc., col = Genotype))+
+  geom_boxplot()+
+  labs(title = "GDF15 maternal study", subtitle = "Dilution factor corrected")
+
+test.data%>%
+  filter(Study == "TRF")%>%
+ggplot(aes(Diet, Conc.))+
+  geom_boxplot()+
+  facet_grid(.~pregnancy)+
+  labs(title = "eTRF maternal study", subtitle = "Dilution factor corrected")
+
+test.data%>%
+  filter(Study == "IR")%>%
+ggplot(aes(Diet, Conc.))+
+  geom_boxplot()+
+  facet_grid(.~pregnancy)+
+  labs(title = "IR maternal study", subtitle = "Dilution factor corrected")
+```
+
+
+```{r yet-again}
+map<-"GDF15_ELISA_10.28.22.csv"
+map.data<-read_csv(map,
+        col_types = cols(
+          well = col_factor(levels = NULL),
+          study = col_factor(levels =c("GDF15","eTRF","IR","")),
+          treatment = col_factor(levels = c("water","eTRF","AL","dex")),
+          diet = col_factor(levels = c("NCD")),
+          pregnancy = col_factor(levels= c("yes","no")),
+          time = col_factor(levels = c("0","1","12","13")),
+          Genotype = col_factor(levels = c("KO","WT")),
+          volume = col_double()
+        ))
+
+map.reduced <-map.data%>%
+  select(well, study, treatment, diet, pregnancy, time, Genotype, volume, MouseID)
+
+volumes<-"attempted.fix.csv"
+volume.data<-read_csv(volumes,
+  col_types = cols(
+    Sample = col_factor(levels = NULL),
+    Well = col_factor(levels = NULL),
+    Raw = col_double(),
+    Conc. = col_double(),
+    volume = col_double()
+  ))
+
+volume.reduced<-volume.data%>%
+  select(well, Conc.)
+
+
+together<-merge(volume.reduced, map.reduced, by = "well")
+
+mutated.together<-together%>%
+  mutate(concentration = Conc.*50/volume)
+```

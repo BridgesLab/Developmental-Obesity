@@ -147,7 +147,7 @@ summary.FE%>%
   facet_grid(.~sex)+
   scale_fill_manual(values = color.scheme)+
   theme(text = element_text(size=18), legend.position = "none", axis.title.x = element_blank())+
-  labs(title = "Feeding efficiency during HFD treatment", y="percent (%)")
+  labs(title = "Feeding efficiency during HFHS treatment", y="percent (%)")
 
 #stats
 FE.HFD.aov<-aov(FE.HFD ~ sex + treatment, summary.FE)#no interaction, remove interaction term
