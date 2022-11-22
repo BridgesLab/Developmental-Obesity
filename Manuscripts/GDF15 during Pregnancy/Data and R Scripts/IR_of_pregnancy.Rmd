@@ -1,0 +1,244 @@
+---
+title: "IR_of_Pregnancy"
+author: "Molly C. Mulcahy"
+date: "2022-11-18"
+output: html_document
+---
+
+```{r setup}
+#load commonly needed packages
+library(processx)
+library(devtools)
+library(tidyr)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(knitr)
+library(car)
+library(lme4)
+library(broom)
+library(forcats)
+
+#figures made will go to directory called figures, will make them as both png and pdf files 
+opts_chunk$set(fig.path='figures/',
+               echo=FALSE, warning=FALSE, message=FALSE,dev=c('png','pdf'))
+options(scipen = 2, digits = 3)
+# set echo and message to TRUE if you want to display code blocks and code output respectively
+knitr::knit_hooks$set(inline = function(x) {
+  knitr:::format_sci(x, 'md')
+})
+se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
+color.scheme = c("#999999","#666666")
+```
+
+#load data
+```{r data-input}
+ITT.file<-"ITT.csv"
+itt.data<-read_csv(ITT.file,
+                   col_types = cols(
+                     ID = col_factor(levels = NULL),
+                     pregnancy = col_factor(levels = NULL),
+                     treatment = col_factor(levels = NULL),
+                     ID = col_factor(levels = NULL),
+                     time = col_double(),
+                     glucose = col_double()))
+itt.mutated<-itt.data%>%
+  group_by(ID)%>%
+  mutate(rel.glucose = (glucose/glucose[time==0])*100,
+         AUC = sum(glucose),
+         rel.auc = sum(rel.glucose))
+
+avg.itt.data<-itt.mutated%>%
+  group_by(treatment, pregnancy, time)%>%
+  summarize_at(vars(glucose, rel.glucose), .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+AUC.data<-itt.mutated%>%
+  select(ID, treatment,pregnancy, AUC,rel.auc)%>%
+  group_by(ID)%>%
+  unique
+```
+#data analysis
+```{r line-plot}
+#effect of pregnancy
+avg.itt.data%>%
+  filter(treatment=="water")%>%
+  ggplot(aes(time, glucose_mean, col = pregnancy))+
+  geom_point()+
+  geom_line()+
+  geom_errorbar(aes(ymax = glucose_mean + glucose_se, ymin = glucose_mean - glucose_se))+
+  labs(title = "Effect of Pregnancy on Insulin Tolerance", y = "glucose (mg/dL)")+
+  scale_color_manual(values = color.scheme)+
+    theme(legend.position = c(0.85, 0.85))
+
+AUC.data%>%
+  filter(treatment =="water")%>%
+  group_by(pregnancy)%>%
+  summarize(avg.auc = mean(AUC),
+            error.auc = se(AUC),
+            length.auc = length(AUC))%>%
+  ggplot(aes(pregnancy, avg.auc))+
+  geom_col(aes(fill = pregnancy))+
+    geom_errorbar(aes(ymin = avg.auc + error.auc, ymax = avg.auc - error.auc), width =0.3)+
+  scale_fill_manual(values = color.scheme)+
+  labs(title = "Area Under the Curve", y="glucose (mg/dL)")+
+  theme(legend.position = "none")
+  #stats
+pregnant.data<-itt.mutated%>%
+  filter(treatment=="water")
+pregnancy.mlm<-lmer(glucose~time + pregnancy + (1|ID), data = pregnant.data)
+summary(pregnancy.mlm)
+pregnant.auc<-AUC.data%>%
+  filter(treatment=="water")
+shapiro.test(pregnant.auc$AUC[pregnant.auc$pregnancy=="pregnant"])#normal p=0.1
+shapiro.test(pregnant.auc$AUC[pregnant.auc$pregnancy=="not-pregnant"])#normal p=0.8
+leveneTest(AUC~pregnancy, data= pregnant.auc)#equal variance p=0.63
+t.test(AUC~pregnancy, data= pregnant.auc)#p=0.7
+
+#effect of dexamethasone in pregnant mice
+avg.itt.data%>%
+  filter(pregnancy=="pregnant")%>%
+  ggplot(aes(time, glucose_mean, col = treatment))+
+  geom_point()+
+  geom_line()+
+  geom_errorbar(aes(ymax = glucose_mean + glucose_se, ymin = glucose_mean - glucose_se))+
+  labs(title = "Effect of Dexamethasone on Insulin Tolerance", y = "glucose (mg/dL)")+
+  scale_color_manual(values = color.scheme)+
+  theme(legend.position = c(0.85, 0.85))
+  
+AUC.data%>%
+  filter(pregnancy =="pregnant")%>%
+  group_by(treatment)%>%
+  summarize(avg.auc = mean(AUC),
+            error.auc = se(AUC),
+            length.auc = length(AUC))%>%
+  ggplot(aes(treatment, avg.auc))+
+  geom_col(aes(fill = treatment))+
+    geom_errorbar(aes(ymin = avg.auc + error.auc, ymax = avg.auc - error.auc), width =0.3)+
+    scale_fill_manual(values = color.scheme)+
+  theme(legend.position = "none")+
+  labs(title = "Area Under the Curve", y="glucose (mg/dL)")
+#stats
+dex.data<-itt.mutated%>%
+  filter(pregnancy=="pregnant")
+dex.mlm<-lmer(glucose~time+treatment+(1|ID), data = dex.data)
+summary(dex.mlm)
+dex.auc<-AUC.data%>%
+  filter(pregnancy=="pregnant")
+shapiro.test(dex.auc$AUC[dex.auc$treatment=="water"])#normal p=0.1
+shapiro.test(dex.auc$AUC[dex.auc$treatment=="dexamethasone"])#normal p=0.4
+leveneTest(AUC~treatment, data= dex.auc)#equal variance p=0.38
+t.test(AUC~treatment, data= dex.auc)#p=0.8
+```
+```{r rel-glucose}
+avg.itt.data%>%
+filter(treatment=="water")%>%
+   ggplot(aes(time, rel.glucose_mean, col = pregnancy))+
+  geom_point()+
+  geom_line()+
+  geom_errorbar(aes(ymax = rel.glucose_mean + rel.glucose_se, ymin = rel.glucose_mean - rel.glucose_se))+
+  labs(title = "Effect of Pregnancy on Insulin Tolerance", y = "relative glucose (%baseline)")+
+  scale_color_manual(values = color.scheme)+
+  theme(legend.position = c(0.85, 0.10))
+#effect of dex
+avg.itt.data%>%
+filter(pregnancy=="pregnant")%>%
+   ggplot(aes(time, rel.glucose_mean, col = treatment))+
+  geom_point()+
+  geom_line()+
+  geom_errorbar(aes(ymax = rel.glucose_mean + rel.glucose_se, ymin = rel.glucose_mean - rel.glucose_se))+
+  labs(title = "Effect of Dexamethasone on Insulin Tolerance", y = "relative glucose (%baseline)")+
+  scale_color_manual(values = color.scheme)+
+  theme(legend.position = c(0.10, 0.10))
+
+AUC.data%>%
+   filter(treatment=="water")%>%
+  group_by(pregnancy)%>%
+  summarize(avg.auc = mean(rel.auc),
+            error.auc = se(rel.auc),
+            length.auc = length(rel.auc))%>%
+  ggplot(aes(pregnancy, avg.auc))+
+  geom_col(aes(fill = pregnancy))+
+    geom_errorbar(aes(ymin = avg.auc + error.auc, ymax = avg.auc - error.auc), width =0.3)+
+  scale_fill_manual(values = color.scheme)+
+  labs(title = "Area Under the Curve")+
+  theme(legend.position = "none")
+
+#stats
+
+  
+shapiro.test(pregnant.auc$rel.auc[pregnant.auc$pregnancy=="not-pregnant"])#normal, p-0.3
+shapiro.test(pregnant.auc$rel.auc[pregnant.auc$pregnancy=="pregnant"])#normal, p-0.3
+leveneTest(rel.auc~pregnancy, data = pregnant.auc)#equal variance, p=0.68
+t.test(rel.auc~pregnancy, data = pregnant.auc)#p0.2
+
+#models
+preg.data<-itt.mutated%>%
+  filter(treatment=="water")
+null.relglu.mlm<-lmer(rel.glucose ~ 1 + (1|ID), data = preg.data)
+time.relglu.mlm<-lmer(rel.glucose ~ time + (1|ID), data = preg.data)
+anova(null.relglu.mlm, time.relglu.mlm)#significant
+preg.relglu.mlm<-lmer(rel.glucose ~ time + pregnancy + (1|ID), data = preg.data)
+anova(time.relglu.mlm, preg.relglu.mlm)#no differences
+int.preg.relglu.mlm<-preg.relglu.mlm<-lmer(rel.glucose ~ time*pregnancy + (1|ID), data = preg.data)
+Anova(int.preg.relglu.mlm)#interaction is not significant
+summary(preg.relglu.mlm)
+dex.data.itt<-itt.mutated%>%
+  filter(pregnancy == "pregnant")
+null.dex.mlm<-lmer(rel.glucose ~ 1 + (1|ID), data = dex.data.itt)
+time.dex.mlm<-lmer(rel.glucose ~ time + (1|ID), data = dex.data.itt)
+anova(null.dex.mlm, time.dex.mlm)#significant effect of time
+treat.dex.mlm<-lmer(rel.glucose ~ time +treatment +(1|ID), data = dex.data.itt)
+anova(time.dex.mlm, treat.dex.mlm)#significant effect of dex
+int.treat.dex.mlm<-treat.dex.mlm<-lmer(rel.glucose ~ time*treatment +(1|ID), data = dex.data.itt)
+summary(int.treat.dex.mlm)
+```
+
+
+```{r FBG}
+FBG.data<-itt.mutated%>%
+  filter(time=="0")
+pregnancy.FBG<-FBG.data%>%
+  filter(treatment=="water")
+
+
+#Effect of pregnancy on FBG
+pregnancy.FBG%>%
+  group_by(pregnancy)%>%
+  summarize(avg.glucose = mean(glucose),
+            error.glucose  = se(glucose))%>%
+  ggplot(aes(pregnancy, avg.glucose, fill =  pregnancy))+
+  geom_col()+
+  geom_errorbar(aes(ymin = avg.glucose -error.glucose, ymax = avg.glucose + error.glucose), width=0.3)+
+  scale_fill_manual(values = color.scheme)+
+  labs(title = "Fasting Blood Glucose", y = "glucose (mg/dL)")+
+  theme(legend.position = "none")
+
+#stats
+shapiro.test(pregnancy.FBG$glucose[pregnancy.FBG$pregnancy=="not-pregnant"])#0.4
+shapiro.test(pregnancy.FBG$glucose[pregnancy.FBG$pregnancy=="pregnant"])#0.5
+leveneTest(glucose~pregnancy, data = pregnancy.FBG)#0.47
+t.test(glucose~pregnancy, data = pregnancy.FBG)
+
+
+#Effect of dexamethasone on FBG
+FBG.data%>%
+  filter(pregnancy=="pregnant")%>%
+  group_by(treatment)%>%
+  summarize(avg.glucose = mean(glucose),
+            error.glucose  = se(glucose))%>%
+  ggplot(aes(treatment, avg.glucose, fill =  treatment))+
+  geom_col()+
+  geom_errorbar(aes(ymin = avg.glucose -error.glucose, ymax = avg.glucose + error.glucose), width=0.3)+
+  scale_fill_manual(values = color.scheme)+
+  labs(title = "Fasting Blood Glucose", y = "glucose (mg/dL)")+
+  theme(legend.position = "none")
+
+#stats
+dex.FBG<-FBG.data%>%
+  filter(pregnancy=="pregnant")
+
+shapiro.test(dex.FBG$glucose[dex.FBG$treatment=="water"])#0.5
+shapiro.test(dex.FBG$glucose[dex.FBG$treatment=="dexamethasone"])#0.6
+leveneTest(glucose ~ treatment, data = dex.FBG)#0.064
+t.test(glucose ~ treatment, data = dex.FBG)
+```

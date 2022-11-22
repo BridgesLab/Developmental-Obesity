@@ -40,207 +40,8 @@ library(car)
 library(ggpubr)
 library(readr)
 ```
-
-
-```{r data-entry}
-GDF15.plate<-"GDF15.ELISA.csv"
-
-data<-read_csv(GDF15.plate,
-                 col_types = cols(
-                   ID =col_factor(levels = NULL),
-                   well = col_factor(),
-                   study = col_factor(),
-                   time = col_double(),
-                   pregnancy = col_factor(),
-                   trimester = col_factor(),
-                   sex = col_factor(),
-                   genotype = col_factor(),
-                   dex = col_factor(),
-                   diet = col_factor(),
-                   conc. = col_double(),
-                   raw = col_double(),
-                   dexamethasone = col_factor(levels = c("water","dex"))))
-```
-
-```{R data-visualization}
-#effect of pregnancy
-pg<-data%>%
-  filter(sex=="female"& diet=="NCD")%>%
-ggplot(aes(pregnancy, conc.))+
-  geom_boxplot(aes())+
-   theme(axis.text.x = element_text(angle = 45), axis.title.x = element_blank())+
-   labs(title = "Effect of pregnancy")
-#stats effect of pregnancy
-pg.stats<-data%>%
-  filter(sex=="female"& diet=="NCD")
-
-TRF<-data%>%
-  filter(study=="TRF")%>%
-   ggplot(aes(diet, conc.))+
-  geom_boxplot(aes())+
-  facet_grid(.~time)+
-   theme(axis.text.x = element_text(angle = 45), axis.title.x = element_blank())+
-   labs(title = "eTRF during gestation")
-
-IR<-data%>%
-filter(study=="IR")%>%
-  filter(pregnancy=="yes")%>%
-  ggplot(aes(x=dexamethasone, y=conc.))+
-  geom_boxplot(aes())+
-   theme(axis.text.x = element_text(angle = 0), axis.title.x = element_blank())+
-   labs(title = "Dexamethasone during gestation")
-
-
-
-ggarrange(pg, IR,TRF,
-          labels = c("A", "B", "C"),
-          ncol = 3, nrow = 1)
-```
-
-
-```{r Knockout}
-library(readr)
-raw.data<-"GDF15_ELISA_10.28.csv"
-KO.data<-read_csv(raw.data,
-                  col_types = cols(
-                    Genotype = col_factor(levels = c("+/+","-/-")),
-                    full.conc = col_double(),
-                    MouseID = col_factor(levels = NULL),
-                    Well = col_factor(levels = NULL),
-                    Raw = col_double(),
-                    "Background Corrected"= col_double(),
-                    Conc. = col_double()
-                  ))
-
-
-
-ggplot(KO.data, aes(Genotype, full.conc, col = Genotype))+
-  geom_boxplot()+
-  geom_point()+
-  scale_color_manual(values = color.scheme)+
-  labs(title = "Gdf15 Levels in Dams", y = "Gdf15 (pg/mL)")+
-  theme(legend.position = "none")
-#stats
-shapiro.test(KO.data$full.conc[KO.data$Genotype=="+/+"])#0.08
-shapiro.test(KO.data$full.conc[KO.data$Genotype=="-/-"])#0.03
-leveneTest(full.conc ~ Genotype, KO.data)#non-equal variance
-wilcox.test(full.conc ~ Genotype, KO.data)#p=0.001
-```
-#test doc   
-```{r test-GDF15}
-test.doc<-"test.GDF15.csv"
-
-test.data<-read_csv(test.doc,
-                    col_types = cols(
-                      Sample = col_factor(levels = NULL),
-                      Genotype = col_factor(levels = c("WT","KO")),
-                      Study = col_factor(levels = c("GDF15","TRF","IR")),
-                      Diet = col_factor(levels = c("eTRF","AL","dex","water")),
-                      pregnancy = col_factor(levels = c("not pregnant","pregnant"))
-                    ))
-test.data%>%
-  filter(Genotype=="KO"|Genotype=="WT")%>%
-ggplot(aes(Genotype, Conc., col = Genotype))+
-  geom_boxplot()+
-  labs(title = "GDF15 maternal study", subtitle = "Dilution factor corrected")
-
-test.data%>%
-  filter(Study == "TRF")%>%
-ggplot(aes(Diet, Conc.))+
-  geom_boxplot()+
-  facet_grid(.~pregnancy)+
-  labs(title = "eTRF maternal study", subtitle = "Dilution factor corrected")
-
-test.data%>%
-  filter(Study == "IR")%>%
-ggplot(aes(Diet, Conc.))+
-  geom_boxplot()+
-  facet_grid(.~pregnancy)+
-  labs(title = "IR maternal study", subtitle = "Dilution factor corrected")
-```
-
-
-```{r yet-again}
-map<-"GDF15_ELISA_10.28.22.csv"
-map.data<-read_csv(map,
-        col_types = cols(
-          well = col_factor(levels = NULL),
-          study = col_factor(levels =c("GDF15","eTRF","IR","")),
-          treatment = col_factor(levels = c("water","eTRF","AL","dex")),
-          diet = col_factor(levels = c("NCD")),
-          pregnancy = col_factor(levels= c("yes","no")),
-          time = col_factor(levels = c("0","1","12","13")),
-          Genotype = col_factor(levels = c("KO","WT")),
-          volume = col_double()
-        ))
-
-map.reduced <-map.data%>%
-  select(well, study, treatment, diet, pregnancy, time, Genotype, volume, MouseID)
-
-volumes<-"attempted.fix.csv"
-volume.data<-read_csv(volumes,
-  col_types = cols(
-    Sample = col_factor(levels = NULL),
-    Well = col_factor(levels = NULL),
-    Raw = col_double(),
-    Conc. = col_double(),
-    volume = col_double()
-  ))
-
-volume.reduced<-volume.data%>%
-  select(well, Conc.)
-
-
-together<-merge(volume.reduced, map.reduced, by = "well")
-
-mutated.together<-together%>%
-  mutate(concentration = Conc.*50/volume)
-
-mutated.together%>%
-  filter(study=="GDF15")%>%
-ggplot(aes(Genotype, concentration))+
-  geom_boxplot()+
-  labs(title = "plate from 2022 with 2022 std")
-
-mutated.together%>%
-  filter(study=="IR")%>%
-ggplot(aes(treatment, concentration))+
-  facet_grid(.~pregnancy)+
-  geom_boxplot()+
-  labs(title = "plate from 2022 with 2022 std")
-```
-
-
-```{r old-std}
-std.2020.file<-"2022_1dilute_with2020std.csv"
-
-values<-read_csv(std.2020.file)
-
-mutated.values<-values%>%
-  mutate(concentration = Conc.*50/volume)
-
-map.reduced <-map.data%>%
-  select(well, study, treatment, diet, pregnancy, time, Genotype, MouseID)
-
-
-fix.try<-merge(mutated.values, map.reduced, by =  "well")
-fix.try%>%
-  filter(study=="GDF15")%>%
-ggplot(aes(Genotype, concentration))+
-  geom_boxplot()+
-  labs(title = "plate from 2022 with 2020 std")
-
-fix.try%>%
-  filter(study=="IR")%>%
-ggplot(aes(treatment, concentration))+
-  facet_grid(.~pregnancy)+
-  geom_boxplot()+
-  labs(title = "plate from 2022 with 2020 std")
-
-
-std.2022.file<-"1dilute_2022_same_std.csv"
-```      
-```{r fixed}
+     
+```{r read-data}
 ##old 2020 plate with 2022 standard
 reanalyzed.plate<-"2020plate2022std.csv"
 
@@ -313,34 +114,54 @@ both.plate.data<-full_join(new.plate.reduced, old.plate.reduced)
 ```
 
 
-```{r plate-by-plate}
-#IR of pregnancy cohort
-both.plate.data%>%
+```{r IR-pg}
+test<-both.plate.data%>%
   filter(Study=="IR")%>%
-  ggplot(aes(dex, concentration))+
-  facet_grid(plate~pregnancy)+
-  geom_boxplot()+
-  labs(title = "IR of pregnancy study")
-#combined IR
-both.plate.data%>%
-  filter(Study=="IR")%>%
-  ggplot(aes(time, concentration))+
+  group_by(dex, pregnancy, time)%>%
+  summarize(avg = mean(concentration),
+            error = se(concentration))
+  ggplot()+
+  geom_col(data = test, aes(time, avg, fill = pregnancy))+
+  geom_point(data = filter(both.plate.data, Study=="IR"),aes(x=time, y=concentration))+
   facet_grid(dex~pregnancy)+
-  geom_boxplot()+
-  labs(title = "IR study combined")
+  #geom_errorbar(data = test, aes(ymin = avg-error, ymax = avg+error))+
+  labs(title = "GDF15 Concentration", y="GDF15 (pg/mL)", subtitle = "x axis = pregnancy, yaxis = dexamethasone")
+  
+  IR.data.dex<-both.plate.data%>%
+  filter(Study=="IR")%>%
+  filter(pregnancy=="yes")
+  library(lme4)
+library(lmerTest)
+  dex.gdf15.mlm<-lmer(concentration~ time + dex + (1|MouseID), data = IR.data.dex)
+  summary(dex.gdf15.mlm)
+  
+  IR.data.pg<-both.plate.data%>%
+  filter(Study=="IR")%>%
+  filter(dex=="no")
 
-#TRF
-both.plate.data%>%
-  filter(Study=="TRF")%>%
-  ggplot(aes(Diet, concentration))+
-  facet_grid(plate~pregnancy)+
-  geom_boxplot()+
-  labs(title = "TRF study")
-#combined TRF
-both.plate.data%>%
-  filter(Study=="TRF")%>%
-  ggplot(aes(Diet, concentration))+
-  facet_grid(.~pregnancy)+
-  geom_boxplot()+
-  labs(title = "TRF study combined")
+pg.gdf15.mlm<-lmer(concentration~ time + pregnancy + (1|MouseID), data = IR.data.pg)
+  summary(pg.gdf15.mlm)
+  
+```
+
+
+```{r Knockout-study}
+summary.Gdf<-both.plate.data%>%
+  filter(Study=="GDF15")%>%
+  group_by(time, Genotype)%>%
+  summarise(avg = mean(concentration),
+            error = se(concentration))
+  
+
+ggplot()+
+  geom_col(data = summary.Gdf, aes(x=time, y=avg, fill = Genotype, group = Genotype), position = position_dodge(1.0))+
+  geom_point(data = filter(both.plate.data, Study =="GDF15"), aes(x=time, y=concentration, group = Genotype), position = position_dodge2(width = 0.6))+
+  labs(title = "GDF15 in Dams",y="GDF15 (pg/mL)")+
+  facet_grid(.~Genotype)+
+  #geom_errorbar(summary.Gdf, aes(x=time, y=avg, ymax = avg+error, ymin = avg-error, group = Genotype))+
+    scale_fill_manual(values = c("#333333","#CCCCCC"))
+
+```
+
+
 ```
