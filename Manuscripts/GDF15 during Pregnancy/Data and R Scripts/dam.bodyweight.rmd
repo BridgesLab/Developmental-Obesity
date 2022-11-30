@@ -52,7 +52,7 @@ avg.bw.data<-bw.data%>%
 ```
 
 #Analysis
-```{r bodyweight-natal}
+```{r bodyweight-timecourse}
 #plot, all values
 ggplot(bw.data, aes(gest.age, gram.values, col = Genotype))+
   geom_point(aes(col = Genotype))+
@@ -74,18 +74,66 @@ ggplot(bw.data, aes(gest.age, gram.values, col = Genotype))+
 
 ```
 ```{r weight-prenatal}
+#calculate gestational weight gain
 prenatal.bw.data<-bw.data%>%
-mutate(delta.bw.pn = gram.values[week=="pre-pregnancy"]-max(gram.values))
-bw.data%>%
   filter(postnatal=="n")%>%
-ggplot(aes(gest.age, gram.values, col = Genotype))+
-  geom_point(aes(col = Genotype))+
-  geom_smooth(aes(col = Genotype), se= FALSE, span =0.4)+
-  scale_color_manual(values = color.scheme)+
-  labs(title = "Maternal Perinatal Body Weight", y = "grams",x= "Gestational Day")+
-  theme(legend.position = c(0.1, 0.865), legend.background = element_blank())
+  arrange(gest.age)%>%
+  group_by(MouseID)%>%
+  mutate(gwg = last(gram.values)-first(gram.values))
+#filter data for one observation per animal
+prenatal.bw.data.cleaned<-prenatal.bw.data%>%
+  group_by(MouseID, Genotype)%>%
+  distinct(MouseID, .keep_all = T)%>%
+  select(MouseID, Genotype, gwg)
+  
+#bar plot
+prenatal.bw.data.cleaned%>%
+  group_by(Genotype)%>%
+  summarize(avg.gwg = mean(gwg),
+            error.gwg = se(gwg))%>%
+ggplot(aes(Genotype,avg.gwg, fill = Genotype))+
+  geom_col()+
+  scale_fill_manual(values = color.scheme)+
+  geom_errorbar(aes(ymin = avg.gwg - error.gwg, ymax = avg.gwg + error.gwg), width =0.3)+
+  labs(title = "Maternal gestational weight change", y = "grams")+
+  theme(legend.position = "none")
+#stats
+shapiro.test(prenatal.bw.data.cleaned$gwg[prenatal.bw.data.cleaned$Genotype=="+/+"])#p=0.5
+shapiro.test(prenatal.bw.data.cleaned$gwg[prenatal.bw.data.cleaned$Genotype=="-/-"])#p=0.3
+leveneTest(gwg ~ Genotype, prenatal.bw.data.cleaned)#p=0.26
+t.test(gwg ~ Genotype, prenatal.bw.data.cleaned)#p=0.99
 ```
 
+```{r weight-postnatal}
+#calculate postnatal weight loss 
+postnatal.bw.data<-bw.data%>%
+  filter(postnatal=="y")%>%
+  arrange(gest.age)%>%
+  group_by(MouseID)%>%
+  mutate(loss = last(gram.values)-first(gram.values))
+#filter data for one observation per animal
+postnatal.bw.data.cleaned<-postnatal.bw.data%>%
+  group_by(MouseID, Genotype)%>%
+  distinct(MouseID, .keep_all = T)%>%
+  select(MouseID, Genotype, loss)
+#bar plot
+postnatal.bw.data.cleaned%>%
+   group_by(Genotype)%>%
+  summarize(avg.loss = mean(loss),
+            error.loss = se(loss))%>%
+ggplot(aes(Genotype,avg.loss, fill = Genotype))+
+  geom_col()+
+  scale_fill_manual(values = color.scheme)+
+  geom_errorbar(aes(ymin = avg.loss - error.loss, ymax = avg.loss + error.loss), width =0.3)+
+  labs(title = "Maternal postnatal weight loss", y = "grams")+
+  theme(legend.position = "none")
+
+#stats
+shapiro.test(postnatal.bw.data.cleaned$loss[postnatal.bw.data.cleaned$Genotype=="-/-"])#p=0.1
+shapiro.test(postnatal.bw.data.cleaned$loss[postnatal.bw.data.cleaned$Genotype=="+/+"])#p=0.4
+leveneTest(loss ~ Genotype, postnatal.bw.data.cleaned)#p=0.11
+t.test(loss ~ Genotype, postnatal.bw.data.cleaned)#p=0.2
+```
 
 ```{r stats}
 # pre birth

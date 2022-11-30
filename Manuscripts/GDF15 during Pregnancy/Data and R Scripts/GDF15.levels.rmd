@@ -124,7 +124,7 @@ test<-both.plate.data%>%
   geom_col(data = test, aes(time, avg, fill = pregnancy))+
   geom_point(data = filter(both.plate.data, Study=="IR"),aes(x=time, y=concentration))+
   facet_grid(dex~pregnancy)+
-  #geom_errorbar(data = test, aes(ymin = avg-error, ymax = avg+error))+
+  geom_errorbar(data = test, aes(ymin = avg-error, ymax = avg+error))+
   labs(title = "GDF15 Concentration", y="GDF15 (pg/mL)", subtitle = "x axis = pregnancy, yaxis = dexamethasone")
   
   IR.data.dex<-both.plate.data%>%
