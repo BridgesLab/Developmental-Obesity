@@ -124,7 +124,7 @@ test<-both.plate.data%>%
   geom_col(data = test, aes(time, avg, fill = pregnancy))+
   geom_point(data = filter(both.plate.data, Study=="IR"),aes(x=time, y=concentration))+
   facet_grid(dex~pregnancy)+
-  geom_errorbar(data = test, aes(ymin = avg-error, ymax = avg+error))+
+  geom_errorbar(data = test, aes(x = time, y = avg, ymin = avg-error, ymax = avg+error), width = 0.3)+
   labs(title = "GDF15 Concentration", y="GDF15 (pg/mL)", subtitle = "x axis = pregnancy, yaxis = dexamethasone")
   
   IR.data.dex<-both.plate.data%>%
@@ -158,7 +158,7 @@ ggplot()+
   geom_point(data = filter(both.plate.data, Study =="GDF15"), aes(x=time, y=concentration, group = Genotype), position = position_dodge2(width = 0.6))+
   labs(title = "GDF15 in Dams",y="GDF15 (pg/mL)")+
   facet_grid(.~Genotype)+
-  #geom_errorbar(summary.Gdf, aes(x=time, y=avg, ymax = avg+error, ymin = avg-error, group = Genotype))+
+ geom_errorbar(data = summary.Gdf, aes(x=time, y=avg, ymax = avg+error, ymin = avg-error), width = 0.3)+
     scale_fill_manual(values = c("#333333","#CCCCCC"))
 
 ```

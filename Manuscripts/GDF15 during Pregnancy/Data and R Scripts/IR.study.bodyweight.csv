@@ -1,0 +1,582 @@
+animal.MouseID,assay.assay,Weight,Pregnancy,Treatment,experiment.time
+7822,Body Weight,18.9,Pregnant,Water,-14
+7822,Lean Mass,13.72,Pregnant,Water,-14
+7822,Total Fat Mass,2.88,Pregnant,Water,-14
+7822,Free Water,0.038,Pregnant,Water,-14
+7822,Body Weight,19.2,Pregnant,Water,-7
+7822,Total Fat Mass,3.12,Pregnant,Water,-7
+7822,Lean Mass,14.31,Pregnant,Water,-7
+7822,Free Water,0.022,Pregnant,Water,-7
+7822,Body Weight,18.7,Pregnant,Water,0
+7822,Total Fat Mass,2.67,Pregnant,Water,0
+7822,Lean Mass,14.49,Pregnant,Water,0
+7822,Free Water,0.015,Pregnant,Water,0
+7822,Body Weight,19.6,Pregnant,Water,7
+7822,Total Fat Mass,2.25,Pregnant,Water,7
+7822,Lean Mass,15.9,Pregnant,Water,7
+7822,Free Water,0.13,Pregnant,Water,7
+7822,Body Weight,21.5,Pregnant,Water,14
+7822,Total Fat Mass,1.92,Pregnant,Water,14
+7822,Lean Mass,17.89,Pregnant,Water,14
+7822,Free Water,0.13,Pregnant,Water,14
+7822,Body Weight,28,Pregnant,Water,21
+7822,Total Fat Mass,2.57,Pregnant,Water,21
+7822,Lean Mass,22.33,Pregnant,Water,21
+7822,Free Water,1.16,Pregnant,Water,21
+7822,Body Weight,25.5,Pregnant,Water,28
+7822,Total Fat Mass,2.46,Pregnant,Water,28
+7822,Lean Mass,21.12,Pregnant,Water,28
+7822,Free Water,0.09,Pregnant,Water,28
+7822,Body Weight,27.5,Pregnant,Water,35
+7822,Total Fat Mass,2.67,Pregnant,Water,35
+7822,Lean Mass,23.41,Pregnant,Water,35
+7822,Free Water,0.15,Pregnant,Water,35
+7822,Body Weight,26.4,Pregnant,Water,77
+7822,Total Fat Mass,2.53,Pregnant,Water,77
+7822,Lean Mass,21,Pregnant,Water,77
+7863,Body Weight,18,Pregnant,Water,-14
+7863,Total Fat Mass,1.29,Pregnant,Water,-14
+7863,Lean Mass,14.79,Pregnant,Water,-14
+7863,Free Water,0.014,Pregnant,Water,-14
+7863,Body Weight,18.9,Pregnant,Water,-7
+7863,Total Fat Mass,2.06,Pregnant,Water,-7
+7863,Lean Mass,14.95,Pregnant,Water,-7
+7863,Free Water,0.004,Pregnant,Water,-7
+7863,Body Weight,18.5,Pregnant,Water,0
+7863,Total Fat Mass,1.32,Pregnant,Water,0
+7863,Lean Mass,15.28,Pregnant,Water,0
+7863,Free Water,0.006,Pregnant,Water,0
+7863,Body Weight,19.5,Pregnant,Water,7
+7863,Total Fat Mass,1.15,Pregnant,Water,7
+7863,Lean Mass,16.45,Pregnant,Water,7
+7863,Free Water,0.39,Pregnant,Water,7
+7863,Body Weight,22.7,Pregnant,Water,14
+7863,Total Fat Mass,1.93,Pregnant,Water,14
+7863,Lean Mass,18.55,Pregnant,Water,14
+7863,Free Water,0.07,Pregnant,Water,14
+7863,Body Weight,28.6,Pregnant,Water,21
+7863,Total Fat Mass,2.63,Pregnant,Water,21
+7863,Lean Mass,22.64,Pregnant,Water,21
+7863,Free Water,0.87,Pregnant,Water,21
+7863,Body Weight,24.8,Pregnant,Water,28
+7863,Total Fat Mass,2.27,Pregnant,Water,28
+7863,Lean Mass,20.34,Pregnant,Water,28
+7863,Free Water,0,Pregnant,Water,28
+7863,Body Weight,28,Pregnant,Water,35
+7863,Total Fat Mass,2.62,Pregnant,Water,35
+7863,Lean Mass,23.6,Pregnant,Water,35
+7863,Free Water,0.11,Pregnant,Water,35
+7863,Body Weight,27.9,Pregnant,Water,77
+7863,Total Fat Mass,2.91,Pregnant,Water,77
+7863,Lean Mass,21.87,Pregnant,Water,77
+7843,Body Weight,19.5,Pregnant,Water,-14
+7843,Total Fat Mass,2.52,Pregnant,Water,-14
+7843,Lean Mass,15.04,Pregnant,Water,-14
+7843,Free Water,0,Pregnant,Water,-14
+7843,Body Weight,19.6,Pregnant,Water,-7
+7843,Total Fat Mass,1.82,Pregnant,Water,-7
+7843,Lean Mass,15.9,Pregnant,Water,-7
+7843,Free Water,0.068,Pregnant,Water,-7
+7843,Body Weight,19.4,Pregnant,Water,0
+7843,Total Fat Mass,1.82,Pregnant,Water,0
+7843,Lean Mass,16.32,Pregnant,Water,0
+7843,Free Water,0.022,Pregnant,Water,0
+7843,Body Weight,20.6,Pregnant,Water,7
+7843,Total Fat Mass,1.54,Pregnant,Water,7
+7843,Lean Mass,17.47,Pregnant,Water,7
+7843,Free Water,0.21,Pregnant,Water,7
+7843,Body Weight,22.2,Pregnant,Water,14
+7843,Total Fat Mass,2.22,Pregnant,Water,14
+7843,Lean Mass,18.31,Pregnant,Water,14
+7843,Free Water,0.01,Pregnant,Water,14
+7843,Body Weight,29.5,Pregnant,Water,21
+7843,Total Fat Mass,2.56,Pregnant,Water,21
+7843,Lean Mass,23.3,Pregnant,Water,21
+7843,Free Water,1.17,Pregnant,Water,21
+7843,Body Weight,27.3,Pregnant,Water,28
+7843,Total Fat Mass,2.91,Pregnant,Water,28
+7843,Lean Mass,22,Pregnant,Water,28
+7843,Free Water,0.58,Pregnant,Water,28
+7843,Body Weight,28.6,Pregnant,Water,35
+7843,Total Fat Mass,3.07,Pregnant,Water,35
+7843,Lean Mass,23.86,Pregnant,Water,35
+7843,Free Water,0.49,Pregnant,Water,35
+7843,Body Weight,29.4,Pregnant,Water,77
+7843,Total Fat Mass,3.32,Pregnant,Water,77
+7843,Lean Mass,22.33,Pregnant,Water,77
+7826,Body Weight,19.8,Not Pregnant,Water,-14
+7826,Total Fat Mass,1.9,Not Pregnant,Water,-14
+7826,Lean Mass,15.62,Not Pregnant,Water,-14
+7826,Free Water,0,Not Pregnant,Water,-14
+7826,Body Weight,19.5,Not Pregnant,Water,-7
+7826,Total Fat Mass,1.83,Not Pregnant,Water,-7
+7826,Lean Mass,16.3,Not Pregnant,Water,-7
+7826,Free Water,0.092,Not Pregnant,Water,-7
+7826,Body Weight,20.3,Not Pregnant,Water,0
+7826,Total Fat Mass,1.41,Not Pregnant,Water,0
+7826,Lean Mass,16.93,Not Pregnant,Water,0
+7826,Free Water,0.081,Not Pregnant,Water,0
+7826,Body Weight,21.4,Not Pregnant,Water,7
+7826,Total Fat Mass,1.54,Not Pregnant,Water,7
+7826,Lean Mass,18.33,Not Pregnant,Water,7
+7826,Free Water,0.12,Not Pregnant,Water,7
+7826,Body Weight,21.8,Not Pregnant,Water,14
+7826,Total Fat Mass,1.92,Not Pregnant,Water,14
+7826,Lean Mass,18.73,Not Pregnant,Water,14
+7826,Free Water,0.6,Not Pregnant,Water,14
+7826,Body Weight,22.1,Not Pregnant,Water,21
+7826,Total Fat Mass,1.25,Not Pregnant,Water,21
+7826,Lean Mass,19.2,Not Pregnant,Water,21
+7826,Free Water,0.06,Not Pregnant,Water,21
+7826,Body Weight,22.5,Not Pregnant,Water,28
+7826,Total Fat Mass,1.84,Not Pregnant,Water,28
+7826,Lean Mass,19.27,Not Pregnant,Water,28
+7826,Free Water,0.3,Not Pregnant,Water,28
+7826,Body Weight,23.6,Not Pregnant,Water,35
+7826,Total Fat Mass,1.88,Not Pregnant,Water,35
+7826,Lean Mass,20.28,Not Pregnant,Water,35
+7826,Free Water,0.28,Not Pregnant,Water,35
+7826,Body Weight,27.8,Not Pregnant,Water,77
+7826,Total Fat Mass,2.69,Not Pregnant,Water,77
+7826,Lean Mass,22.65,Not Pregnant,Water,77
+7827,Body Weight,20.5,Not Pregnant,Water,-14
+7827,Total Fat Mass,2.45,Not Pregnant,Water,-14
+7827,Lean Mass,15.83,Not Pregnant,Water,-14
+7827,Free Water,0.217,Not Pregnant,Water,-14
+7827,Body Weight,20.2,Not Pregnant,Water,-7
+7827,Total Fat Mass,2.08,Not Pregnant,Water,-7
+7827,Lean Mass,16.35,Not Pregnant,Water,-7
+7827,Free Water,0.028,Not Pregnant,Water,-7
+7827,Body Weight,21.1,Not Pregnant,Water,0
+7827,Total Fat Mass,1.81,Not Pregnant,Water,0
+7827,Lean Mass,17.31,Not Pregnant,Water,0
+7827,Free Water,0.044,Not Pregnant,Water,0
+7827,Body Weight,21.4,Not Pregnant,Water,7
+7827,Total Fat Mass,1.62,Not Pregnant,Water,7
+7827,Lean Mass,18.38,Not Pregnant,Water,7
+7827,Free Water,0.02,Not Pregnant,Water,7
+7827,Body Weight,22.6,Not Pregnant,Water,14
+7827,Total Fat Mass,1.61,Not Pregnant,Water,14
+7827,Lean Mass,19.42,Not Pregnant,Water,14
+7827,Free Water,0.2,Not Pregnant,Water,14
+7827,Body Weight,22.5,Not Pregnant,Water,21
+7827,Total Fat Mass,1.52,Not Pregnant,Water,21
+7827,Lean Mass,19.37,Not Pregnant,Water,21
+7827,Free Water,0,Not Pregnant,Water,21
+7827,Body Weight,23.4,Not Pregnant,Water,28
+7827,Total Fat Mass,1.64,Not Pregnant,Water,28
+7827,Lean Mass,19.4,Not Pregnant,Water,28
+7827,Free Water,0,Not Pregnant,Water,28
+7827,Body Weight,22.6,Not Pregnant,Water,35
+7827,Total Fat Mass,2.05,Not Pregnant,Water,35
+7827,Lean Mass,19.55,Not Pregnant,Water,35
+7827,Free Water,0.64,Not Pregnant,Water,35
+7827,Body Weight,40.6,Not Pregnant,Water,77
+7827,Total Fat Mass,3.59,Not Pregnant,Water,77
+7827,Lean Mass,30.84,Not Pregnant,Water,77
+7828,Body Weight,21.7,Pregnant,Dexamethasone,-14
+7828,Total Fat Mass,4.48,Pregnant,Dexamethasone,-14
+7828,Lean Mass,15.1,Pregnant,Dexamethasone,-14
+7828,Free Water,0,Pregnant,Dexamethasone,-14
+7828,Body Weight,20.7,Pregnant,Dexamethasone,-7
+7828,Total Fat Mass,3.55,Pregnant,Dexamethasone,-7
+7828,Lean Mass,15.48,Pregnant,Dexamethasone,-7
+7828,Free Water,0.28,Pregnant,Dexamethasone,-7
+7828,Body Weight,21.5,Pregnant,Dexamethasone,0
+7828,Total Fat Mass,3.46,Pregnant,Dexamethasone,0
+7828,Lean Mass,15.95,Pregnant,Dexamethasone,0
+7828,Free Water,0.08,Pregnant,Dexamethasone,0
+7828,Body Weight,19.1,Pregnant,Dexamethasone,7
+7828,Total Fat Mass,2.4,Pregnant,Dexamethasone,7
+7828,Lean Mass,14.59,Pregnant,Dexamethasone,7
+7828,Free Water,0.12,Pregnant,Dexamethasone,7
+7828,Body Weight,20.8,Pregnant,Dexamethasone,14
+7828,Total Fat Mass,3.3,Pregnant,Dexamethasone,14
+7828,Lean Mass,15.96,Pregnant,Dexamethasone,14
+7828,Free Water,0.15,Pregnant,Dexamethasone,14
+7828,Body Weight,25.1,Pregnant,Dexamethasone,21
+7828,Total Fat Mass,4.4,Pregnant,Dexamethasone,21
+7828,Lean Mass,17.86,Pregnant,Dexamethasone,21
+7828,Free Water,0.9,Pregnant,Dexamethasone,21
+7828,Body Weight,19,Pregnant,Dexamethasone,28
+7828,Total Fat Mass,1.78,Pregnant,Dexamethasone,28
+7828,Lean Mass,15.35,Pregnant,Dexamethasone,28
+7828,Free Water,0,Pregnant,Dexamethasone,28
+7828,Body Weight,24.3,Pregnant,Dexamethasone,35
+7828,Total Fat Mass,5.16,Pregnant,Dexamethasone,35
+7828,Lean Mass,17.26,Pregnant,Dexamethasone,35
+7828,Free Water,0.17,Pregnant,Dexamethasone,35
+7829,Body Weight,18.9,Not Pregnant,Water,-14
+7829,Total Fat Mass,2.43,Not Pregnant,Water,-14
+7829,Lean Mass,14.4,Not Pregnant,Water,-14
+7829,Free Water,0.009,Not Pregnant,Water,-14
+7829,Body Weight,18.4,Not Pregnant,Water,-7
+7829,Total Fat Mass,1.96,Not Pregnant,Water,-7
+7829,Lean Mass,14.86,Not Pregnant,Water,-7
+7829,Free Water,0.038,Not Pregnant,Water,-7
+7829,Body Weight,18.8,Not Pregnant,Water,0
+7829,Total Fat Mass,1.59,Not Pregnant,Water,0
+7829,Lean Mass,15.56,Not Pregnant,Water,0
+7829,Free Water,0.029,Not Pregnant,Water,0
+7829,Body Weight,20.5,Not Pregnant,Water,7
+7829,Total Fat Mass,1.35,Not Pregnant,Water,7
+7829,Lean Mass,17.59,Not Pregnant,Water,7
+7829,Free Water,0.4,Not Pregnant,Water,7
+7829,Body Weight,20.5,Not Pregnant,Water,14
+7829,Total Fat Mass,1.53,Not Pregnant,Water,14
+7829,Lean Mass,17.79,Not Pregnant,Water,14
+7829,Free Water,0.24,Not Pregnant,Water,14
+7829,Body Weight,21.1,Not Pregnant,Water,21
+7829,Total Fat Mass,1.08,Not Pregnant,Water,21
+7829,Lean Mass,18.62,Not Pregnant,Water,21
+7829,Free Water,0.25,Not Pregnant,Water,21
+7829,Body Weight,22,Not Pregnant,Water,28
+7829,Total Fat Mass,1.85,Not Pregnant,Water,28
+7829,Lean Mass,18.69,Not Pregnant,Water,28
+7829,Free Water,0.37,Not Pregnant,Water,28
+7829,Body Weight,22.4,Not Pregnant,Water,35
+7829,Total Fat Mass,1.54,Not Pregnant,Water,35
+7829,Lean Mass,19.15,Not Pregnant,Water,35
+7829,Free Water,0.64,Not Pregnant,Water,35
+7829,Body Weight,27,Not Pregnant,Water,77
+7829,Total Fat Mass,2.64,Not Pregnant,Water,77
+7829,Lean Mass,21.88,Not Pregnant,Water,77
+7830,Body Weight,18.1,Not Pregnant,Water,-14
+7830,Total Fat Mass,1.29,Not Pregnant,Water,-14
+7830,Lean Mass,14.83,Not Pregnant,Water,-14
+7830,Free Water,0,Not Pregnant,Water,-14
+7830,Body Weight,18.6,Not Pregnant,Water,-7
+7830,Total Fat Mass,1.83,Not Pregnant,Water,-7
+7830,Lean Mass,15.26,Not Pregnant,Water,-7
+7830,Free Water,0.033,Not Pregnant,Water,-7
+7830,Body Weight,18.7,Not Pregnant,Water,0
+7830,Total Fat Mass,1.54,Not Pregnant,Water,0
+7830,Lean Mass,15.75,Not Pregnant,Water,0
+7830,Free Water,0.003,Not Pregnant,Water,0
+7830,Body Weight,19.8,Not Pregnant,Water,7
+7830,Total Fat Mass,1.24,Not Pregnant,Water,7
+7830,Lean Mass,17.64,Not Pregnant,Water,7
+7830,Free Water,0.18,Not Pregnant,Water,7
+7830,Body Weight,20.3,Not Pregnant,Water,14
+7830,Total Fat Mass,1.63,Not Pregnant,Water,14
+7830,Lean Mass,17.59,Not Pregnant,Water,14
+7830,Free Water,0.16,Not Pregnant,Water,14
+7830,Body Weight,21.1,Not Pregnant,Water,21
+7830,Total Fat Mass,1.47,Not Pregnant,Water,21
+7830,Lean Mass,18.06,Not Pregnant,Water,21
+7830,Free Water,0.04,Not Pregnant,Water,21
+7830,Body Weight,21.4,Not Pregnant,Water,28
+7830,Total Fat Mass,1.92,Not Pregnant,Water,28
+7830,Lean Mass,18.16,Not Pregnant,Water,28
+7830,Free Water,0.36,Not Pregnant,Water,28
+7830,Body Weight,21.5,Not Pregnant,Water,35
+7830,Total Fat Mass,2.04,Not Pregnant,Water,35
+7830,Lean Mass,18.67,Not Pregnant,Water,35
+7830,Free Water,0.41,Not Pregnant,Water,35
+7830,Body Weight,35.8,Not Pregnant,Water,77
+7830,Total Fat Mass,2.4,Not Pregnant,Water,77
+7830,Lean Mass,27.17,Not Pregnant,Water,77
+7844,Body Weight,17.8,Pregnant,Dexamethasone,-14
+7844,Total Fat Mass,1.57,Pregnant,Dexamethasone,-14
+7844,Lean Mass,14.33,Pregnant,Dexamethasone,-14
+7844,Free Water,0.71,Pregnant,Dexamethasone,-14
+7844,Body Weight,18.4,Pregnant,Dexamethasone,-7
+7844,Total Fat Mass,1.67,Pregnant,Dexamethasone,-7
+7844,Lean Mass,14.79,Pregnant,Dexamethasone,-7
+7844,Free Water,0.09,Pregnant,Dexamethasone,-7
+7844,Body Weight,19.3,Pregnant,Dexamethasone,0
+7844,Total Fat Mass,1.38,Pregnant,Dexamethasone,0
+7844,Lean Mass,15.97,Pregnant,Dexamethasone,0
+7844,Free Water,0.1,Pregnant,Dexamethasone,0
+7844,Body Weight,17.6,Pregnant,Dexamethasone,7
+7844,Total Fat Mass,1.4,Pregnant,Dexamethasone,7
+7844,Lean Mass,13.63,Pregnant,Dexamethasone,7
+7844,Free Water,0.9,Pregnant,Dexamethasone,7
+7844,Body Weight,18.7,Pregnant,Dexamethasone,14
+7844,Total Fat Mass,2.15,Pregnant,Dexamethasone,14
+7844,Lean Mass,14.83,Pregnant,Dexamethasone,14
+7844,Free Water,0.57,Pregnant,Dexamethasone,14
+7844,Body Weight,25.2,Pregnant,Dexamethasone,21
+7844,Total Fat Mass,3.37,Pregnant,Dexamethasone,21
+7844,Lean Mass,18.45,Pregnant,Dexamethasone,21
+7844,Free Water,1.12,Pregnant,Dexamethasone,21
+7844,Body Weight,17.8,Pregnant,Dexamethasone,28
+7844,Total Fat Mass,0.82,Pregnant,Dexamethasone,28
+7844,Lean Mass,14.86,Pregnant,Dexamethasone,28
+7844,Free Water,0,Pregnant,Dexamethasone,28
+7844,Body Weight,22.2,Pregnant,Dexamethasone,35
+7844,Total Fat Mass,4.5,Pregnant,Dexamethasone,35
+7844,Lean Mass,16.16,Pregnant,Dexamethasone,35
+7844,Free Water,0.14,Pregnant,Dexamethasone,35
+7832,Body Weight,22,Pregnant,Dexamethasone,14
+7832,Body Weight,18.5,Pregnant,Dexamethasone,-14
+7832,Total Fat Mass,1.92,Pregnant,Dexamethasone,-14
+7832,Lean Mass,14.48,Pregnant,Dexamethasone,-14
+7832,Free Water,0.2,Pregnant,Dexamethasone,-14
+7832,Body Weight,18.4,Pregnant,Dexamethasone,-7
+7832,Total Fat Mass,2.05,Pregnant,Dexamethasone,-7
+7832,Lean Mass,14.8,Pregnant,Dexamethasone,-7
+7832,Free Water,0.12,Pregnant,Dexamethasone,-7
+7832,Body Weight,18.6,Pregnant,Dexamethasone,0
+7832,Total Fat Mass,1.27,Pregnant,Dexamethasone,0
+7832,Lean Mass,15.44,Pregnant,Dexamethasone,0
+7832,Free Water,0.08,Pregnant,Dexamethasone,0
+7832,Body Weight,16.8,Pregnant,Dexamethasone,7
+7832,Total Fat Mass,1.36,Pregnant,Dexamethasone,7
+7832,Lean Mass,13.52,Pregnant,Dexamethasone,7
+7832,Free Water,0,Pregnant,Dexamethasone,7
+7832,Body Weight,18.5,Pregnant,Dexamethasone,14
+7832,Total Fat Mass,2.04,Pregnant,Dexamethasone,14
+7832,Lean Mass,14.96,Pregnant,Dexamethasone,14
+7832,Free Water,0.34,Pregnant,Dexamethasone,14
+7832,Body Weight,22.4,Pregnant,Dexamethasone,21
+7832,Total Fat Mass,3.03,Pregnant,Dexamethasone,21
+7832,Lean Mass,17,Pregnant,Dexamethasone,21
+7832,Free Water,0.67,Pregnant,Dexamethasone,21
+7832,Body Weight,16.8,Pregnant,Dexamethasone,28
+7832,Total Fat Mass,0.72,Pregnant,Dexamethasone,28
+7832,Lean Mass,14.26,Pregnant,Dexamethasone,28
+7832,Free Water,0,Pregnant,Dexamethasone,28
+7832,Body Weight,16.2,Pregnant,Dexamethasone,35
+7832,Total Fat Mass,1.17,Pregnant,Dexamethasone,35
+7832,Lean Mass,13.58,Pregnant,Dexamethasone,35
+7832,Free Water,0,Pregnant,Dexamethasone,35
+7835,Body Weight,19.3,Not Pregnant,Water,-14
+7835,Total Fat Mass,2.32,Not Pregnant,Water,-14
+7835,Lean Mass,14.94,Not Pregnant,Water,-14
+7835,Free Water,0.001,Not Pregnant,Water,-14
+7835,Body Weight,19.4,Not Pregnant,Water,-7
+7835,Total Fat Mass,2.57,Not Pregnant,Water,-7
+7835,Lean Mass,15.41,Not Pregnant,Water,-7
+7835,Free Water,0.007,Not Pregnant,Water,-7
+7835,Body Weight,19.1,Not Pregnant,Water,0
+7835,Total Fat Mass,1.7,Not Pregnant,Water,0
+7835,Lean Mass,15.68,Not Pregnant,Water,0
+7835,Free Water,0,Not Pregnant,Water,0
+7835,Body Weight,20.7,Not Pregnant,Water,7
+7835,Total Fat Mass,1.68,Not Pregnant,Water,7
+7835,Lean Mass,17.87,Not Pregnant,Water,7
+7835,Free Water,0,Not Pregnant,Water,7
+7835,Body Weight,21.3,Not Pregnant,Water,14
+7835,Total Fat Mass,1.79,Not Pregnant,Water,14
+7835,Lean Mass,18.17,Not Pregnant,Water,14
+7835,Free Water,0.18,Not Pregnant,Water,14
+7835,Body Weight,21.9,Not Pregnant,Water,21
+7835,Total Fat Mass,1.61,Not Pregnant,Water,21
+7835,Lean Mass,18.51,Not Pregnant,Water,21
+7835,Free Water,0.02,Not Pregnant,Water,21
+7835,Body Weight,22.6,Not Pregnant,Water,28
+7835,Total Fat Mass,1.89,Not Pregnant,Water,28
+7835,Lean Mass,18.7,Not Pregnant,Water,28
+7835,Lean Mass,18.7,Not Pregnant,Water,28
+7835,Free Water,0,Not Pregnant,Water,28
+7835,Body Weight,22.8,Not Pregnant,Water,35
+7835,Total Fat Mass,2.01,Not Pregnant,Water,35
+7835,Lean Mass,19.6,Not Pregnant,Water,35
+7835,Free Water,0.2,Not Pregnant,Water,35
+7835,Body Weight,38.5,Not Pregnant,Water,77
+7835,Total Fat Mass,2.62,Not Pregnant,Water,77
+7835,Lean Mass,27.97,Not Pregnant,Water,77
+7862,Body Weight,18.3,Pregnant,Water,-14
+7862,Total Fat Mass,1.86,Pregnant,Water,-14
+7862,Lean Mass,14.47,Pregnant,Water,-14
+7862,Free Water,0.047,Pregnant,Water,-14
+7862,Body Weight,19.4,Pregnant,Water,-7
+7862,Total Fat Mass,2.45,Pregnant,Water,-7
+7862,Lean Mass,15.34,Pregnant,Water,-7
+7862,Free Water,0.023,Pregnant,Water,-7
+7862,Body Weight,19.2,Pregnant,Water,0
+7862,Total Fat Mass,2.1,Pregnant,Water,0
+7862,Lean Mass,15.35,Pregnant,Water,0
+7862,Free Water,0.009,Pregnant,Water,0
+7862,Body Weight,20.4,Pregnant,Water,7
+7862,Total Fat Mass,1.86,Pregnant,Water,7
+7862,Lean Mass,16.66,Pregnant,Water,7
+7862,Free Water,0.17,Pregnant,Water,7
+7862,Total Fat Mass,2.11,Pregnant,Water,14
+7862,Lean Mass,18.03,Pregnant,Water,14
+7862,Free Water,0.17,Pregnant,Water,14
+7862,Body Weight,27.5,Pregnant,Water,21
+7862,Total Fat Mass,2.31,Pregnant,Water,21
+7862,Lean Mass,21.96,Pregnant,Water,21
+7862,Free Water,1.01,Pregnant,Water,21
+7862,Body Weight,26.1,Pregnant,Water,28
+7862,Total Fat Mass,2.27,Pregnant,Water,28
+7862,Lean Mass,20.56,Pregnant,Water,28
+7862,Free Water,0.73,Pregnant,Water,28
+7862,Body Weight,30.5,Pregnant,Water,35
+7862,Total Fat Mass,3.67,Pregnant,Water,35
+7862,Lean Mass,24.57,Pregnant,Water,35
+7862,Free Water,0.07,Pregnant,Water,35
+7862,Body Weight,29.5,Pregnant,Water,77
+7862,Total Fat Mass,2.68,Pregnant,Water,77
+7862,Lean Mass,23.44,Pregnant,Water,77
+7840,Body Weight,17.9,Pregnant,Dexamethasone,-14
+7840,Total Fat Mass,1.18,Pregnant,Dexamethasone,-14
+7840,Lean Mass,14.8,Pregnant,Dexamethasone,-14
+7840,Free Water,0.04,Pregnant,Dexamethasone,-14
+7840,Body Weight,19.7,Pregnant,Dexamethasone,-7
+7840,Total Fat Mass,2.6,Pregnant,Dexamethasone,-7
+7840,Lean Mass,15.8,Pregnant,Dexamethasone,-7
+7840,Free Water,0.31,Pregnant,Dexamethasone,-7
+7840,Body Weight,19.2,Pregnant,Dexamethasone,0
+7840,Total Fat Mass,2.6,Pregnant,Dexamethasone,0
+7840,Lean Mass,15.29,Pregnant,Dexamethasone,0
+7840,Free Water,0,Pregnant,Dexamethasone,0
+7840,Body Weight,18.1,Pregnant,Dexamethasone,7
+7840,Total Fat Mass,1.9,Pregnant,Dexamethasone,7
+7840,Lean Mass,14.62,Pregnant,Dexamethasone,7
+7840,Free Water,0.13,Pregnant,Dexamethasone,7
+7840,Body Weight,17.9,Pregnant,Dexamethasone,14
+7840,Total Fat Mass,1.78,Pregnant,Dexamethasone,14
+7840,Lean Mass,14.52,Pregnant,Dexamethasone,14
+7840,Free Water,0.15,Pregnant,Dexamethasone,14
+7840,Body Weight,22.1,Pregnant,Dexamethasone,21
+7840,Total Fat Mass,3.38,Pregnant,Dexamethasone,21
+7840,Lean Mass,17.01,Pregnant,Dexamethasone,21
+7840,Free Water,0.6,Pregnant,Dexamethasone,21
+7840,Body Weight,27.4,Pregnant,Dexamethasone,28
+7840,Total Fat Mass,3.06,Pregnant,Dexamethasone,28
+7840,Lean Mass,21.16,Pregnant,Dexamethasone,28
+7840,Free Water,0.81,Pregnant,Dexamethasone,28
+7840,Body Weight,20.6,Pregnant,Dexamethasone,35
+7840,Total Fat Mass,3.24,Pregnant,Dexamethasone,35
+7840,Lean Mass,16.33,Pregnant,Dexamethasone,35
+7840,Free Water,0,Pregnant,Dexamethasone,35
+7841,Body Weight,19.3,Pregnant,Water,-14
+7841,Total Fat Mass,1.62,Pregnant,Water,-14
+7841,Lean Mass,15.6,Pregnant,Water,-14
+7841,Free Water,0,Pregnant,Water,-14
+7841,Body Weight,19.8,Pregnant,Water,-7
+7841,Total Fat Mass,2.05,Pregnant,Water,-7
+7841,Lean Mass,16.45,Pregnant,Water,-7
+7841,Free Water,0.009,Pregnant,Water,-7
+7841,Body Weight,19.4,Pregnant,Water,0
+7841,Total Fat Mass,1.61,Pregnant,Water,0
+7841,Lean Mass,16.37,Pregnant,Water,0
+7841,Free Water,0.011,Pregnant,Water,0
+7841,Body Weight,20.9,Pregnant,Water,7
+7841,Total Fat Mass,1.52,Pregnant,Water,7
+7841,Lean Mass,17.8,Pregnant,Water,7
+7841,Free Water,0.27,Pregnant,Water,7
+7841,Body Weight,23.8,Pregnant,Water,14
+7841,Total Fat Mass,2.28,Pregnant,Water,14
+7841,Lean Mass,20.02,Pregnant,Water,14
+7841,Free Water,0.13,Pregnant,Water,14
+7841,Body Weight,29.9,Pregnant,Water,21
+7841,Total Fat Mass,2.92,Pregnant,Water,21
+7841,Lean Mass,23.72,Pregnant,Water,21
+7841,Free Water,1.05,Pregnant,Water,21
+7841,Body Weight,26.2,Pregnant,Water,28
+7841,Total Fat Mass,2.63,Pregnant,Water,28
+7841,Lean Mass,21.87,Pregnant,Water,28
+7841,Free Water,0,Pregnant,Water,28
+7841,Body Weight,28.1,Pregnant,Water,35
+7841,Total Fat Mass,2.61,Pregnant,Water,35
+7841,Lean Mass,23.98,Pregnant,Water,35
+7841,Free Water,0.08,Pregnant,Water,35
+7841,Body Weight,28.2,Pregnant,Water,77
+7841,Total Fat Mass,2.82,Pregnant,Water,77
+7841,Lean Mass,22.81,Pregnant,Water,77
+7864,Body Weight,18.2,Not Pregnant,Water,-14
+7864,Total Fat Mass,2.32,Not Pregnant,Water,-14
+7864,Lean Mass,14.07,Not Pregnant,Water,-14
+7864,Free Water,0,Not Pregnant,Water,-14
+7864,Body Weight,18.3,Not Pregnant,Water,-7
+7864,Total Fat Mass,2,Not Pregnant,Water,-7
+7864,Lean Mass,14.78,Not Pregnant,Water,-7
+7864,Free Water,0.002,Not Pregnant,Water,-7
+7864,Body Weight,19.4,Not Pregnant,Water,0
+7864,Total Fat Mass,1.67,Not Pregnant,Water,0
+7864,Lean Mass,16.08,Not Pregnant,Water,0
+7864,Free Water,0,Not Pregnant,Water,0
+7864,Body Weight,20.3,Not Pregnant,Water,7
+7864,Total Fat Mass,1.5,Not Pregnant,Water,7
+7864,Lean Mass,17.1,Not Pregnant,Water,7
+7864,Free Water,0.41,Not Pregnant,Water,7
+7864,Body Weight,20.5,Not Pregnant,Water,14
+7864,Total Fat Mass,1.93,Not Pregnant,Water,14
+7864,Lean Mass,17.21,Not Pregnant,Water,14
+7864,Free Water,0.29,Not Pregnant,Water,14
+7864,Body Weight,20.7,Not Pregnant,Water,21
+7864,Total Fat Mass,1.67,Not Pregnant,Water,21
+7864,Lean Mass,17.42,Not Pregnant,Water,21
+7864,Free Water,0.22,Not Pregnant,Water,21
+7864,Body Weight,20.4,Not Pregnant,Water,28
+7864,Total Fat Mass,1.62,Not Pregnant,Water,28
+7864,Lean Mass,16.95,Not Pregnant,Water,28
+7864,Free Water,0.33,Not Pregnant,Water,28
+7864,Body Weight,22,Not Pregnant,Water,35
+7864,Total Fat Mass,1.87,Not Pregnant,Water,35
+7864,Lean Mass,18.56,Not Pregnant,Water,35
+7864,Free Water,0.15,Not Pregnant,Water,35
+7864,Body Weight,28.8,Not Pregnant,Water,77
+7864,Total Fat Mass,2.65,Not Pregnant,Water,77
+7864,Lean Mass,23.34,Not Pregnant,Water,77
+7839,Body Weight,18.9,Pregnant,Dexamethasone,-14
+7839,Total Fat Mass,2.26,Pregnant,Dexamethasone,-14
+7839,Lean Mass,14.72,Pregnant,Dexamethasone,-14
+7839,Free Water,0.22,Pregnant,Dexamethasone,-14
+7839,Body Weight,18.8,Pregnant,Dexamethasone,-7
+7839,Total Fat Mass,2.49,Pregnant,Dexamethasone,-7
+7839,Lean Mass,14.75,Pregnant,Dexamethasone,-7
+7839,Free Water,0.13,Pregnant,Dexamethasone,-7
+7839,Body Weight,19.4,Pregnant,Dexamethasone,0
+7839,Total Fat Mass,2.24,Pregnant,Dexamethasone,0
+7839,Lean Mass,15.26,Pregnant,Dexamethasone,0
+7839,Free Water,0.06,Pregnant,Dexamethasone,0
+7839,Body Weight,17.4,Pregnant,Dexamethasone,7
+7839,Total Fat Mass,1.84,Pregnant,Dexamethasone,7
+7839,Lean Mass,13.85,Pregnant,Dexamethasone,7
+7839,Free Water,0.06,Pregnant,Dexamethasone,7
+7839,Body Weight,18.3,Pregnant,Dexamethasone,14
+7839,Total Fat Mass,2.11,Pregnant,Dexamethasone,14
+7839,Lean Mass,14.54,Pregnant,Dexamethasone,14
+7839,Free Water,0,Pregnant,Dexamethasone,14
+7839,Body Weight,24.2,Pregnant,Dexamethasone,21
+7839,Total Fat Mass,2.35,Pregnant,Dexamethasone,21
+7839,Lean Mass,18.3,Pregnant,Dexamethasone,21
+7839,Free Water,0.83,Pregnant,Dexamethasone,21
+7839,Body Weight,18.2,Pregnant,Dexamethasone,28
+7839,Total Fat Mass,1.18,Pregnant,Dexamethasone,28
+7839,Lean Mass,15.44,Pregnant,Dexamethasone,28
+7839,Free Water,0.27,Pregnant,Dexamethasone,28
+7839,Body Weight,21.8,Pregnant,Dexamethasone,35
+7839,Total Fat Mass,4.28,Pregnant,Dexamethasone,35
+7839,Lean Mass,15.62,Pregnant,Dexamethasone,35
+7839,Free Water,0.06,Pregnant,Dexamethasone,35
+7833,Body Weight,18.2,Not Pregnant,Water,-14
+7833,Total Fat Mass,2.88,Not Pregnant,Water,-14
+7833,Lean Mass,13.39,Not Pregnant,Water,-14
+7833,Free Water,0,Not Pregnant,Water,-14
+7833,Body Weight,18.6,Not Pregnant,Water,-7
+7833,Total Fat Mass,3.23,Not Pregnant,Water,-7
+7833,Lean Mass,13.88,Not Pregnant,Water,-7
+7833,Free Water,0.019,Not Pregnant,Water,-7
+7833,Body Weight,19.1,Not Pregnant,Water,0
+7833,Total Fat Mass,3.57,Not Pregnant,Water,0
+7833,Lean Mass,14.02,Not Pregnant,Water,0
+7833,Free Water,0.009,Not Pregnant,Water,0
+7833,Body Weight,19.9,Not Pregnant,Water,7
+7833,Total Fat Mass,3.76,Not Pregnant,Water,7
+7833,Lean Mass,14.77,Not Pregnant,Water,7
+7833,Free Water,0.33,Not Pregnant,Water,7
+7833,Body Weight,19.9,Not Pregnant,Water,14
+7833,Total Fat Mass,2.68,Not Pregnant,Water,14
+7833,Lean Mass,15.81,Not Pregnant,Water,14
+7833,Free Water,0.32,Not Pregnant,Water,14
+7833,Body Weight,20.1,Not Pregnant,Water,21
+7833,Total Fat Mass,2.03,Not Pregnant,Water,21
+7833,Lean Mass,16.68,Not Pregnant,Water,21
+7833,Free Water,0.26,Not Pregnant,Water,21
+7833,Body Weight,20.9,Not Pregnant,Water,28
+7833,Total Fat Mass,2,Not Pregnant,Water,28
+7833,Lean Mass,17.22,Not Pregnant,Water,28
+7833,Free Water,0.08,Not Pregnant,Water,28
+7833,Body Weight,21.5,Not Pregnant,Water,35
+7833,Total Fat Mass,2.22,Not Pregnant,Water,35
+7833,Lean Mass,18.23,Not Pregnant,Water,35
+7833,Free Water,0.26,Not Pregnant,Water,35
+7833,Body Weight,30.8,Not Pregnant,Water,77
+7833,Total Fat Mass,2.31,Not Pregnant,Water,77
+7833,Lean Mass,23.94,Not Pregnant,Water,77

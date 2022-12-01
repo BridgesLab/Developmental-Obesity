@@ -85,7 +85,7 @@ prenatal.final%>%
 shapiro.test(prenatal.final$final.pre[prenatal.final$Genotype=="-/-"])#0.5
 shapiro.test(prenatal.final$final.pre[prenatal.final$Genotype=="+/+"])#0.08
 leveneTest(final.pre ~ Genotype, data = prenatal.final)#0.98
-t.test(final.pre ~ Genotype, data = prenatal.final)#p=0.5
+t.test(final.pre ~ Genotype, data = prenatal.final)$p.value#p=0.5
 ```
 
 
@@ -123,7 +123,7 @@ sub.post%>%
 shapiro.test(sub.post$postnatal.final[sub.post$Genotype=="+/+"])#0.1
 shapiro.test(sub.post$postnatal.final[sub.post$Genotype=="-/-"])#0.3
 leveneTest(postnatal.final ~ Genotype, sub.post)#0.83
-t.test(postnatal.final ~ Genotype, sub.post)#0.9
+t.test(postnatal.final ~ Genotype, sub.post)$p.value#0.9
   
 ```
  

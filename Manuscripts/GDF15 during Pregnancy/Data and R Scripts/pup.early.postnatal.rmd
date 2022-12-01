@@ -128,7 +128,7 @@ GA.stat<-pup.data%>%
 shapiro.test(GA.stat$gest.age[GA.stat$Genotype=="-/-"])#not normal
 shapiro.test(GA.stat$gest.age[GA.stat$Genotype=="+/+"])#not normal
 leveneTest(gest.age ~ Genotype, data = GA.stat)#equivalent variance
-wilcox.test(gest.age ~ Genotype, data = GA.stat)
+wilcox.test(gest.age ~ Genotype, data = GA.stat, paired = FALSE)
 ```
 
 
@@ -240,5 +240,9 @@ sex.lme%>%summary
 geno.lme<-lmer(weight ~ day + sex + Genotype +  (1|MouseID) + (day||pup.number)+(1|pup.number)+(day||MouseID), data = full.sex.data)
 anova(sex.lme, geno.lme)
 geno.lme%>%summary
-  fixef(geno.lme)            
+  fixef(geno.lme)      
+  Anova(geno.lme)
+  
+  int.sex.time<-lmer(weight ~ day*sex + Genotype +  (1|MouseID) + (day||pup.number)+(1|pup.number)+(day||MouseID), data = full.sex.data)
+Anova(int.sex.time)
 ```

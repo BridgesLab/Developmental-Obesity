@@ -103,7 +103,7 @@ Anova(geno.rel)
 ```
 
 
-```{r FBG}
+```{r Fasting-BG}
 ITT.data%>%
   filter(time == "0")%>%
   group_by(Genotype)%>%

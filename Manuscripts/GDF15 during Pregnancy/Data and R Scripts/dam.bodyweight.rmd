@@ -132,7 +132,7 @@ ggplot(aes(Genotype,avg.loss, fill = Genotype))+
 shapiro.test(postnatal.bw.data.cleaned$loss[postnatal.bw.data.cleaned$Genotype=="-/-"])#p=0.1
 shapiro.test(postnatal.bw.data.cleaned$loss[postnatal.bw.data.cleaned$Genotype=="+/+"])#p=0.4
 leveneTest(loss ~ Genotype, postnatal.bw.data.cleaned)#p=0.11
-t.test(loss ~ Genotype, postnatal.bw.data.cleaned)#p=0.2
+t.test(loss ~ Genotype, postnatal.bw.data.cleaned)#$p.value#p=0.2
 ```
 
 ```{r stats}
