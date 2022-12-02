@@ -75,6 +75,7 @@ Anova(geno.int.glu)#no genotype effect, p=0.071
 anova(geno.glu, geno.int.glu)#0.07
 Anova(geno.glu)
 fixef(geno.glu)
+
 ```
 
 
