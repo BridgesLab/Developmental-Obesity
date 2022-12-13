@@ -62,7 +62,8 @@ avg.data<- ITT.data%>%
   scale_color_manual(values = color.scheme)+
   geom_line(aes(col = Genotype))+
   labs(title = "Insulin tolerance test", y= "mg/dL")+
-  theme(legend.position = c(0.85, 0.85))
+  theme(legend.position = c(0.85, 0.85),text = element_text(size=14))+
+  theme_bw()
 
 #stat
 null.glu<-lmer(glucose ~ 1+(1|MouseID), data = ITT.data)
@@ -88,8 +89,10 @@ ggplot(aes(time, mean, col = Genotype))+
   geom_errorbar(aes(ymin = mean - se, ymax = mean + se, col = Genotype), width =0.3)+
   scale_color_manual(values = color.scheme)+
   geom_line(aes(col = Genotype))+
-  labs(title = "Insulin tolerance test", y= "% baseline")+
-  theme(legend.position = c(0.85, 0.85))
+  labs(title = "Insulin tolerance test", y= "relative glucose (% baseline)",x="Time From Injection (minutes)")+
+  theme_bw()+
+  theme(legend.position = c(0.85, 0.85),legend.background = element_blank(),text = element_text(size=14))
+  
 
 #stats
 null.rel <- lmer(glucose ~ 1 + (1|MouseID), ITT.data)
@@ -113,8 +116,9 @@ ITT.data%>%
   geom_col(aes(fill = Genotype))+
   geom_errorbar(aes(ymin = mean - se, ymax = mean + se), width =0.3)+
   scale_fill_manual(values = color.scheme)+
-  theme(legend.position = "none")+
-  labs(title = "Fasting Blood Glucose", y = "mg/dL")
+  labs(title = "Fasting Blood Glucose", y = "glucose (mg/dL)")+
+   theme_bw()+
+  theme(legend.position = "none", text = element_text(size=14))
 #stats
 FBG.data <-ITT.data%>%
   filter(time == "0")
@@ -138,10 +142,9 @@ AUC.data%>%
   geom_col(aes(fill = Genotype))+
   geom_errorbar(aes(ymax = mean + se, ymin = mean - se), width =0.3)+
   scale_fill_manual(values = color.scheme)+
-  theme(legend.position = "none")+
-  labs(title = "Area Under the Curve", y = "mg/dL")
-
-
+  labs(title = "Area Under the Curve", y = "glucose (mg/dL)/dam")+
+  theme_bw()+
+  theme(legend.position = "none",text = element_text(size=14))
 #stats
 shapiro.test(AUC.data$"AUC"[AUC.data$Genotype=="+/+"])#normal
 shapiro.test(AUC.data$"AUC"[AUC.data$Genotype=="-/-"])#normal
@@ -172,9 +175,9 @@ ggplot(summary.models, aes(Genotype, mean, fill = Genotype))+
   geom_col(aes(fill = Genotype))+
   geom_errorbar(aes(ymin = mean-se, ymax = mean + se), width = 0.3)+
   scale_fill_manual(values = color.scheme)+
-  labs(title = "Rate of Drop",y="rate of glucose disposal")+
-  theme(legend.position = "none")
- 
+  labs(title = "Initial Rate of Glucose Change",y="rate of glucose disposal")+
+  theme_bw()+
+  theme(legend.position = "none",text = element_text(size=14)) 
 #stats
 shapiro.test(models$slope[models$Genotype=="-/-"])#normal
 shapiro.test(models$slope[models$Genotype=="+/+"])#normal

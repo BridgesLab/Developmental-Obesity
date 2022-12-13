@@ -82,7 +82,8 @@ ggplot(avg.wsw, aes(Genotype, avg.dam.loss, fill = Genotype))+
   geom_errorbar(aes(ymin = avg.dam.loss - error.dam.loss, ymax = avg.dam.loss + error.dam.loss), width =0.3)+
   scale_fill_manual(values = color.scheme)+
   labs(title = "Mass Lost by Dam", y = "Mass lost after suckling (grams)")+
-  theme(legend.position = "none")
+  theme_bw()+
+  theme(legend.position = "none",text = element_text(size=14))
 
 #stats
 shapiro.test(milk.weights$Dam.Lost.Weight.norm[milk.weights$Genotype=="+/+"])#normal
@@ -100,7 +101,8 @@ ggplot(avg.wsw.pup, aes(Genotype, avg.pup.gain, fill = Genotype))+
   geom_errorbar(aes(ymin = avg.pup.gain - error.pup.gain , ymax = avg.pup.gain  + error.pup.gain ), width =0.3)+
   scale_fill_manual(values = color.scheme)+
   labs(title = "Mass Gained by Pup", y = "Mass gained after suckling (grams)")+
-  theme(legend.position = "none")
+  theme_bw()+
+    theme(legend.position = "none",text = element_text(size=14))
 
 #stats
 shapiro.test(milk.weights$Pup.Gained.Weight.norm[milk.weights$Genotype=="+/+"])#not normal
@@ -129,8 +131,10 @@ summary.milk.data%>%
            geom_col()+
   geom_errorbar(aes(ymin = milk.fat - se.milk.fat, ymax = milk.fat + se.milk.fat), width =0.3)+
   scale_fill_manual(values = color.scheme)+
-  theme(legend.position = "none")+
-  labs(title = "Milk Fat Percentage", y = "Percent")
+  labs(title = "Milk Fat Percentage", y = "Energy from fat (%)")+
+  theme_bw()+
+  theme(legend.position = "none",text = element_text(size=14))
+  
 
 #stats
 milk.stats<-mutated.milk.data%>%

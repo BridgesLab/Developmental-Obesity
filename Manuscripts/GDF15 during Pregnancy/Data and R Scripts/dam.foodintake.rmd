@@ -78,8 +78,9 @@ prenatal.final%>%
   geom_col()+
   geom_errorbar(aes(ymin = avg.kcal -error.kcal, ymax = avg.kcal + error.kcal),width=0.3)+
   scale_fill_manual(values = color.scheme)+
-  labs(title = "Prenatal cumulative food intake", y="kcal/mouse")+
-  theme(legend.position = "none")
+  labs(title = "Prenatal cumulative food intake", y="Prenatal cumulative food intake (kcal/dam)")+
+  theme_bw()+
+  theme(legend.position = "none",text = element_text(size=14))
 
 #prenatal food intake stats
 shapiro.test(prenatal.final$final.pre[prenatal.final$Genotype=="-/-"])#0.5
@@ -116,8 +117,9 @@ sub.post%>%
   geom_col()+
   geom_errorbar(aes(ymin = avg.kcal -error.kcal, ymax = avg.kcal + error.kcal),width=0.3)+
   scale_fill_manual(values = color.scheme)+
-  labs(title = "Postnatal cumulative food intake", y="kcal/mouse")+
-  theme(legend.position = "none")
+  labs(title = "Postnatal cumulative food intake", y="Postnatal cumulative food intake (kcal/dam)")+
+  theme_bw()+
+    theme(legend.position = "none",text = element_text(size=14))
 
 #postnatal food intake stats
 shapiro.test(sub.post$postnatal.final[sub.post$Genotype=="+/+"])#0.1
@@ -134,9 +136,9 @@ ggplot(intake.data.cleaned, aes(as.integer(week), kcals.consumed, col = Genotype
   geom_smooth(aes(col = Genotype), se = FALSE, span =0.5)+
   scale_x_continuous(breaks=c(1,2,3,4,5,6,7),labels = c("pre","0","1","2","3","4","5"))+
   scale_color_manual(values = color.scheme)+
-  labs(title = "Maternal Food Intake", y= "kcal/mouse/day",x="Gestational Age")+
-  theme(legend.position = c(0.1,0.85))
-
+  labs(title = "Maternal Food Intake", y= "food intake (kcal/mouse/day)",x="Gestational Age")+
+  theme_bw()+
+  theme(legend.position = c(0.1,0.85), legend.background = element_blank(),text = element_text(size=14))
 
 #Cumulative Food Intake
  intake.data.cleaned%>%
@@ -145,12 +147,12 @@ ggplot(intake.data.cleaned, aes(as.integer(week), kcals.consumed, col = Genotype
    geom_point(aes(col = Genotype))+
     scale_color_manual(values = color.scheme)+
    geom_smooth(aes(col = Genotype),se=FALSE)+
-  labs(title = "Maternal Cumulative Food Intake", y= "kcals/mouse",x="Gestational Age")+
-  theme(legend.position = c(0.1,0.85))
+  labs(title = "Maternal Cumulative Food Intake", y= "kcals/mouse",x="Gestational Day")+
+  theme(legend.position = c(0.1,0.85),legend.background = element_blank())
 ```
 
 
-```{r stats}
+```{ stats}
 #pre birth
 ##daily kcals
 pre.birth.intake<-intake.data.cleaned%>%
@@ -205,7 +207,4 @@ anova(geno.cumu.post, geno.int.cumu.post)#no differences between models
 Anova(geno.int.cumu.post)#No interaction effect present, continue with simple genotype model
 Anova(geno.cumu.post)
 fixef(geno.cumu.post)
-```
-
-
-
+``
