@@ -171,3 +171,23 @@ Anova(geno.int.post)#no interaction
 fixef(geno.post)
 Anova(geno.post)
 ```
+
+
+```{r power}
+weight.change<-prenatal.bw.data%>%
+  group_by(MouseID)%>%
+  arrange(gest.age)%>%
+  mutate(percent.wt.change = (gwg/first(gram.values)*100))
+
+summary.weight.change<-weight.change%>%
+  group_by(MouseID, Genotype)%>%
+  distinct(MouseID, .keep_all = T)%>%
+  select(MouseID, Genotype, percent.wt.change)
+
+avg.weight.change<-summary.weight.change%>%
+  group_by(Genotype)%>%
+  summarize(avg.pct = mean(percent.wt.change),
+            error.pct = sd(percent.wt.change),
+            num = length(percent.wt.change))
+
+```
