@@ -182,12 +182,15 @@ weight.change<-prenatal.bw.data%>%
 summary.weight.change<-weight.change%>%
   group_by(MouseID, Genotype)%>%
   distinct(MouseID, .keep_all = T)%>%
-  select(MouseID, Genotype, percent.wt.change)
+  select(MouseID, Genotype, percent.wt.change, gwg)
 
 avg.weight.change<-summary.weight.change%>%
   group_by(Genotype)%>%
   summarize(avg.pct = mean(percent.wt.change),
-            error.pct = sd(percent.wt.change),
-            num = length(percent.wt.change))
+            stdev.pct = sd(percent.wt.change),
+            num = length(percent.wt.change),
+            avg.gwg = mean(gwg),
+            stdev.gwg = sd(gwg),
+            num.gwg = length(gwg))
 
 ```
