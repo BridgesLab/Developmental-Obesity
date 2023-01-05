@@ -1,0 +1,185 @@
+---
+title: "eTRF-maternal-ITT.rmd"
+author: "Molly C. Mulcahy"
+date: "2022-12-22"
+output: html_document
+---
+
+```{r global_options, include=FALSE}
+library(knitr)
+library(readr)
+library(tidyr)
+library(ggplot2)
+library(car)
+library(lme4)
+library(dplyr)
+#figures makde will go to directory called figures, will make them as both png and pdf files 
+opts_chunk$set(fig.path='figures/',
+               echo=FALSE, warning=FALSE, message=FALSE,dev=c('png','pdf'))
+options(scipen = 2, digits = 3)
+# set echo and message to TRUE if you want to display code blocks and code output respectively
+
+knitr::knit_hooks$set(inline = function(x) {
+  knitr:::format_sci(x, 'md')
+})
+
+
+superpose.eb <- function (x, y, ebl, ebu = ebl, length = 0.08, ...)
+  arrows(x, y + ebu, x, y - ebl, angle = 90, code = 3,
+  length = length, ...)
+
+  
+se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
+# sets maize and blue color scheme
+color.scheme <-  c('999999','333333')
+```
+
+```{r data-entry}
+raw.data.file<-"dam.ITT.csv"
+
+ITT.data<-read_csv(raw.data.file,
+                   col_types = cols(
+                     ID = col_factor(levels = NULL),
+                     treatment = col_factor(levels = c("AL","eTRF")),
+                     pregnancy = col_factor(levels = c("1","2")),
+                     cohort = col_factor(levels = c("1","2","3")),
+                     time = col_integer(),
+                     glucose = col_double(),
+                     dose.weight = col_double()
+                   ))
+
+```
+
+
+```{r cohort-checks}
+summary(lm(glucose ~ dose.weight + cohort, data = ITT.data))
+
+ggplot(ITT.data, )
+```
+
+
+```{r analysis}
+ata.filename <- 'parent.ITT.csv' #make this a separate line, you can use any variable you want
+
+library(googlesheets4)
+#read in file for 6-hour food intake
+mapping.file<-'parent.mapping.csv'
+
+
+#this loads whatever the file is into a dataframe called exp.data if it exists
+exp.data <- read_csv(data.filename, col_types=cols(
+  ID = col_factor(levels=NULL),
+  time = col_double(),
+  glucose = col_integer(),
+  gest.age = col_integer()
+))
+
+mapping.data.raw <- read_csv(mapping.file,
+  col_types = cols(
+  ID = col_factor(levels=NULL),
+  treatment = col_factor(levels=c("AL","eTRF")),
+  pregnancy = col_factor(levels=NULL),
+  cohort = col_factor(levels = NULL),
+  gave.birth = col_factor(levels = c("yes","no"))
+))
+remove<- c("7834","7822","7841","7843","7835")
+joined.ITT<-merge(mapping.data.raw, exp.data)
+joined.ITT%>%
+    filter(gave.birth=="yes")%>%
+    filter(!(ID %in% remove))%>%
+  group_by(cohort, treatment, time)%>%
+  summarize(avg.glucose = mean(glucose),
+            error.glucose = se(glucose))%>%
+  ggplot(aes(time, avg.glucose, col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_errorbar(aes(ymin = avg.glucose - error.glucose, ymax = avg.glucose + error.glucose))+
+  geom_line(aes(col = treatment))+
+  facet_grid(.~cohort)+
+  scale_color_manual (values = color.scheme)+
+  labs(title = "ITT in dams by cohort")
+joined.ITT%>%
+  filter(gave.birth=="yes")%>%
+    filter(!(ID %in% remove))%>%
+  group_by(treatment,cohort)%>%
+  distinct(ID, .keep_all = T)%>%
+  count%>%
+   kable(caption="Total number of dams")
+
+#combined dam plot
+joined.ITT%>%
+   filter(gave.birth=="yes")%>%
+   filter(!(ID %in% remove))%>%
+  group_by(treatment, time)%>%
+  summarize(avg.glucose = mean(glucose),
+            error.glucose = se(glucose))%>%
+  ggplot(aes(time, avg.glucose, col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_errorbar(aes(ymin = avg.glucose - error.glucose, ymax = avg.glucose + error.glucose))+
+  geom_line(aes(col = treatment))+
+  scale_color_manual (values = color.scheme)+
+  labs(title = "ITT in dams")
+
+AUC.data<-joined.ITT%>%
+  filter(gave.birth=="yes")%>%
+   filter(!(ID %in% remove))%>%
+  group_by(ID)%>%
+  mutate(AUC = sum(glucose))%>%
+  select(ID, treatment, cohort, gave.birth, AUC)%>%
+  unique()
+ 
+AUC.data%>%
+  group_by(cohort, treatment)%>%
+  summarize(avg.AUC = mean(AUC),
+            error.AUC = se(AUC))%>%
+  ggplot(aes(treatment, avg.AUC))+
+  geom_col(aes(fill = treatment))+
+  facet_grid(.~cohort)+
+  scale_fill_manual(values = color.scheme)+
+  geom_errorbar(aes(ymin = avg.AUC - error.AUC, ymax = avg.AUC + error.AUC), width = 0.3)+
+  labs(title = "Area Under the Curve by Cohort")
+  
+#combined AUC
+AUC.data%>%
+  group_by(treatment)%>%
+  summarize(avg.AUC = mean(AUC),
+            error.AUC = se(AUC))%>%
+  ggplot(aes(treatment, avg.AUC))+
+  geom_col(aes(fill = treatment))+
+  scale_fill_manual(values = color.scheme)+
+  geom_errorbar(aes(ymin = avg.AUC - error.AUC, ymax = avg.AUC + error.AUC), width = 0.3)+
+  labs(title = "Area Under the Curve")
+
+#mmales
+originlplot<-joined.ITT%>%
+  filter(pregnancy=="m")%>%
+   group_by(treatment, time)%>%
+   group_by(cohort, treatment, time)%>%
+  summarize(avg.glucose = mean(glucose),
+            error.glucose = se(glucose))%>%
+  ggplot(aes(time, avg.glucose, col = treatment))+
+  geom_point(aes(col = treatment))+
+  geom_errorbar(aes(ymin = avg.glucose - error.glucose, ymax = avg.glucose + error.glucose))+
+  geom_line(aes(col = treatment))+
+  facet_grid(.~cohort)+
+  scale_color_manual (values = color.scheme)+
+  labs(title = "ITT in males by cohort")
+
+AUC.data.m<-joined.ITT%>%
+  filter(pregnancy=="m")%>%
+  group_by(ID)%>%
+  mutate(AUC = sum(glucose))%>%
+  select(ID, treatment, cohort, gave.birth, AUC)%>%
+  unique()
+ 
+AUC.data.m%>%
+  group_by(cohort, treatment)%>%
+  summarize(avg.AUC = mean(AUC),
+            error.AUC = se(AUC))%>%
+  ggplot(aes(treatment, avg.AUC))+
+  geom_col(aes(fill = treatment))+
+  facet_grid(.~cohort)+
+  scale_fill_manual(values = color.scheme)+
+  geom_errorbar(aes(ymin = avg.AUC - error.AUC, ymax = avg.AUC + error.AUC), width = 0.3)+
+  labs(title = "Area Under the Curve by Cohort")
+
+```

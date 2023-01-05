@@ -1,0 +1,45 @@
+---
+title: "early-postnatal-analysis"
+author: "Molly C. Mulcahy"
+date: "2022-12-20"
+output: html_document
+---
+
+```{r global_options, include=FALSE}
+library(knitr)
+library(readr)
+library(tidyr)
+library(ggplot2)
+library(car)
+library(lme4)
+library(dplyr)
+#figures makde will go to directory called figures, will make them as both png and pdf files 
+opts_chunk$set(fig.path='figures/',
+               echo=FALSE, warning=FALSE, message=FALSE,dev=c('png','pdf'))
+options(scipen = 2, digits = 3)
+# set echo and message to TRUE if you want to display code blocks and code output respectively
+
+knitr::knit_hooks$set(inline = function(x) {
+  knitr:::format_sci(x, 'md')
+})
+
+
+superpose.eb <- function (x, y, ebl, ebu = ebl, length = 0.08, ...)
+  arrows(x, y + ebu, x, y - ebl, angle = 90, code = 3,
+  length = length, ...)
+
+  
+se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
+# sets maize and blue color scheme
+color.scheme <-  c('999999','333333')
+```
+
+```{r data-entry}
+pup.postnatal.file<-"pup.data.csv"
+
+pup.postnatal.data<-read_csv(pup.postnatal.file,
+          col_types = cols(
+            birth.weight = col_double(),
+            MouseID = col_
+          ))
+```
