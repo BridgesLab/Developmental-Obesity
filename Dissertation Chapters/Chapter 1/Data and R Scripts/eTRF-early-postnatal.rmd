@@ -13,7 +13,7 @@ library(ggplot2)
 library(car)
 library(lme4)
 library(dplyr)
-#figures makde will go to directory called figures, will make them as both png and pdf files 
+#figures made will go to directory called figures, will make them as both png and pdf files 
 opts_chunk$set(fig.path='figures/',
                echo=FALSE, warning=FALSE, message=FALSE,dev=c('png','pdf'))
 options(scipen = 2, digits = 3)

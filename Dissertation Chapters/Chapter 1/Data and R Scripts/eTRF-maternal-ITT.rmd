@@ -149,37 +149,5 @@ AUC.data%>%
   geom_errorbar(aes(ymin = avg.AUC - error.AUC, ymax = avg.AUC + error.AUC), width = 0.3)+
   labs(title = "Area Under the Curve")
 
-#mmales
-originlplot<-joined.ITT%>%
-  filter(pregnancy=="m")%>%
-   group_by(treatment, time)%>%
-   group_by(cohort, treatment, time)%>%
-  summarize(avg.glucose = mean(glucose),
-            error.glucose = se(glucose))%>%
-  ggplot(aes(time, avg.glucose, col = treatment))+
-  geom_point(aes(col = treatment))+
-  geom_errorbar(aes(ymin = avg.glucose - error.glucose, ymax = avg.glucose + error.glucose))+
-  geom_line(aes(col = treatment))+
-  facet_grid(.~cohort)+
-  scale_color_manual (values = color.scheme)+
-  labs(title = "ITT in males by cohort")
-
-AUC.data.m<-joined.ITT%>%
-  filter(pregnancy=="m")%>%
-  group_by(ID)%>%
-  mutate(AUC = sum(glucose))%>%
-  select(ID, treatment, cohort, gave.birth, AUC)%>%
-  unique()
- 
-AUC.data.m%>%
-  group_by(cohort, treatment)%>%
-  summarize(avg.AUC = mean(AUC),
-            error.AUC = se(AUC))%>%
-  ggplot(aes(treatment, avg.AUC))+
-  geom_col(aes(fill = treatment))+
-  facet_grid(.~cohort)+
-  scale_fill_manual(values = color.scheme)+
-  geom_errorbar(aes(ymin = avg.AUC - error.AUC, ymax = avg.AUC + error.AUC), width = 0.3)+
-  labs(title = "Area Under the Curve by Cohort")
 
 ```
