@@ -31,7 +31,7 @@ superpose.eb <- function (x, y, ebl, ebu = ebl, length = 0.08, ...)
   
 se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
 # sets maize and blue color scheme
-color.scheme <-  c('999999','333333')
+color.scheme <-  c('#999999','#333333')
 ```
 
 ```{r data-entry}
@@ -54,100 +54,145 @@ ITT.data<-read_csv(raw.data.file,
 ```{r cohort-checks}
 summary(lm(glucose ~ dose.weight + cohort, data = ITT.data))
 
-ggplot(ITT.data, )
+ggplot(ITT.data, aes(dose.weight, glucose,col=treatment))+
+  geom_point()
 ```
 
+```{r FBG}
+#plot
+ITT.data%>%
+  filter(time=="0")%>%
+  group_by(treatment)%>%
+  summarize(avg.FBG = mean(glucose),
+            error.FBG = se(glucose))%>%
+  ggplot(aes(treatment, avg.FBG, fill = treatment))+
+  geom_col(aes(treatment))+
+  geom_errorbar(aes(ymin = avg.FBG - error.FBG, ymax = avg.FBG + error.FBG),width =0.3)+
+  scale_fill_manual(values = color.scheme)+
+  labs(title = "Dam Fasting Blood Glucose", y = "Glucose (mg/dL)")+
+   scale_fill_manual(values = color.scheme)+
+  theme_bw()+
+  theme(legend.position = "none",text = element_text(size=18))
 
-```{r analysis}
-ata.filename <- 'parent.ITT.csv' #make this a separate line, you can use any variable you want
-
-library(googlesheets4)
-#read in file for 6-hour food intake
-mapping.file<-'parent.mapping.csv'
-
-
-#this loads whatever the file is into a dataframe called exp.data if it exists
-exp.data <- read_csv(data.filename, col_types=cols(
-  ID = col_factor(levels=NULL),
-  time = col_double(),
-  glucose = col_integer(),
-  gest.age = col_integer()
-))
-
-mapping.data.raw <- read_csv(mapping.file,
-  col_types = cols(
-  ID = col_factor(levels=NULL),
-  treatment = col_factor(levels=c("AL","eTRF")),
-  pregnancy = col_factor(levels=NULL),
-  cohort = col_factor(levels = NULL),
-  gave.birth = col_factor(levels = c("yes","no"))
-))
-remove<- c("7834","7822","7841","7843","7835")
-joined.ITT<-merge(mapping.data.raw, exp.data)
-joined.ITT%>%
-    filter(gave.birth=="yes")%>%
-    filter(!(ID %in% remove))%>%
-  group_by(cohort, treatment, time)%>%
-  summarize(avg.glucose = mean(glucose),
-            error.glucose = se(glucose))%>%
-  ggplot(aes(time, avg.glucose, col = treatment))+
-  geom_point(aes(col = treatment))+
-  geom_errorbar(aes(ymin = avg.glucose - error.glucose, ymax = avg.glucose + error.glucose))+
-  geom_line(aes(col = treatment))+
-  facet_grid(.~cohort)+
-  scale_color_manual (values = color.scheme)+
-  labs(title = "ITT in dams by cohort")
-joined.ITT%>%
-  filter(gave.birth=="yes")%>%
-    filter(!(ID %in% remove))%>%
-  group_by(treatment,cohort)%>%
-  distinct(ID, .keep_all = T)%>%
-  count%>%
-   kable(caption="Total number of dams")
-
-#combined dam plot
-joined.ITT%>%
-   filter(gave.birth=="yes")%>%
-   filter(!(ID %in% remove))%>%
-  group_by(treatment, time)%>%
-  summarize(avg.glucose = mean(glucose),
-            error.glucose = se(glucose))%>%
-  ggplot(aes(time, avg.glucose, col = treatment))+
-  geom_point(aes(col = treatment))+
-  geom_errorbar(aes(ymin = avg.glucose - error.glucose, ymax = avg.glucose + error.glucose))+
-  geom_line(aes(col = treatment))+
-  scale_color_manual (values = color.scheme)+
-  labs(title = "ITT in dams")
-
-AUC.data<-joined.ITT%>%
-  filter(gave.birth=="yes")%>%
-   filter(!(ID %in% remove))%>%
+FBG.data<-ITT.data%>%
+  filter(time=="0")
+shapiro.test(FBG.data$glucose[FBG.data$treatment =="eTRF"])#normal
+shapiro.test(FBG.data$glucose[FBG.data$treatment =="AL"])#normal
+leveneTest(glucose~treatment, data = FBG.data)#equal variance
+t.test(glucose~treatment, data = FBG.data)$p.value
+```
+```{r AUC}
+#generate AUC
+AUC.data<-ITT.data%>%
   group_by(ID)%>%
   mutate(AUC = sum(glucose))%>%
-  select(ID, treatment, cohort, gave.birth, AUC)%>%
+  select(ID, treatment, cohort,AUC)%>%
   unique()
- 
-AUC.data%>%
-  group_by(cohort, treatment)%>%
-  summarize(avg.AUC = mean(AUC),
-            error.AUC = se(AUC))%>%
-  ggplot(aes(treatment, avg.AUC))+
-  geom_col(aes(fill = treatment))+
-  facet_grid(.~cohort)+
-  scale_fill_manual(values = color.scheme)+
-  geom_errorbar(aes(ymin = avg.AUC - error.AUC, ymax = avg.AUC + error.AUC), width = 0.3)+
-  labs(title = "Area Under the Curve by Cohort")
-  
-#combined AUC
+#Plot
 AUC.data%>%
   group_by(treatment)%>%
-  summarize(avg.AUC = mean(AUC),
-            error.AUC = se(AUC))%>%
-  ggplot(aes(treatment, avg.AUC))+
-  geom_col(aes(fill = treatment))+
+  summarize(avg.auc = mean(AUC),
+            error.auc = se(AUC))%>%
+ggplot(aes(treatment, avg.auc, fill = treatment))+
+         geom_col()+
+  geom_errorbar(aes(ymin = avg.auc - error.auc, ymax = avg.auc + error.auc), width =0.3)+
+  labs(title = "Area Under the Curve", y = "Glucose (mg/dL)")+
   scale_fill_manual(values = color.scheme)+
-  geom_errorbar(aes(ymin = avg.AUC - error.AUC, ymax = avg.AUC + error.AUC), width = 0.3)+
-  labs(title = "Area Under the Curve")
+  theme_bw()+
+  theme(legend.position = "none",text = element_text(size=18))
+ 
 
+shapiro.test(AUC.data$AUC[AUC.data$treatment=="eTRF"])#normal
+shapiro.test(AUC.data$AUC[AUC.data$treatment=="AL"])# not normal
+leveneTest(AUC ~ treatment, data = AUC.data)# equivalent variance
+wilcox.test(AUC ~ treatment, data = AUC.data, paired = FALSE)
+```
 
+```{r drop}
+#rate of drop
+models<-ITT.data%>%
+  filter(time<45)%>%
+  group_by(ID, treatment)%>%
+  mutate(l.glucose = log(glucose))%>%
+  do(fitted.model= lm(l.glucose~ time, data =.))%>%
+  mutate(rate =coef(fitted.model)["time"],
+          max = coef(fitted.model)["(Intercept)"],
+         rsq = summary(fitted.model)$r.squared)%>%
+  mutate(max.exp = exp(max))%>%
+  mutate( slope= max.exp*rate)
+summary.models<-models%>%
+  group_by(treatment)%>%
+summarise_at(.var ="slope", .funs = funs(mean, se))
+
+#plot
+ggplot(summary.models, aes(treatment, mean, fill = treatment))+
+  geom_col(aes(fill = treatment))+
+  geom_errorbar(aes(ymin = mean-se, ymax = mean + se), width = 0.3)+
+  scale_fill_manual(values = color.scheme)+
+  labs(title = "Rate of Drop in Glucose",y="mg/dL per minute")+
+   scale_fill_manual(values = color.scheme)+
+  theme_bw()+
+  theme(legend.position = "none",text = element_text(size=18))
+
+shapiro.test(models$slope[models$treatment=="eTRF"])#normal
+shapiro.test(models$slope[models$treatment=="AL"])#normal
+leveneTest(slope ~ treatment, data = models)#equal variance
+t.test(slope ~ treatment, data = models)$p.value
+```
+
+```{r rebound}
+#rebound analysis
+rebound<-ITT.data%>%
+  filter(as.numeric(time) > 60)%>%
+  group_by(ID, treatment)%>%
+  do(fitted.model= lm(glucose~ time, data =.))%>%
+  mutate(rate =coef(fitted.model)["time"],
+         rsq = summary(fitted.model)$r.squared)
+summary.rebound<-rebound%>%
+  group_by(treatment)%>%
+summarise_at(.var ="rate", .funs = funs(mean, se))
+
+#plot
+ggplot(summary.rebound, aes(treatment, mean, fill = treatment))+
+  geom_col(aes(fill = treatment))+
+  geom_errorbar(aes(ymin = mean-se, ymax = mean + se), width = 0.3)+
+  scale_fill_manual(values = color.scheme)+
+  labs(title = "Rate of Glucose Increase after Hypoglycemia",y="delta glucose (mg/dL/min")+
+   scale_fill_manual(values = color.scheme)+
+  theme_bw()+
+  theme(legend.position = "none",text = element_text(size=18))
+  
+shapiro.test(rebound$rate[rebound$treatment=="eTRF"])#normal
+shapiro.test(rebound$rate[rebound$treatment=="AL"])#not normal
+leveneTest(rate ~ treatment, data = rebound)
+t.test(rate ~ treatment, data = rebound)$p.value
+```
+```{r time-course}
+#modeling over time
+#plot
+ITT.data%>%
+  group_by(time, treatment)%>%
+  summarize(avg.glu = mean(glucose),
+            error.glu = se(glucose))%>%
+ggplot(aes(time, avg.glu, col = treatment))+
+  geom_point()+
+  geom_line(aes(col = treatment))+
+  geom_errorbar(aes(ymin = avg.glu - error.glu, ymax = avg.glu + error.glu), width =0.4)+
+  scale_color_manual(values = color.scheme)+
+  theme_bw()+
+  labs(title = "Insulin Tolerance Test, E16", y = "Glucose (mg/dL)", x = "Time after injection (minutes)")+
+  theme(legend.position = "none",text = element_text(size=18))
+
+#linear mixed effect modeling
+null.ITT<-lmer(glucose~ 1 + (1|ID), data = ITT.data)
+time.ITT<-lmer(glucose~ time + (1|ID), data = ITT.data)
+anova(null.ITT, time.ITT)#p=0.3
+simple.group.ITT<-lmer(glucose~ time + treatment + (1|ID), data = ITT.data)
+anova(time.ITT, simple.group.ITT)#0.04
+int.group.ITT<-lmer(glucose~ time*treatment + (1|ID), data = ITT.data)
+anova(simple.group.ITT, int.group.ITT)#significant
+anova(int.group.ITT)%>%kable(caption = "glucose~ time*treatment + (1|ID)")
+
+fixef(int.group.ITT)
+summary(int.group.ITT)
 ```

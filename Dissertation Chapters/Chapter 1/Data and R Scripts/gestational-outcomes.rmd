@@ -120,7 +120,7 @@ ggplot(summary.litter, aes(treatment,percent.survival_mean, fill = treatment))+
   geom_col()+
     geom_errorbar(aes(ymin = percent.survival_mean - percent.survival_se, ymax = percent.survival_mean + percent.survival_se), width = 0.3)+
     scale_fill_manual(values = color.scheme)+
-  labs(title = "Survial to PND 3", y = "Pups survived to PND 3 (%)")+
+  labs(title = "Survival to PND 3", y = "Pups survived to PND 3 (%)")+
   theme_bw()+
   theme(legend.position = "none",text = element_text(size=18))
   
@@ -188,5 +188,10 @@ sex.pup.data<-pup.data.mutated%>%
   labs(title = "Pup Body Weight", y = "Body Weight (grams)")+
   theme_bw()+
   theme(legend.position = "none",text = element_text(size=18))
+
+```
+
+```{r pg-success}
+litter.data<-
 
 ```
