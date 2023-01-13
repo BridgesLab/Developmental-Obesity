@@ -185,14 +185,14 @@ ggplot(aes(time, avg.glu, col = treatment))+
 
 #linear mixed effect modeling
 null.ITT<-lmer(glucose~ 1 + (1|ID), data = ITT.data)
-time.ITT<-lmer(glucose~ time + (1|ID), data = ITT.data)
+time.ITT<-lmer(glucose~ as.factor(time) + (1|ID), data = ITT.data)
 anova(null.ITT, time.ITT)#p=0.3
-simple.group.ITT<-lmer(glucose~ time + treatment + (1|ID), data = ITT.data)
+simple.group.ITT<-lmer(glucose~ as.factor(time) + treatment + (1|ID), data = ITT.data)
 anova(time.ITT, simple.group.ITT)#0.04
-int.group.ITT<-lmer(glucose~ time*treatment + (1|ID), data = ITT.data)
+int.group.ITT<-lmer(glucose~ as.factor(time)*treatment + (1|ID), data = ITT.data)
 anova(simple.group.ITT, int.group.ITT)#significant
 anova(int.group.ITT)%>%kable(caption = "glucose~ time*treatment + (1|ID)")
 
 fixef(int.group.ITT)
-summary(int.group.ITT)
+summary(int.group.ITT)#update methods too
 ```
