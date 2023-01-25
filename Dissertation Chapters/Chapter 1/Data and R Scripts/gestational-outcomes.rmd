@@ -104,7 +104,7 @@ summary.litter<-litter.data.mutated%>%
     scale_fill_manual(values = color.scheme)+
   labs(title = "Gestational Age", y = "Gestational Age (Days)")+
   theme_bw()+
-  theme(legend.position = "none",text = element_text(size=18))
+  theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
   
   #stats
   kable(shapiro.test(litter.data.mutated$GA[litter.data.mutated$treatment=="AL"])$p.value)#not normal
@@ -122,7 +122,7 @@ ggplot(summary.litter, aes(treatment,percent.survival_mean, fill = treatment))+
     scale_fill_manual(values = color.scheme)+
   labs(title = "Survival to PND 3", y = "Pups survived to PND 3 (%)")+
   theme_bw()+
-  theme(legend.position = "none",text = element_text(size=18))
+  theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
   
   #stats
   kable(shapiro.test(litter.data.mutated$percent.survival[litter.data.mutated$treatment=="AL"])$p.value)#not normal
@@ -139,7 +139,7 @@ ggplot(summary.litter, aes(treatment,`#.pups.born_mean`, fill = treatment))+
     scale_fill_manual(values = color.scheme)+
   labs(title = "Litter Size", y = "Litter size (pups)")+
   theme_bw()+
-  theme(legend.position = "none",text = element_text(size=18))
+  theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
   
   #stats
   kable(shapiro.test(litter.data.mutated$`#.pups.born`[litter.data.mutated$treatment=="AL"])$p.value)#normal
@@ -163,7 +163,7 @@ pup.data.mutated%>%
   scale_fill_manual(values = color.scheme)+
   labs(title = "Birthweight", y = "Birthweight (grams)")+
   theme_bw()+
-  theme(legend.position = "none",text = element_text(size=18))
+  theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
   
   #stats
   kable(shapiro.test(pup.data.mutated$birth.weight[pup.data.mutated$treatment=="AL"])$p.value)# not normal
@@ -185,13 +185,60 @@ sex.pup.data<-pup.data.mutated%>%
   geom_errorbar(aes(ymin = avg.weight - error.weight, ymax = avg.weight + error.weight), width =0.3)+
   geom_line(aes(col = treatment))+
   scale_color_manual(values = color.scheme)+
-  labs(title = "Pup Body Weight", y = "Body Weight (grams)")+
+  labs(title = "Pup Body Weight", y = "Body Weight (grams)", x = "Age (days)")+
   theme_bw()+
-  theme(legend.position = "none",text = element_text(size=18))
+  theme(legend.position = c(0.20, 0.85),text = element_text(size=18), legend.background = element_blank())
 
 ```
 
 ```{r pg-success}
-litter.data<-
+success.file<-"mating.success.csv"
+
+success.data<-read_csv(success.file,
+         col_types = cols(
+           ID = col_factor(levels = NULL),
+           treatment = col_factor(levels = c("AL","eTRF")),
+           gave.birth = col_factor(levels = c("yes","no"))
+         ))
+
+success.data%>%
+  group_by(treatment)%>%
+  distinct(ID)%>%
+  count()%>%
+  kable(caption = "total matings by group")
+
+summary.success<-success.data%>%
+  group_by(treatment, gave.birth)%>%
+  count%>%
+  mutate(mating.success = case_when(
+         treatment=="eTRF"~(n/24)*100,
+         treatment=="AL"~(n/22)*100))%>%
+  filter(gave.birth =="yes")
+
+ggplot(summary.success, aes(treatment, mating.success, fill = treatment))+
+  geom_col()+
+  scale_fill_manual(values = color.scheme)+
+  labs(title = "Mating Success", y = "Successful Mating Events (%)")+
+  theme_bw()+
+  theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
+
+#ggplot(summary.success, aes(x="", y=mating.success, fill=gave.birth)) +
+  #geom_bar(stat="identity", width=1, color="white") +
+ # coord_polar("y", start=0) +
+ # facet_grid(.~treatment)
+#  theme_void() 
+ # scale_color_manual(values = c("white","black"))+
+ # labs(title = "Mating Success", y = "Successful Mating Events (%)")+
+ # theme_bw()+
+ # theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
+
+#Stats
+
+#shapiro.test(success.data$as.numeric(gave.birth)[success.data$treatment=="eTRF"])
+```
+
+
+```{r time-in-estrus}
+
 
 ```

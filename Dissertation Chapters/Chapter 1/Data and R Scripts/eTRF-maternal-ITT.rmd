@@ -72,7 +72,8 @@ ITT.data%>%
   labs(title = "Dam Fasting Blood Glucose", y = "Glucose (mg/dL)")+
    scale_fill_manual(values = color.scheme)+
   theme_bw()+
-  theme(legend.position = "none",text = element_text(size=18))
+  theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
+
 
 FBG.data<-ITT.data%>%
   filter(time=="0")
@@ -99,7 +100,7 @@ ggplot(aes(treatment, avg.auc, fill = treatment))+
   labs(title = "Area Under the Curve", y = "Glucose (mg/dL)")+
   scale_fill_manual(values = color.scheme)+
   theme_bw()+
-  theme(legend.position = "none",text = element_text(size=18))
+  theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
  
 
 shapiro.test(AUC.data$AUC[AUC.data$treatment=="eTRF"])#normal
@@ -132,7 +133,7 @@ ggplot(summary.models, aes(treatment, mean, fill = treatment))+
   labs(title = "Rate of Drop in Glucose",y="mg/dL per minute")+
    scale_fill_manual(values = color.scheme)+
   theme_bw()+
-  theme(legend.position = "none",text = element_text(size=18))
+  theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
 
 shapiro.test(models$slope[models$treatment=="eTRF"])#normal
 shapiro.test(models$slope[models$treatment=="AL"])#normal
@@ -181,7 +182,7 @@ ggplot(aes(time, avg.glu, col = treatment))+
   scale_color_manual(values = color.scheme)+
   theme_bw()+
   labs(title = "Insulin Tolerance Test, E16", y = "Glucose (mg/dL)", x = "Time after injection (minutes)")+
-  theme(legend.position = "none",text = element_text(size=18))
+  theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
 
 #linear mixed effect modeling
 null.ITT<-lmer(glucose~ 1 + (1|ID), data = ITT.data)

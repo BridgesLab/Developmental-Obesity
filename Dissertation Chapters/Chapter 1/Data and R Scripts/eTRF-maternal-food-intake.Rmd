@@ -1,0 +1,199 @@
+---
+title: "eTRF-maternal-food-intake"
+author: "Molly C. Mulcahy"
+date: "2023-01-18"
+output: html_document
+---
+
+```{r global_options, include=FALSE}
+library(knitr)
+library(readr)
+library(tidyr)
+library(ggplot2)
+library(car)
+library(lme4)
+library(dplyr)
+#figures makde will go to directory called figures, will make them as both png and pdf files 
+opts_chunk$set(fig.path='figures/',
+               echo=FALSE, warning=FALSE, message=FALSE,dev=c('png','pdf'))
+options(scipen = 2, digits = 3)
+# set echo and message to TRUE if you want to display code blocks and code output respectively
+
+knitr::knit_hooks$set(inline = function(x) {
+  knitr:::format_sci(x, 'md')
+})
+
+
+superpose.eb <- function (x, y, ebl, ebu = ebl, length = 0.08, ...)
+  arrows(x, y + ebu, x, y - ebl, angle = 90, code = 3,
+  length = length, ...)
+
+  
+se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
+# sets maize and blue color scheme
+color.scheme <-  c('#999999','#333333')
+```
+
+
+```{r data input}
+six.hr.file<-"six.hr.intake.csv"
+
+six.hr.data<-read_csv(six.hr.file,
+         col_types = cols(
+         ID = col_factor(levels = NULL),
+         treatment = col_factor(levels = c("AL","eTRF")),
+         cohort = col_factor(levels = c("1","2","3")),
+         pregnancy = col_factor(levels = c("1","2")),
+         gest.day = col_double(),
+         day = col_double(),
+         food.consumed = col_double(),
+         kcals.consumed = col_double(),
+         food.cumulative = col_double()
+         ))
+
+clean.six.hr<-six.hr.data%>%
+  filter(kcals.consumed>0&kcals.consumed<40)
+  
+  
+twentyfour.hr.file<-"twentyfour.hr.intake.csv" 
+
+twentyfour.hr.data<-read_csv(twentyfour.hr.file,
+         col_types = cols(
+         ID = col_factor(levels = NULL),
+         treatment = col_factor(levels = c("AL","eTRF")),
+         cohort = col_factor(levels = c("1","2","3")),
+         pregnancy = col_factor(levels = c("1","2")),
+         gest.day = col_double(),
+         day = col_double(),
+         food.consumed = col_double(),
+         kcals.consumed = col_double(),
+         food.cumulative = col_double(),
+         gave.birth = col_factor(levels = NULL)
+         ))
+
+clean.twentyfour.hr<-twentyfour.hr.data%>%
+  dplyr::select(-gave.birth)
+```
+
+
+```{r adaptation-period}
+clean.twentyfour.hr%>%
+  filter(day <8)%>%
+  ggplot(aes(day, kcals.consumed, col = treatment))+
+  geom_point()+
+  geom_smooth(aes(col = treatment), method = "lm")+
+  scale_color_manual(values = color.scheme)+
+  labs(title = "Adaptation to eTRF")
+
+```
+# plot for each cohort, GA
+clean.six.hr%>%
+ggplot(aes(gest.day, kcals.consumed, col = treatment))+
+  geom_point()+
+  geom_smooth(aes(col = treatment), method = "lm")+
+  scale_color_manual(values = color.scheme)+
+  labs(title = "6h food intake")
+
+six.hr.adapt<-six.hr.joined%>%
+  filter(gave.birth=="yes")%>%
+  filter(kcals.consumed>0&kcals.consumed<40)%>%
+  filter(day <10)
+  ggplot(six.hr.adapt, aes(day, kcals.consumed, group = treatment))+
+  geom_point(aes(col = treatment))+
+  labs(title = "Adaptation to restriction")+
+    scale_color_manual(values = color.scheme)+
+    geom_smooth(aes(col = treatment), method = "loess")
+#adaptation stats  
+  
+
+#stats
+null.6.lme<-lmer(kcals.consumed ~ 1+(1|ID), data = six.hr.mutated)
+day.6.lme<-lmer(kcals.consumed ~ day + (1|ID), data = six.hr.mutated)
+anova(null.6.lme, day.6.lme)
+Anova(day.6.lme)
+group.int.6.lme<-lmer(kcals.consumed ~ day*treatment + (1|ID), data = six.hr.mutated)
+anova(day.6.lme, group.int.6.lme)
+Anova(group.int.6.lme)
+group.simple.6.lme<-lmer(kcals.consumed ~ day+treatment + (1|ID), data = six.hr.mutated)
+anova(day.6.lme, group.simple.6.lme)
+Anova(group.simple.6.lme)
+fixef(group.int.6.lme)
+fixef(group.simple.6.lme)
+
+#read in file for 24-hour food intake
+twentyfour.hr.file<-read_sheet('10e6of_-mLTP4JuA-ADi-HAxm2HWjZ8hSAcoBGcLXBSQ', sheet = 8)
+#reconfigure columns
+twentyfour.hr.mutated<-twentyfour.hr.file%>%
+mutate(ID=factor(ID),
+       treatment = factor(treatment, levels = c("AL","eTRF")),
+       pregnancy = factor(pregnancy, levels = c("1","2")),
+       cohort = factor(cohort, levels = c("1","2","3")))%>%
+   arrange(day) %>%
+  group_by(ID) %>%
+  mutate (food.consumed = (food.start - food.end)/`Number.in.cage`,
+          kcals.consumed = food.consumed *2.91) %>%
+mutate(food.cumulative = cumsum(kcals.consumed))%>%
+  select(food.consumed, kcals.consumed, day, ID, treatment, food.cumulative, pregnancy, gest.day, cohort)
+
+#take eTRF 
+just.eTRF<-six.hr.mutated%>%
+  filter(treatment == "eTRF")
+
+total.kcals<-rbind(just.eTRF,twentyfour.hr.mutated)
+
+total.kcal.data<-merge(total.kcals, map.data)
+
+
+#plot combined 24 hours
+total.kcal.data%>%
+  filter(gave.birth=="yes")%>%
+  filter(kcals.consumed>0&kcals.consumed<40)%>%
+  filter(day <40)%>%
+  group_by(day, treatment)%>%
+  summarize(avg.kcal = mean(kcals.consumed),
+            error.kcal = se(kcals.consumed))%>%
+ggplot(aes(day, avg.kcal, col = treatment))+
+  geom_point()+
+  geom_errorbar(aes(ymin = avg.kcal - error.kcal, ymax = avg.kcal + error.kcal))+
+  geom_line(aes(col = treatment))+
+  labs(title = "food intake", subtitle = "24 hour intake")+
+  scale_color_manual(values = color.scheme)
+#combined, GA
+total.kcal.data%>%
+  filter(gave.birth=="yes")%>%  
+  filter(kcals.consumed>0&kcals.consumed<40)%>%
+ggplot(aes(gest.day, kcals.consumed, col = treatment))+
+  geom_point()+
+  geom_smooth(aes(col = treatment), method = "lm")+
+  labs(title = "24 hr food intake", y = "kcals/mouse/day", x = "gestational age (days)")+
+  scale_color_manual(values = color.scheme)
+#24 intake per cohort, by GA
+total.kcal.data%>%
+  filter(gave.birth=="yes")%>%  
+  filter(kcals.consumed>0&kcals.consumed<40)%>%
+  filter(gest.day>-7)%>%
+  group_by(gest.day, treatment, cohort)%>%
+  summarize(avg.kcal = mean(kcals.consumed),
+            error.kcal = se(kcals.consumed))%>%
+ggplot(aes(gest.day, avg.kcal, col = treatment))+
+  geom_point()+
+  geom_errorbar(aes(ymin = avg.kcal - error.kcal, ymax = avg.kcal + error.kcal))+
+  geom_line(aes(col = treatment))+
+  facet_grid(.~cohort)+
+  labs(title = "food intake", subtitle = "24 hour intake")+
+  scale_color_manual(values = color.scheme)
+
+
+
+#stats
+null.24.lme<-lmer(kcals.consumed ~ 1+(1|ID), data = total.kcals)
+day.24.lme<-lmer(kcals.consumed ~ gest.day + (1|ID), data = total.kcals)
+anova(null.24.lme, day.24.lme)
+Anova(day.24.lme)
+group.int.lme<-lmer(kcals.consumed ~ gest.day*treatment + (1|ID), data = total.kcals)
+anova(day.24.lme, group.int.lme)
+Anova(group.int.lme)
+group.simple.24.lme<-lmer(kcals.consumed ~ gest.day+treatment + (1|ID), data = total.kcals)
+anova(day.24.lme, group.simple.24.lme)
+Anova(group.simple.24.lme)
+```
