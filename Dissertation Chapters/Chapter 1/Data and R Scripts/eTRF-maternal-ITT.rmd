@@ -130,7 +130,7 @@ ggplot(summary.models, aes(treatment, mean, fill = treatment))+
   geom_col(aes(fill = treatment))+
   geom_errorbar(aes(ymin = mean-se, ymax = mean + se), width = 0.3)+
   scale_fill_manual(values = color.scheme)+
-  labs(title = "Rate of Drop in Glucose",y="mg/dL per minute")+
+  labs(title = "Rate of Glucose Decline",y="mg/dL per minute")+
    scale_fill_manual(values = color.scheme)+
   theme_bw()+
   theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
@@ -158,16 +158,17 @@ ggplot(summary.rebound, aes(treatment, mean, fill = treatment))+
   geom_col(aes(fill = treatment))+
   geom_errorbar(aes(ymin = mean-se, ymax = mean + se), width = 0.3)+
   scale_fill_manual(values = color.scheme)+
-  labs(title = "Rate of Glucose Increase after Hypoglycemia",y="delta glucose (mg/dL/min")+
+  labs(title = "Rate of Glucose Recovery",y="Delta Glucose (mg/dL/min)")+
    scale_fill_manual(values = color.scheme)+
   theme_bw()+
-  theme(legend.position = "none",text = element_text(size=18))
+  theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
   
 shapiro.test(rebound$rate[rebound$treatment=="eTRF"])#normal
 shapiro.test(rebound$rate[rebound$treatment=="AL"])#not normal
 leveneTest(rate ~ treatment, data = rebound)
 t.test(rate ~ treatment, data = rebound)$p.value
 ```
+
 ```{r time-course}
 #modeling over time
 #plot
@@ -181,18 +182,19 @@ ggplot(aes(time, avg.glu, col = treatment))+
   geom_errorbar(aes(ymin = avg.glu - error.glu, ymax = avg.glu + error.glu), width =0.4)+
   scale_color_manual(values = color.scheme)+
   theme_bw()+
-  labs(title = "Insulin Tolerance Test, E16", y = "Glucose (mg/dL)", x = "Time after injection (minutes)")+
-  theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
+  labs(title = "Insulin Tolerance Test, E16", y = "Glucose (mg/dL)" )+
+  scale_x_continuous(breaks=seq(0, 120, 15))+
+  theme(legend.position = c(0.23, 0.8),text = element_text(size=18), legend.background = element_blank())
 
 #linear mixed effect modeling
 null.ITT<-lmer(glucose~ 1 + (1|ID), data = ITT.data)
 time.ITT<-lmer(glucose~ as.factor(time) + (1|ID), data = ITT.data)
-anova(null.ITT, time.ITT)#p=0.3
+anova(null.ITT, time.ITT)#p<0.001
 simple.group.ITT<-lmer(glucose~ as.factor(time) + treatment + (1|ID), data = ITT.data)
 anova(time.ITT, simple.group.ITT)#0.04
 int.group.ITT<-lmer(glucose~ as.factor(time)*treatment + (1|ID), data = ITT.data)
-anova(simple.group.ITT, int.group.ITT)#significant
-anova(int.group.ITT)%>%kable(caption = "glucose~ time*treatment + (1|ID)")
+anova(simple.group.ITT, int.group.ITT)#p<0.001
+Anova(int.group.ITT)%>%kable(caption = "glucose~ time*treatment + (1|ID)")
 
 fixef(int.group.ITT)
 summary(int.group.ITT)#update methods too
