@@ -188,6 +188,26 @@ sex.pup.data<-pup.data.mutated%>%
   labs(title = "Pup Body Weight", y = "Body Weight (grams)", x = "Age (days)")+
   theme_bw()+
   theme(legend.position = c(0.20, 0.85),text = element_text(size=18), legend.background = element_blank())
+  
+  ##borrowed from GDF15
+  full.sex.data<-pup.weight.data%>%
+  filter(!(is.na(sex)))
+null.lme<-lmer(weight ~ 1 +  (1|MouseID) + (day||pup.number)+(1|pup.number)+(day||MouseID), data = full.sex.data)
+
+day.lme<-lmer(weight ~ day +  (1|MouseID) + (day||pup.number)+(1|pup.number)+(day||MouseID), data = full.sex.data)
+anova(null.lme, day.lme)
+day.lme%>%summary
+sex.lme<-lmer(weight ~ day + sex  +(1|MouseID) + (day||pup.number)+(1|pup.number)+(day||MouseID), data = full.sex.data)
+anova(sex.lme, day.lme)
+sex.lme%>%summary
+geno.lme<-lmer(weight ~ day + sex + Genotype +  (1|MouseID) + (day||pup.number)+(1|pup.number)+(day||MouseID), data = full.sex.data)
+anova(sex.lme, geno.lme)
+geno.lme%>%summary
+  fixef(geno.lme)      
+  Anova(geno.lme)
+  
+  int.sex.time<-lmer(weight ~ day*sex + Genotype +  (1|MouseID) + (day||pup.number)+(1|pup.number)+(day||MouseID), data = full.sex.data)
+Anova(int.sex.time)
 
 ```
 
@@ -222,23 +242,58 @@ ggplot(summary.success, aes(treatment, mating.success, fill = treatment))+
   theme_bw()+
   theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
 
-#ggplot(summary.success, aes(x="", y=mating.success, fill=gave.birth)) +
-  #geom_bar(stat="identity", width=1, color="white") +
- # coord_polar("y", start=0) +
- # facet_grid(.~treatment)
-#  theme_void() 
- # scale_color_manual(values = c("white","black"))+
- # labs(title = "Mating Success", y = "Successful Mating Events (%)")+
- # theme_bw()+
- # theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
-
-#Stats
-
-#shapiro.test(success.data$as.numeric(gave.birth)[success.data$treatment=="eTRF"])
+#chi-square test for mating success
 ```
 
 
 ```{r time-in-estrus}
+estrus.file<-"estrus-raw-data.csv"
 
+
+estrus.data<-read_csv(estrus.file,
+                      col_types = cols(
+                        ID = col_factor(levels = NULL),
+                        treatment = col_factor(levels = c("AL","eTRF")),
+                        pregnancy = col_factor(levels = NULL),
+                        cohort = col_factor(levels = NULL),
+                        gave.birth = col_factor(levels = c("yes","no")),
+                        date = col_date(),
+                        estrus.stage = col_factor(levels = c("P","E","M","D")),
+                        estrus.number = col_double()
+                      ))
+#create column with full name of estrus stage
+estrus.full.data<-estrus.data%>%
+  mutate(estrus.stage.name = case_when(
+    estrus.stage =="P"~ "Proestrus",
+    estrus.stage =="E"~ "Estrus",
+    estrus.stage =="M"~"Metestrus",
+    estrus.stage =="D"~"Diestrus"
+  ))
+
+#summary dataset
+estrus.summary.data<-estrus.full.data%>%
+  group_by(ID, estrus.stage.name, treatment)%>%
+  count(estrus.stage.name)%>%
+  group_by(treatment, estrus.stage.name)%>%
+  summarize_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+#cumulative plot 
+  ggplot(estrus.summary.data, aes(treatment, mean, fill = treatment))+
+  geom_bar(stat = "identity", aes(fill = treatment))+
+    facet_grid(.~estrus.stage.name)+
+  geom_errorbar(aes(ymin = mean-se, ymax=mean+se), width =0.4)+
+    scale_fill_manual(values = color.scheme)+
+    labs(title = "Estrus cycle", y="average days per stage")+
+     theme_bw()+
+  theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
+  
+#Chi-Sq of estrus stage by treatment
+estrus.table<-table(estrus.full.data$treatment, estrus.full.data$estrus.stage.name)
+chisq.test(estrus.table)%>%tidy%>%kable(caption = "Effect of Treatment on Time Spent in Each Stage of Estrus")
+```
+
+
+```{r latency-to-plug}
+estrus.full.data
 
 ```
