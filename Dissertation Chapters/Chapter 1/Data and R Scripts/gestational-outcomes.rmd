@@ -192,27 +192,27 @@ ggplot(sex.pup.data,aes(day,avg.weight, col = treatment))+
   theme_bw()+
   theme(legend.position = c(0.20, 0.85),text = element_text(size=18), legend.background = element_blank())
   
-  ##borrowed from GDF15
+  ##stats
   full.sex.data<-pup.data.mutated%>%
   filter(!(is.na(sex)))
 null.lme<-lmer(weight ~ 1 +  (1|MouseID) + (day||pup.number)+(1|pup.number)+(day||MouseID), data = full.sex.data)
 
 day.lme<-lmer(weight ~ day +  (1|MouseID) + (day||pup.number)+(1|pup.number)+(day||MouseID), data = full.sex.data)
-anova(null.lme, day.lme)
+anova(null.lme, day.lme)#p<0.0001
 day.lme%>%summary
 sex.lme<-lmer(weight ~ day + sex  +(1|MouseID) + (day||pup.number)+(1|pup.number)+(day||MouseID), data = full.sex.data)
-anova(sex.lme, day.lme)
+anova(sex.lme, day.lme)#0.41
 sex.lme%>%summary
 tx.lme<-lmer(weight ~ day + sex + treatment +  (1|MouseID) + (day||pup.number)+(1|pup.number)+(day||MouseID), data = full.sex.data)
-anova(sex.lme, tx.lme)#no significant effect of treatment
+anova(sex.lme, tx.lme)#no significant effect of treatment, p=0.073
 tx.lme%>%summary
   fixef(tx.lme)      
   Anova(tx.lme)
   
   int.sex.time<-lmer(weight ~ day*sex +treatment +  (1|MouseID) + (day||pup.number)+(1|pup.number)+(day||MouseID), data = full.sex.data)
-Anova(int.sex.time)
-
+Anova(int.sex.time)#no interaction effect
 ```
+
 
 ```{r pg-success}
 success.file<-"mating.success.csv"

@@ -77,123 +77,171 @@ clean.twentyfour.hr<-twentyfour.hr.data%>%
 
 
 ```{r adaptation-period}
+
 clean.twentyfour.hr%>%
+  filter(kcals.consumed>0&kcals.consumed<50)%>%
+  filter(day <8)%>%
+  ggplot(aes(day, kcals.consumed, col = treatment))+
+  geom_point()+
+  geom_smooth(aes(col = treatment), method = "loess", span = 0.3)+
+  scale_color_manual(values = color.scheme)+
+  labs(title = "Adaptation to eTRF", subtitle = "24 hour intake", y = "kcals/mouse/day", x = "Days Post Randomization")+
+  scale_fill_manual(values = color.scheme)+
+  theme_bw()+
+  theme(legend.position = c(0.15, 0.85),text = element_text(size=18), legend.background = element_blank())+
+  scale_fill_manual(values = color.scheme)
+ 
+
+
+clean.six.hr%>%
+  filter(kcals.consumed>0&kcals.consumed<50)%>%
   filter(day <8)%>%
   ggplot(aes(day, kcals.consumed, col = treatment))+
   geom_point()+
   geom_smooth(aes(col = treatment), method = "lm")+
   scale_color_manual(values = color.scheme)+
-  labs(title = "Adaptation to eTRF")
+  labs(title = "Adaptation to eTRF", subtitle = "6 hour intake", y = "Kcals/Mouse/Day", x = "Days Post Randomization")+
+  theme_bw()+
+  theme(legend.position = c(0.15, 0.85),text = element_text(size=18), legend.background = element_blank())
 
+#stats 6 hour
+stats.adapt<-clean.six.hr%>%
+  filter(kcals.consumed>0&kcals.consumed<50)%>%
+  filter(day <8)
+null.adapt<-lmer(kcals.consumed ~ 1 + (1|ID), stats.adapt)
+day.adapt<-lmer(kcals.consumed ~ day + (1|ID), stats.adapt)
+anova(null.adapt, day.adapt)#0.0013
+simple.adapt<-lmer(kcals.consumed ~ day + treatment+ (1|ID), stats.adapt)
+anova(day.adapt, simple.adapt)#p=0.0047
+int.adapt<-lmer(kcals.consumed ~ day*treatment+ (1|ID), stats.adapt)
+anova(simple.adapt, int.adapt)#p=0.00039
+Anova(int.adapt)#significant interaction, p=0.00033
+summary(int.adapt)
 ```
-# plot for each cohort, GA
+
+
+```{r ga-6-hr-pregest}
+
+##PRE-Pregnancy
+#plot
 clean.six.hr%>%
+  filter(kcals.consumed>0&kcals.consumed<50)%>%
+  filter(gest.day>-7&gest.day<1)%>%
 ggplot(aes(gest.day, kcals.consumed, col = treatment))+
   geom_point()+
   geom_smooth(aes(col = treatment), method = "lm")+
   scale_color_manual(values = color.scheme)+
-  labs(title = "6h food intake")
-
-six.hr.adapt<-six.hr.joined%>%
-  filter(gave.birth=="yes")%>%
-  filter(kcals.consumed>0&kcals.consumed<40)%>%
-  filter(day <10)
-  ggplot(six.hr.adapt, aes(day, kcals.consumed, group = treatment))+
-  geom_point(aes(col = treatment))+
-  labs(title = "Adaptation to restriction")+
-    scale_color_manual(values = color.scheme)+
-    geom_smooth(aes(col = treatment), method = "loess")
-#adaptation stats  
-  
+  labs(title = "Pre-Pregnancy Food Intake, 6 hours", y = "Kcals/Mouse/Day", x = "Time to Plug (days)")+
+   theme_bw()+
+  theme(legend.position = c(0.15, 0.85),text = element_text(size=18), legend.background = element_blank())
 
 #stats
-null.6.lme<-lmer(kcals.consumed ~ 1+(1|ID), data = six.hr.mutated)
-day.6.lme<-lmer(kcals.consumed ~ day + (1|ID), data = six.hr.mutated)
-anova(null.6.lme, day.6.lme)
+stats.6h.data<-clean.six.hr%>%
+  filter(kcals.consumed>0&kcals.consumed<50)%>%
+  filter(gest.day>-7&gest.day<1)
+
+null.6.lme<-lmer(kcals.consumed ~ 1+(1|ID), data = stats.6h.data)
+day.6.lme<-lmer(kcals.consumed ~ gest.day + (1|ID), data = stats.6h.data)
+anova(null.6.lme, day.6.lme)#p<0.001
 Anova(day.6.lme)
-group.int.6.lme<-lmer(kcals.consumed ~ day*treatment + (1|ID), data = six.hr.mutated)
-anova(day.6.lme, group.int.6.lme)
-Anova(group.int.6.lme)
-group.simple.6.lme<-lmer(kcals.consumed ~ day+treatment + (1|ID), data = six.hr.mutated)
-anova(day.6.lme, group.simple.6.lme)
-Anova(group.simple.6.lme)
-fixef(group.int.6.lme)
-fixef(group.simple.6.lme)
+group.int.6.lme<-lmer(kcals.consumed ~ gest.day*treatment + (1|ID), data = stats.6h.data)
+anova(day.6.lme, group.int.6.lme)#p=0.00025
+Anova(group.int.6.lme)#No interaction present
+group.simple.6.lme<-lmer(kcals.consumed ~ gest.day+treatment + (1|ID), data = stats.6h.data)
+anova(day.6.lme, group.simple.6.lme)#p=0.00014
+summary(group.simple.6.lme)
+```
 
-#read in file for 24-hour food intake
-twentyfour.hr.file<-read_sheet('10e6of_-mLTP4JuA-ADi-HAxm2HWjZ8hSAcoBGcLXBSQ', sheet = 8)
-#reconfigure columns
-twentyfour.hr.mutated<-twentyfour.hr.file%>%
-mutate(ID=factor(ID),
-       treatment = factor(treatment, levels = c("AL","eTRF")),
-       pregnancy = factor(pregnancy, levels = c("1","2")),
-       cohort = factor(cohort, levels = c("1","2","3")))%>%
-   arrange(day) %>%
-  group_by(ID) %>%
-  mutate (food.consumed = (food.start - food.end)/`Number.in.cage`,
-          kcals.consumed = food.consumed *2.91) %>%
-mutate(food.cumulative = cumsum(kcals.consumed))%>%
-  select(food.consumed, kcals.consumed, day, ID, treatment, food.cumulative, pregnancy, gest.day, cohort)
-
-#take eTRF 
-just.eTRF<-six.hr.mutated%>%
-  filter(treatment == "eTRF")
-
-total.kcals<-rbind(just.eTRF,twentyfour.hr.mutated)
-
-total.kcal.data<-merge(total.kcals, map.data)
-
-
-#plot combined 24 hours
-total.kcal.data%>%
-  filter(gave.birth=="yes")%>%
-  filter(kcals.consumed>0&kcals.consumed<40)%>%
-  filter(day <40)%>%
-  group_by(day, treatment)%>%
-  summarize(avg.kcal = mean(kcals.consumed),
-            error.kcal = se(kcals.consumed))%>%
-ggplot(aes(day, avg.kcal, col = treatment))+
-  geom_point()+
-  geom_errorbar(aes(ymin = avg.kcal - error.kcal, ymax = avg.kcal + error.kcal))+
-  geom_line(aes(col = treatment))+
-  labs(title = "food intake", subtitle = "24 hour intake")+
-  scale_color_manual(values = color.scheme)
-#combined, GA
-total.kcal.data%>%
-  filter(gave.birth=="yes")%>%  
-  filter(kcals.consumed>0&kcals.consumed<40)%>%
+```{r ga-6-hr-gest}
+##Pregnancy
+#plot
+clean.six.hr%>%
+  filter(kcals.consumed>0&kcals.consumed<50)%>%
+  filter(gest.day>0&gest.day<21)%>%
 ggplot(aes(gest.day, kcals.consumed, col = treatment))+
   geom_point()+
   geom_smooth(aes(col = treatment), method = "lm")+
-  labs(title = "24 hr food intake", y = "kcals/mouse/day", x = "gestational age (days)")+
-  scale_color_manual(values = color.scheme)
-#24 intake per cohort, by GA
-total.kcal.data%>%
-  filter(gave.birth=="yes")%>%  
-  filter(kcals.consumed>0&kcals.consumed<40)%>%
-  filter(gest.day>-7)%>%
-  group_by(gest.day, treatment, cohort)%>%
-  summarize(avg.kcal = mean(kcals.consumed),
-            error.kcal = se(kcals.consumed))%>%
-ggplot(aes(gest.day, avg.kcal, col = treatment))+
-  geom_point()+
-  geom_errorbar(aes(ymin = avg.kcal - error.kcal, ymax = avg.kcal + error.kcal))+
-  geom_line(aes(col = treatment))+
-  facet_grid(.~cohort)+
-  labs(title = "food intake", subtitle = "24 hour intake")+
-  scale_color_manual(values = color.scheme)
+  scale_color_manual(values = color.scheme)+
+  labs(title = "Pregnancy Food Intake, 6 hours", y = "Kcals/Mouse/Day", x = "Gestational Age (days)")+
+   theme_bw()+
+  theme(legend.position = c(0.15, 0.85),text = element_text(size=18), legend.background = element_blank())
 
+#stats
+stats.6h.data.pg<-clean.six.hr%>%
+   filter(kcals.consumed>0&kcals.consumed<50)%>%
+  filter(gest.day>0&gest.day<21)
+
+null.6.lme<-lmer(kcals.consumed ~ 1+(1|ID), data = stats.6h.data.pg)
+day.6.lme<-lmer(kcals.consumed ~ as.factor(gest.day) + (1|ID), data = stats.6h.data.pg)
+anova(null.6.lme, day.6.lme)#p<0.001
+Anova(day.6.lme)
+group.int.6.lme<-lmer(kcals.consumed ~ as.factor(gest.day)*treatment + (1|ID), data = stats.6h.data.pg)
+anova(day.6.lme, group.int.6.lme)#p<0.0001
+Anova(group.int.6.lme)#Interaction present
+group.simple.6.lme<-lmer(kcals.consumed ~ as.factor(gest.day)+treatment + (1|ID), data = stats.6h.data.pg)
+summary(group.int.6.lme)
+```
+```{r ga-24-hr}
+#Pre-Pregnancy 24 hour intake
+clean.twentyfour.hr%>%
+ filter(kcals.consumed>0&kcals.consumed<50)%>%
+  filter(gest.day>-7&gest.day<1)%>%
+ggplot(aes(gest.day, kcals.consumed, col = treatment))+
+  geom_point()+
+  geom_smooth(aes(col = treatment), method = "lm")+
+  scale_color_manual(values = color.scheme)+
+ labs(title = "Pre-Pregnancy Food Intake, 24 hours", y = "Kcals/Mouse/Day", x = "Time to Plug (days)")+
+   theme_bw()+
+  theme(legend.position = c(0.15, 0.85),text = element_text(size=18), legend.background = element_blank())
 
 
 #stats
-null.24.lme<-lmer(kcals.consumed ~ 1+(1|ID), data = total.kcals)
-day.24.lme<-lmer(kcals.consumed ~ gest.day + (1|ID), data = total.kcals)
-anova(null.24.lme, day.24.lme)
+stats.twentyfour.hr.prepg<-clean.twentyfour.hr%>%
+  filter(kcals.consumed>0&kcals.consumed<50)%>%
+  filter(gest.day>-7&gest.day<1)
+
+null.24.lme<-lmer(kcals.consumed ~ 1+(1|ID), data = stats.twentyfour.hr.prepg)
+day.24.lme<-lmer(kcals.consumed ~ gest.day + (1|ID), data = stats.twentyfour.hr.prepg)
+anova(null.24.lme, day.24.lme)#p<0.0001
 Anova(day.24.lme)
-group.int.lme<-lmer(kcals.consumed ~ gest.day*treatment + (1|ID), data = total.kcals)
-anova(day.24.lme, group.int.lme)
-Anova(group.int.lme)
-group.simple.24.lme<-lmer(kcals.consumed ~ gest.day+treatment + (1|ID), data = total.kcals)
-anova(day.24.lme, group.simple.24.lme)
+group.int.lme<-lmer(kcals.consumed ~ gest.day*treatment + (1|ID), data = stats.twentyfour.hr.prepg)
+anova(day.24.lme, group.int.lme)#p=0.77
+Anova(group.int.lme)#no interaction
+group.simple.24.lme<-lmer(kcals.consumed ~ gest.day+treatment + (1|ID), data = stats.twentyfour.hr.prepg)
+anova(day.24.lme, group.simple.24.lme)#p=0.65
 Anova(group.simple.24.lme)
+summary(group.simple.24.lme)
+```
+
+```{r ga-24-hr-gest}
+#Pre-Pregnancy 24 hour intake
+clean.twentyfour.hr%>%
+ filter(kcals.consumed>0&kcals.consumed<50)%>%
+  filter(gest.day>0&gest.day<21)%>%
+ggplot(aes(gest.day, kcals.consumed, col = treatment))+
+  geom_point()+
+  geom_smooth(aes(col = treatment), method = "lm")+
+  scale_color_manual(values = color.scheme)+
+ labs(title = "Pregnancy Food Intake, 24 hours", y = "Kcals/Mouse/Day", x = "Gestational Age (days)")+
+   theme_bw()+
+  theme(legend.position = c(0.15, 0.85),text = element_text(size=18), legend.background = element_blank())
+
+
+#stats
+stats.twentyfour.hr.pg<-clean.twentyfour.hr%>%
+ filter(kcals.consumed>0&kcals.consumed<50)%>%
+  filter(gest.day>0&gest.day<21)
+
+null.24.lme<-lmer(kcals.consumed ~ 1+(1|ID), data = stats.twentyfour.hr.pg)
+day.24.lme<-lmer(kcals.consumed ~ gest.day + (1|ID), data = stats.twentyfour.hr.pg)
+anova(null.24.lme, day.24.lme)#p<0.0001
+Anova(day.24.lme)
+group.int.lme<-lmer(kcals.consumed ~ gest.day*treatment + (1|ID), data = stats.twentyfour.hr.pg)
+anova(day.24.lme, group.int.lme)#p=0.77
+Anova(group.int.lme)#no interaction, p=0.088
+group.simple.24.lme<-lmer(kcals.consumed ~ gest.day+treatment + (1|ID), data = stats.twentyfour.hr.pg)
+anova(day.24.lme, group.simple.24.lme)#p=0.65
+Anova(group.simple.24.lme)
+summary(group.simple.24.lme)
+
 ```

@@ -1,0 +1,108 @@
+---
+title: "eTRF_Maternal_Body_Weight"
+author: "Molly C. Mulcahy"
+date: "2023-01-26"
+output: html_document
+---
+
+```{r global_options, include=FALSE}
+library(knitr)
+library(readr)
+library(tidyr)
+library(ggplot2)
+library(car)
+library(lme4)
+library(dplyr)
+#figures makde will go to directory called figures, will make them as both png and pdf files 
+opts_chunk$set(fig.path='figures/',
+               echo=FALSE, warning=FALSE, message=FALSE,dev=c('png','pdf'))
+options(scipen = 2, digits = 3)
+# set echo and message to TRUE if you want to display code blocks and code output respectively
+
+knitr::knit_hooks$set(inline = function(x) {
+  knitr:::format_sci(x, 'md')
+})
+
+
+superpose.eb <- function (x, y, ebl, ebu = ebl, length = 0.08, ...)
+  arrows(x, y + ebu, x, y - ebl, angle = 90, code = 3,
+  length = length, ...)
+
+  
+se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
+# sets maize and blue color scheme
+color.scheme <-  c('#999999','#333333')
+```
+
+```{r data-entry}
+BW.file<-"Maternal_BW.csv"
+
+BW.data<-read_csv(BW.file,
+                  col_types = cols(
+                    ID = col_factor(levels = NULL),
+                    cohort = col_factor(levels = c("1","2","3")),
+                    treatment = col_factor(levels = c("AL","eTRF")),
+                    pregnancy = col_factor(levels = NULL),
+                    body.weight = col_double(),
+                    date = col_date(),
+                   "postnatal(Y/N)" = col_factor(levels = c("Y","N")),
+                   gest.age = col_double(),
+                   week = col_double()
+                  ))
+```
+
+```{R BW-pregest}
+BW.data%>%
+  filter(`postnatal(Y/N)`=="N")%>%
+  filter(gest.age<1&gest.age>-7)%>%
+
+ggplot(aes(gest.age, body.weight, color = treatment))+
+  geom_point()+
+  geom_smooth(aes(col = treatment), method = "lm")+
+  scale_color_manual(values = color.scheme)+
+  labs(title = "Pre-Pregnancy Body Weight", y = "Body Weight (grams)", x = "Time to Plug (days)")+
+  theme_bw()+
+  theme(legend.position = c(0.15, 0.85),text = element_text(size=18), legend.background = element_blank())
+#stats
+pre.pg.bw.stats<-BW.data%>%
+  filter(`postnatal(Y/N)`=="N")%>%
+  filter(gest.age<1&gest.age>-7)
+null.prepg.bw<-lm(body.weight ~ 1 , data = pre.pg.bw.stats)
+day.prepg.bw<-lm(body.weight ~ gest.age, data = pre.pg.bw.stats)
+anova(null.prepg.bw, day.prepg.bw)#p=0.76
+simple.prepg.bw<-lm(body.weight ~ gest.age + treatment, data = pre.pg.bw.stats)
+anova(day.prepg.bw, simple.prepg.bw)#p=0.68
+int.prepg.bw<-lm(body.weight ~ gest.age*treatment, data = pre.pg.bw.stats)
+anova(simple.prepg.bw, int.prepg.bw)#p=0.86, no interaction present
+Anova(simple.prepg.bw)
+summary(simple.prepg.bw)
+```
+
+
+```{r BW-gest}
+BW.data%>%
+  filter(`postnatal(Y/N)`=="N")%>%
+  filter(gest.age>0&gest.age<21)%>%
+
+ggplot(aes(gest.age, body.weight, color = treatment))+
+  geom_point()+
+  geom_smooth(aes(col = treatment), method = "lm")+
+  scale_color_manual(values = color.scheme)+
+  labs(title = "Pregnancy Body Weight", y = "Body Weight (grams)", x = "Gestational Age (days)")+
+  theme_bw()+
+  theme(legend.position = c(0.15, 0.85),text = element_text(size=18), legend.background = element_blank())
+#stats
+pg.bw.stats<-BW.data%>%
+  filter(`postnatal(Y/N)`=="N")%>%
+  filter(gest.age>0&gest.age<21)
+null.pg.bw<-lmer(body.weight ~ 1 + (1|ID), data = pg.bw.stats)
+day.pg.bw<-lmer(body.weight ~ gest.age + (1|ID), data = pg.bw.stats)
+anova(null.pg.bw, day.pg.bw)#p<0.0001
+simple.pg.bw<-lmer(body.weight ~ gest.age + treatment+(1|ID), data = pg.bw.stats)
+anova(day.pg.bw, simple.pg.bw)#0.33
+int.pg.bw<-lmer(body.weight ~ gest.age*treatment+(1|ID), data = pg.bw.stats)
+anova(simple.pg.bw, int.pg.bw)#0.28, no interaction present
+Anova(simple.pg.bw)
+summary(simple.pg.bw)
+
+```
