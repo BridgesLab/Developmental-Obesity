@@ -51,6 +51,13 @@ BW.data<-read_csv(BW.file,
                   ))
 ```
 
+```{r count}
+BW.data%>%
+  group_by(treatment)%>%
+  distinct(ID)%>%
+  count()
+```
+
 ```{R BW-pregest}
 BW.data%>%
   filter(`postnatal(Y/N)`=="N")%>%

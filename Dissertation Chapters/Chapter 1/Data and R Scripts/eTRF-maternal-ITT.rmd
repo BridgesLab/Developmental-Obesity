@@ -48,6 +48,11 @@ ITT.data<-read_csv(raw.data.file,
                      dose.weight = col_double()
                    ))
 
+
+ITT.data%>%
+  group_by(treatment)%>%
+  distinct(ID)%>%
+  count()
 ```
 
 

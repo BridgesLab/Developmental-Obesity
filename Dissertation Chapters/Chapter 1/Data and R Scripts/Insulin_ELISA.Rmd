@@ -1,0 +1,80 @@
+---
+title: "Insulin_ELISA"
+author: "Molly C. Mulcahy"
+date: "2023-02-03"
+output: html_document
+---
+
+```{r global_options, include=FALSE}
+library(knitr)
+library(readr)
+library(tidyr)
+library(ggplot2)
+library(car)
+library(lme4)
+library(dplyr)
+#figures makde will go to directory called figures, will make them as both png and pdf files 
+opts_chunk$set(fig.path='figures/',
+               echo=FALSE, warning=FALSE, message=FALSE,dev=c('png','pdf'))
+options(scipen = 2, digits = 3)
+# set echo and message to TRUE if you want to display code blocks and code output respectively
+
+knitr::knit_hooks$set(inline = function(x) {
+  knitr:::format_sci(x, 'md')
+})
+
+
+superpose.eb <- function (x, y, ebl, ebu = ebl, length = 0.08, ...)
+  arrows(x, y + ebu, x, y - ebl, angle = 90, code = 3,
+  length = length, ...)
+
+  
+se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
+# sets maize and blue color scheme
+color.scheme <-  c('#999999','#333333')
+```
+
+```{r data-entry}
+ELISA.file<-"Insulin_ELISA_1.31.23.csv"
+
+
+insulin.data<-read_csv(ELISA.file,
+                       col_types = cols(
+                         Sample = col_factor(levels = NULL),
+                         Wells = col_factor(levels = NULL),
+                         Raw = col_double(),
+                         Conc. = col_double(),
+                         "Conc.\n(Average)" = col_double(),
+                         Time = col_factor(levels = c("1","13","")),
+                         Treatment = col_factor(levels = c("AL","eTRF","")),
+                         outside.range = col_factor(levels = c("no","yes"))
+                       ))
+
+insulin.data<-insulin.data%>%
+  select(Sample, Conc., Time, Treatment, outside.range)
+```
+
+
+```{r eTRF-data}
+dam.data<-insulin.data%>%
+  filter(Treatment =="eTRF"|Treatment =="AL")
+
+dam.data%>%
+  group_by(Treatment,Time)%>%
+  summarize_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))%>%
+  ggplot(aes(Treatment, mean, fill = Treatment))+
+  geom_col(position = position_dodge())+
+  facet_grid(.~Time)+
+  geom_errorbar(aes(ymin = mean-se, ymax = mean+se), width =0.3)+
+  scale_fill_manual(values = color.scheme)+
+ labs(title = "Insulin", y = "Insulin (ng/mL)")+
+  theme_bw()+
+  theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
+
+#stats
+Insulin.aov<-aov(Conc. ~ Treatment*Time, data = dam.data)
+summary(Insulin.aov)# No evidence of interaction
+simple.insulin.aov<-aov(Conc. ~ Treatment + Time, data = dam.data)
+summary(simple.insulin.aov)
+coef(simple.insulin.aov)
+```

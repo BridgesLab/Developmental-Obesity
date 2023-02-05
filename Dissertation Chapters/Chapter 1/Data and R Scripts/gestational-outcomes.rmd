@@ -211,6 +211,11 @@ tx.lme%>%summary
   
   int.sex.time<-lmer(weight ~ day*sex +treatment +  (1|MouseID) + (day||pup.number)+(1|pup.number)+(day||MouseID), data = full.sex.data)
 Anova(int.sex.time)#no interaction effect
+
+full.sex.data%>%
+  group_by(treatment, sex)%>%
+  distinct(pup.number, keep_all = T)%>%
+  count
 ```
 
 
@@ -297,6 +302,12 @@ estrus.summary.data<-estrus.full.data%>%
 #Chi-Sq of estrus stage by treatment
 estrus.table<-table(estrus.full.data$treatment, estrus.full.data$estrus.stage.name)
 chisq.test(estrus.table)$p.value#%>%tidy%>%kable(caption = "Effect of Treatment on Time Spent in Each Stage of Estrus")
+
+
+estrus.data%>%
+  group_by(treatment)%>%
+  distinct(ID, keep_all = T)%>%
+  count
 ```
 
 
