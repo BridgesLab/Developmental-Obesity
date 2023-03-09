@@ -32,6 +32,7 @@ superpose.eb <- function (x, y, ebl, ebu = ebl, length = 0.08, ...)
 se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
 # sets maize and blue color scheme
 color.scheme <-  c('#999999','#333333')
+defense.color.scheme<-c('#00274C','#9A3324')
 ```
 
 ```{r data-entry}
@@ -66,7 +67,7 @@ BW.data%>%
 ggplot(aes(gest.age, body.weight, color = treatment))+
   geom_point()+
   geom_smooth(aes(col = treatment), method = "lm")+
-  scale_color_manual(values = color.scheme)+
+  scale_color_manual(values = defense.color.scheme)+
   labs(title = "Pre-Pregnancy Body Weight", y = "Body Weight (grams)", x = "Time to Plug (days)")+
   theme_bw()+
   theme(legend.position = c(0.15, 0.85),text = element_text(size=18), legend.background = element_blank())
@@ -94,7 +95,7 @@ BW.data%>%
 ggplot(aes(gest.age, body.weight, color = treatment))+
   geom_point()+
   geom_smooth(aes(col = treatment), method = "lm")+
-  scale_color_manual(values = color.scheme)+
+  scale_color_manual(values = defense.color.scheme)+
   labs(title = "Pregnancy Body Weight", y = "Body Weight (grams)", x = "Gestational Age (days)")+
   theme_bw()+
   theme(legend.position = c(0.15, 0.85),text = element_text(size=18), legend.background = element_blank())

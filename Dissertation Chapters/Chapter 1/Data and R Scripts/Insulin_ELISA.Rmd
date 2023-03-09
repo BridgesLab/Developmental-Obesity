@@ -32,6 +32,7 @@ superpose.eb <- function (x, y, ebl, ebu = ebl, length = 0.08, ...)
 se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
 # sets maize and blue color scheme
 color.scheme <-  c('#999999','#333333')
+defense.color.scheme<-c('#00274C','#9A3324')
 ```
 
 ```{r data-entry}
@@ -66,7 +67,7 @@ dam.data%>%
   geom_col(position = position_dodge())+
   facet_grid(.~Time)+
   geom_errorbar(aes(ymin = mean-se, ymax = mean+se), width =0.3)+
-  scale_fill_manual(values = color.scheme)+
+  scale_fill_manual(values = defense.color.scheme)+
  labs(title = "Insulin", y = "Insulin (ng/mL)")+
   theme_bw()+
   theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())

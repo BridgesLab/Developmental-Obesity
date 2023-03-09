@@ -32,6 +32,7 @@ superpose.eb <- function (x, y, ebl, ebu = ebl, length = 0.08, ...)
 se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
 # sets maize and blue color scheme
 color.scheme <-  c('#999999','#333333')
+defense.color.scheme<-c('#00274C','#9A3324')
 ```
 
 ```{r data-entry}
@@ -102,7 +103,7 @@ summary.litter<-litter.data.mutated%>%
   ggplot(summary.litter, aes(treatment,GA_mean, fill = treatment))+
   geom_col()+
     geom_errorbar(aes(ymin = GA_mean - GA_se, ymax = GA_mean + GA_se), width = 0.3)+
-    scale_fill_manual(values = color.scheme)+
+    scale_fill_manual(values = defense.color.scheme)+
   labs(title = "Gestational Age", y = "Gestational Age (days)")+
   theme_bw()+
   theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
@@ -120,7 +121,7 @@ wilcox.test(GA~treatment, data = litter.data.mutated, paired = FALSE)$p.value%>%
 ggplot(summary.litter, aes(treatment,percent.survival_mean, fill = treatment))+
   geom_col()+
     geom_errorbar(aes(ymin = percent.survival_mean - percent.survival_se, ymax = percent.survival_mean + percent.survival_se), width = 0.3)+
-    scale_fill_manual(values = color.scheme)+
+    scale_fill_manual(values = defense.color.scheme)+
   labs(title = "Survival to PND 3", y = "Pups Survived to PND 3 (%)")+
   theme_bw()+
   theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
@@ -137,7 +138,7 @@ wilcox.test(percent.survival~treatment, data = litter.data.mutated, paired = FAL
 ggplot(summary.litter, aes(treatment,`#.pups.born_mean`, fill = treatment))+
   geom_col()+
     geom_errorbar(aes(ymin = `#.pups.born_mean` - `#.pups.born_se`, ymax = `#.pups.born_mean` + `#.pups.born_se`), width = 0.3)+
-    scale_fill_manual(values = color.scheme)+
+    scale_fill_manual(values = defense.color.scheme)+
   labs(title = "Litter Size", y = "Litter Size (pups)")+
   theme_bw()+
   theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
@@ -161,7 +162,7 @@ pup.data.mutated%>%
   ggplot(aes(treatment, avg.bw, fill = treatment))+
   geom_col()+
   geom_errorbar(aes(ymin = avg.bw - error.bw, ymax = avg.bw + error.bw), width = 0.3)+
-  scale_fill_manual(values = color.scheme)+
+  scale_fill_manual(values = defense.color.scheme)+
   labs(title = "Birthweight", y = "Birthweight (grams)")+
   theme_bw()+
   theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
@@ -187,7 +188,7 @@ ggplot(sex.pup.data,aes(day,avg.weight, col = treatment))+
   facet_grid(.~sex)+
   geom_errorbar(aes(ymin = avg.weight - error.weight, ymax = avg.weight + error.weight), width =0.3)+
   geom_line(aes(col = treatment))+
-  scale_color_manual(values = color.scheme)+
+  scale_color_manual(values = defense.color.scheme)+
   labs(title = "Pup Body Weight", y = "Body Weight (grams)", x = "Age (days)")+
   theme_bw()+
   theme(legend.position = c(0.20, 0.85),text = element_text(size=18), legend.background = element_blank())
@@ -245,7 +246,7 @@ summary.success<-success.data%>%
 
 ggplot(summary.success, aes(treatment, mating.success, fill = treatment))+
   geom_col()+
-  scale_fill_manual(values = color.scheme)+
+  scale_fill_manual(values = defense.color.scheme)+
   labs(title = "Mating Success", y = "Successful Mating Events (%)")+
   theme_bw()+
   theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
@@ -294,7 +295,7 @@ estrus.summary.data<-estrus.full.data%>%
   geom_bar(stat = "identity", aes(fill = treatment))+
     facet_grid(.~estrus.stage.name)+
   geom_errorbar(aes(ymin = mean-se, ymax=mean+se), width =0.4)+
-    scale_fill_manual(values = color.scheme)+
+    scale_fill_manual(values = defense.color.scheme)+
     labs(title = "Estrus cycle", y="average days per stage")+
      theme_bw()+
   theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
@@ -335,7 +336,7 @@ summary.fertility<-fertility.data.raw%>%
 ggplot(summary.fertility, aes(treatment,mean, fill = treatment))+
   geom_col(aes(fill = treatment))+
   geom_errorbar(aes(ymax= mean + se, ymin = mean - se), width = 0.3)+
-  scale_fill_manual(values = color.scheme)+
+  scale_fill_manual(values = defense.color.scheme)+
   labs(title = "Latency to Plug", y = "Days since mating")+
    theme_bw()+
   theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())

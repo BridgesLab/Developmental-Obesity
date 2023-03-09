@@ -29,6 +29,7 @@ superpose.eb <- function (x, y, ebl, ebu = ebl, length = 0.08, ...)
   
 se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
 color.scheme<-c("#333333" ,"#CCCCCC")
+defense.color.scheme<-c("","")
 #load these packages, nearly always needed
 library(tidyr)
 library(tidyverse)
@@ -114,7 +115,7 @@ both.plate.data<-full_join(new.plate.reduced, old.plate.reduced)
 ```
 
 
-```{r IR-pg}
+```{ IR-pg}
 test<-both.plate.data%>%
   filter(Study=="IR")%>%
   group_by(dex, pregnancy, time)%>%
@@ -153,7 +154,7 @@ pg.gdf15.mlm<-lmer(concentration~ time + pregnancy + (1|MouseID), data = IR.data
       ylim(0,275)+
        geom_errorbar(data = avg.pg.data, aes(x=time, y=avg.gdf, ymax = avg.gdf+error.gdf, ymin = avg.gdf-error.gdf), width = 0.3)+
       facet_grid(.~pregnancy)+
-    scale_fill_manual(values = c("grey3","grey45"))+
+    scale_fill_manual(values = c("#A5A508","#00274C"))+
       labs(title = "GDF15 levels by Pregnancy Status", y= "GDF15 (pg/mL)", x= "zeitgeber time (hours from midnight)")+
   theme_bw()+
       theme(text = element_text(size=14))
@@ -170,7 +171,7 @@ pg.gdf15.mlm<-lmer(concentration~ time + pregnancy + (1|MouseID), data = IR.data
        geom_errorbar(data = avg.dex.data, aes(x=time, y=avg.gdf, ymax = avg.gdf+error.gdf, ymin = avg.gdf-error.gdf), width = 0.3)+
         ylim(0,275)+
       facet_grid(.~dex)+
-    scale_fill_manual(values = c("grey3","grey79"))+
+    scale_fill_manual(values = c())+
       labs(title = "GDF15 levels by Dexamethasone Treatment", y= "GDF15 (pg/mL)", x= "zeitgeber time (hours from midnight)")+
   theme_bw()+
       theme(text = element_text(size=14))
@@ -188,10 +189,10 @@ summary.Gdf<-both.plate.data%>%
 ggplot()+
   geom_col(data = summary.Gdf, aes(x=time, y=avg, fill = Genotype, group = Genotype), position = position_dodge(1.0))+
   geom_point(data = filter(both.plate.data, Study =="GDF15"), aes(x=time, y=concentration, group = Genotype), position = position_dodge2(width = 0.6))+
-  labs(title = "GDF15 in Dams",y="GDF15 (pg/mL)", x= "zeitgeber time (hours from midnight))"+
+  labs(title = "GDF15 in Dams",y="GDF15 (pg/mL)", x= "zeitgeber time (hours from midnight)")+
   facet_grid(.~Genotype)+
  geom_errorbar(data = summary.Gdf, aes(x=time, y=avg, ymax = avg+error, ymin = avg-error), width = 0.3)+
-    scale_fill_manual(values = c("#333333","#CCCCCC"))+
+    scale_fill_manual(values = c("#00274C","#A5A508"))+
   theme_bw()+
   theme(text = element_text(size=14), legend.position = "none")
 

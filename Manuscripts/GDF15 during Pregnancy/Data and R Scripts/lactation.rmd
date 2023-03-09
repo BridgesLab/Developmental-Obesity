@@ -33,6 +33,7 @@ se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
 
 #set plot color scheme
 color.scheme = c("#333333","#CCCCCC")
+defense.color.scheme<- c("#00274C","#A5A508")
 ```
 
 ```{r data-input}
@@ -80,7 +81,7 @@ milk.weights <- wsw.data %>%
 ggplot(avg.wsw, aes(Genotype, avg.dam.loss, fill = Genotype))+
   geom_col(aes(fill = Genotype))+
   geom_errorbar(aes(ymin = avg.dam.loss - error.dam.loss, ymax = avg.dam.loss + error.dam.loss), width =0.3)+
-  scale_fill_manual(values = color.scheme)+
+  scale_fill_manual(values = defense.color.scheme)+
   labs(title = "Mass Lost by Dam", y = "Mass lost after suckling (grams)")+
   theme_bw()+
   theme(legend.position = "none",text = element_text(size=14))
@@ -99,7 +100,7 @@ t.test(Dam.Lost.Weight.norm ~ Genotype, data = milk.weights)
 ggplot(avg.wsw.pup, aes(Genotype, avg.pup.gain, fill = Genotype))+
   geom_col(aes(fill = Genotype))+
   geom_errorbar(aes(ymin = avg.pup.gain - error.pup.gain , ymax = avg.pup.gain  + error.pup.gain ), width =0.3)+
-  scale_fill_manual(values = color.scheme)+
+  scale_fill_manual(values = defense.color.scheme)+
   labs(title = "Mass Gained by Pup", y = "Mass gained after suckling (grams)")+
   theme_bw()+
     theme(legend.position = "none",text = element_text(size=14))
@@ -130,7 +131,7 @@ summary.milk.data%>%
   ggplot(aes(Genotype,milk.fat, fill = Genotype))+
            geom_col()+
   geom_errorbar(aes(ymin = milk.fat - se.milk.fat, ymax = milk.fat + se.milk.fat), width =0.3)+
-  scale_fill_manual(values = color.scheme)+
+  scale_fill_manual(values = defense.color.scheme)+
   labs(title = "Milk Fat Percentage", y = "Energy from fat (%)")+
   theme_bw()+
   theme(legend.position = "none",text = element_text(size=14))

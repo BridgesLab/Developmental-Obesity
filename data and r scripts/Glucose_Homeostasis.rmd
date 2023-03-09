@@ -30,6 +30,7 @@ knitr::knit_hooks$set(inline = function(x) {
 se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
 # sets color scheme for plots
 color.scheme <- c('gray69','gray36')
+defense.color.scheme<-c('#9A3324','#00274C')
 ```
 
 #Pre HFD ITT
@@ -61,7 +62,7 @@ ggplot(summary.ITT, aes(time, glucose_mean, col = treatment))+
   geom_line(aes(col = treatment))+
   geom_errorbar(aes(ymin = glucose_mean -glucose_se, ymax = glucose_mean + glucose_se))+
   facet_grid(.~sex)+
-  scale_color_manual(values = color.scheme )+
+  scale_color_manual(values = defense.color.scheme )+
   labs(title = "Insulin Tolerance Test", y = "Blood Glucose (mg/dL)", x = "Time (minutes)")+
    theme(text = element_text(size=18),legend.position = c(0.9,0.80), legend.background = element_rect(fill = "transparent"))
 
@@ -90,7 +91,7 @@ ggplot(AUC.NCD.ITT.summary, aes(treatment,AUC_mean))+
   geom_col(aes(fill = treatment))+
   geom_errorbar(aes(ymin = AUC_mean -AUC_se, ymax = AUC_mean + AUC_se), width = 0.3)+
   facet_grid(.~sex)+
-  scale_fill_manual(values = color.scheme )+
+  scale_fill_manual(values = defense.color.scheme )+
   labs(title = "ITT Area Under the Curve", y = "Avg AUC (mg/dL)")+
    theme(text = element_text(size=18),legend.position = 'none')
 #AUC stats
@@ -120,7 +121,7 @@ ggplot(summary.models, aes(treatment, mean, fill = treatment))+
   geom_col(aes(fill = treatment))+
   facet_grid(.~sex)+
   geom_errorbar(aes(ymin = mean-se, ymax = mean + se), width = 0.3)+
-  scale_fill_manual(values = color.scheme)+
+  scale_fill_manual(values = defense.color.scheme)+
   labs(title = "Rate of Drop, NCD ITT",y="mg/dL per minute")
 
 rate.aov<-aov(slope ~ sex + treatment, data = models)#no interaction, p=0.39, so removed
@@ -148,7 +149,7 @@ summary(models$slope)
     geom_col(aes(fill = treatment))+
     facet_grid(.~sex)+
     geom_errorbar(aes(ymin = glucose_mean -glucose_se, ymax = glucose_mean + glucose_se), width = 0.3)+
-    scale_fill_manual(values = color.scheme)+
+    scale_fill_manual(values = defense.color.scheme)+
     labs(title = "Fasting Blood Glucose", y = "Blood Glucose (mg/dL)")+
    theme(text = element_text(size=18),legend.position = 'none')
   
@@ -197,7 +198,7 @@ ggplot(summary.GTT, aes(time, glucose_mean, col = treatment))+
   geom_line(aes(col = treatment))+
   geom_errorbar(aes(ymin = glucose_mean -glucose_se, ymax = glucose_mean + glucose_se),)+
   facet_grid(.~sex)+
-  scale_color_manual(values = color.scheme )+
+  scale_color_manual(values = defense.color.scheme )+
   labs(title = "Glucose Tolerance Test", y = "Blood Glucose (mg/dL)", x = "Time (minutes)")+
    theme(text = element_text(size=18),legend.position = c(0.4,0.80), legend.background = element_rect(fill = "transparent"))
 
@@ -225,7 +226,7 @@ ggplot(AUC.NCD.GTT.summary, aes(treatment, AUC_mean))+
   geom_col(aes(fill = treatment))+
   geom_errorbar(aes(ymin = AUC_mean -AUC_se, ymax = AUC_mean + AUC_se), width = 0.3)+
   facet_grid(.~sex)+
-  scale_fill_manual(values = color.scheme )+
+  scale_fill_manual(values = defense.color.scheme )+
   labs(title = "GTT Area Under the Curve", y = "Avg AUC (mg/dL)")+
    theme(text = element_text(size=18),legend.position = 'none')
 #AUC stats
@@ -289,7 +290,7 @@ ggplot(summary.HFD.ITT, aes(time, glucose_mean, col = treatment))+
   geom_line(aes(col = treatment))+
   geom_errorbar(aes(ymin = glucose_mean - glucose_se, ymax = glucose_mean + glucose_se))+
   facet_grid(.~sex)+
-  scale_color_manual(values = color.scheme )+
+  scale_color_manual(values = defense.color.scheme )+
   labs(title = "Insulin Tolerance Test", y = "Blood Glucose (mg/dL)", x = "Time (minutes)")+
    theme(text = element_text(size=18),legend.position = c(0.4,0.80), legend.background = element_rect(fill = "transparent"))
 
@@ -335,7 +336,7 @@ ggplot( AUC.ITT.HFD.summary,aes(treatment, AUC_mean))+
   geom_col(aes(fill = treatment))+
   geom_errorbar(aes(ymin = AUC_mean - AUC_se, ymax = AUC_mean + AUC_se), width = 0.3)+
   facet_grid(.~sex)+
-  scale_fill_manual(values = color.scheme )+
+  scale_fill_manual(values = defense.color.scheme )+
   labs(title = "ITT Area Under the Curve", y = " Avg Blood Glucose (mg/dL)")+
    theme(text = element_text(size=18),legend.position = 'none')
 
@@ -386,7 +387,7 @@ ggplot(summary.models.HFD, aes(treatment, mean, fill = treatment))+
   geom_col(aes(fill = treatment))+
   facet_grid(.~sex)+
   geom_errorbar(aes(ymin = mean-se, ymax = mean + se), width = 0.3)+
-  scale_fill_manual(values = color.scheme)+
+  scale_fill_manual(values = defense.color.scheme)+
   labs(title = "Rate of Drop, HFD ITT",y="mg/dL per minute")
 
 rate.aov<-aov(slope ~ sex + treatment, data = models.HFD)#no interaction, p=0.39, so removed
@@ -406,7 +407,7 @@ summary.HFD.FBG<-HFD.FBG.data%>%
 ggplot(summary.HFD.FBG,  aes(treatment, glucose_mean, fill = treatment))+
   geom_col(aes(fill = treatment))+
   facet_grid(.~sex)+
-  scale_fill_manual(values = color.scheme)+
+  scale_fill_manual(values = defense.color.scheme)+
   geom_errorbar(aes(ymin = glucose_mean - glucose_se, ymax = glucose_mean + glucose_se), width = 0.3)+
   labs(title = "Fasting Blood Glucose", y = "Blood Glucose (mg/dL)")+
    theme(text = element_text(size=18),legend.position = 'none')
@@ -447,7 +448,7 @@ ggplot(summary.HFD.GTT, aes(time, glucose_mean, col = treatment))+
   geom_line(aes(col = treatment))+
   geom_errorbar(aes(ymin = glucose_mean - glucose_se, ymax = glucose_mean + glucose_se))+
   facet_grid(.~sex)+
-  scale_color_manual(values = color.scheme )+
+  scale_color_manual(values = defense.color.scheme )+
   labs(title = "Glucose Tolerance Test", y = "Blood Glucose (mg/dL)", x = "Time (minutes)")+
    theme(text = element_text(size=18),legend.position = c(0.4,0.80), legend.background = element_rect(fill = "transparent"))
 
@@ -492,7 +493,7 @@ ggplot( AUC.GTT.HFD.summary,aes(treatment, AUC_mean))+
   geom_col(aes(fill = treatment))+
   geom_errorbar(aes(ymin = AUC_mean - AUC_se, ymax = AUC_mean + AUC_se), width = 0.3)+
   facet_grid(.~sex)+
-  scale_fill_manual(values = color.scheme )+
+  scale_fill_manual(values = defense.color.scheme )+
   labs(title = "GTT Area Under the Curve", y = " Avg Blood Glucose (mg/dL)")+
    theme(text = element_text(size=18),legend.position = 'none')
 
@@ -546,12 +547,13 @@ summary.GSIS<-GSIS.data.raw%>%
 
 #Plot
 color.scheme <- c('gray69','gray36')
+defense.color.scheme<-c('#9A3324','#00274C')
 dodge <- position_dodge(width=1)
 ggplot(summary.GSIS, aes(as.factor(time), full.conc_mean, fill = diet))+
   geom_bar(aes(fill = diet), stat = "identity", position = position_dodge(0.75), width = 0.75)+
   facet_grid(.~sex)+
   geom_errorbar(aes(ymin = full.conc_mean-full.conc_se, ymax = full.conc_mean+full.conc_se, group = diet),width = .3, position = position_dodge(0.75))+
-   scale_fill_manual(values = c('gray69','gray36'))+
+   scale_fill_manual(values = c('#9A3324','#00274C'))+
   labs(title = "Glucose Stimulated Insulin Secretion", y = "Insulin (ng/mL)", x = "Time (minutes)")+
 theme(text = element_text(size=18),legend.position = c(0.1,0.8), legend.background = element_rect(fill = "transparent"))
 ##Stats
@@ -600,7 +602,7 @@ fold.change.avg<-fold.change.data%>%
  ggplot(fold.change.avg, aes(diet, avg.FC, fill = diet))+
   geom_bar(aes(fill = diet), stat = "identity")+
   facet_grid(.~sex)+
-  scale_fill_manual(values = color.scheme)+
+  scale_fill_manual(values = defense.color.scheme)+
   labs(title = "Fold Change Insulin Secretion", y = "Fold Change", x = "treatment")+
   geom_errorbar(aes(ymin = avg.FC - error.FC, ymax = avg.FC + error.FC), width = 0.3)+
   theme(text = element_text(size=18),legend.position = "none") 
