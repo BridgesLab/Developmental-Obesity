@@ -285,4 +285,13 @@ MRI.raw.data %>%
   group_by(treatment)%>%
   count(treatment) %>%
   kable(caption="Dams per feeding group")
+
+MRI.raw.data %>%
+  mutate(diet = case_when(
+    age>=70~ "HFHS",
+    age<70 ~ "NCD"))%>%
+  group_by(sex,treatment,diet) %>%
+  distinct(ID, .keep_all = T) %>%
+  count %>%
+  kable(caption="Animals in each group of this cohort")
 ```
