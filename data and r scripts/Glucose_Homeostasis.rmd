@@ -56,6 +56,11 @@ summary.ITT<-NCD.ITT.raw.data%>%
   group_by(sex, time, treatment)%>%
   summarise_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
 
+NCD.ITT.raw.data%>%
+  group_by(sex, treatment)%>%
+  distinct(ID, keep_all = T)%>%
+  count()
+
 #plot, time course
 ggplot(summary.ITT, aes(time, glucose_mean, col = treatment))+
   geom_point(aes(col = treatment))+
@@ -437,6 +442,12 @@ HFD.GTT.raw.data<-HFD.GTT.raw.data%>%
   group_by(ID)%>%
   mutate(AUC = sum(glucose))
 
+HFD.GTT.raw.data %>%
+  group_by(sex,treatment) %>%
+  distinct(ID, .keep_all = T) %>%
+  count %>%
+  kable(caption="IDS in each group")
+
 ##summary dataset
 summary.HFD.GTT<-HFD.GTT.raw.data%>%
   group_by(sex, treatment, time)%>%
@@ -538,6 +549,11 @@ GSIS.data.raw<-read_csv(GSIS.file,
     Corrected = col_double(),
     Concs. = col_double(),
     full.conc. = col_double()))
+GSIS.data.raw%>%
+  group_by(sex, diet) %>%
+  distinct(ID, .keep_all = T) %>%
+  count %>%
+  kable(caption="IDS in each group")
 
 #summary
 summary.GSIS<-GSIS.data.raw%>%
