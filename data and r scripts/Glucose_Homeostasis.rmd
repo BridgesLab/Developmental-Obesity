@@ -494,6 +494,14 @@ anova(null.HFD.GTT.lme.f, age.HFD.GTT.lme.f)#significant, p=0.0062
 diet.HFD.GTT.lme.f<-lmer(glucose ~ time + treatment + time:treatment + (1|ID) + (1|dam), data = HFD.GTT.F)
 anova(age.HFD.GTT.lme.f, diet.HFD.GTT.lme.f)# p=0.61
 fixef(diet.HFD.GTT.lme.f)
+
+#effect of cohort
+cohort.data<-HFD.GTT.raw.data%>%
+  group_by(sex, cohort, treatment)%>%
+  filter(time == "0")
+cohort.aov<-aov(AUC ~ time + treatment*cohort+sex, data = cohort.data)
+summary(cohort.aov)
+#there is no evidence that glucose intolerance differed by cohort (p=0.33)
 ```
 #HFD GTT AUC
 ```{r Fig3H}
