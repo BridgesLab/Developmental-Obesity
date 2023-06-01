@@ -1,0 +1,197 @@
+---
+title: "Dam Weight"
+author: "Molly C. Mulcahy"
+date: '2022-05-05'
+output: html_document
+---
+
+```{r setup}
+#load commonly needed packages
+library(processx)
+library(devtools)
+library(tidyr)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(knitr)
+library(car)
+library(lme4)
+library(broom)
+library(forcats)
+
+#figures made will go to directory called figures, will make them as both png and pdf files 
+opts_chunk$set(fig.path='figures/',
+               echo=FALSE, warning=FALSE, message=FALSE,dev=c('png','pdf'))
+options(scipen = 2, digits = 3)
+# set echo and message to TRUE if you want to display code blocks and code output respectively
+knitr::knit_hooks$set(inline = function(x) {
+  knitr:::format_sci(x, 'md')
+})
+se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
+
+#set plot color scheme
+color.scheme = c("#333333","#CCCCCC")
+defense.color.scheme<- c("#00274C","#A5A508")
+```
+
+```{r data-entry}
+dam.bodyweight.file<-"dam_bodyweight.csv"
+
+bw.data<-read_csv(dam.bodyweight.file, 
+         col_types = cols(
+          MouseID = col_factor(levels = NULL),
+          Genotype = col_factor(levels = c("+/+","-/-")),
+          gram.values = col_double(),
+          gest.age = col_double(),
+          postnatal = col_factor(levels = c("n","y"))  
+         ))%>%
+mutate( week = cut(gest.age, breaks = c(-7.5,0,7.5, 14.5, 21.5, 28.5, 35.5,42.5), labels = c("pre-pregnancy","E0.5","E7.5","E14.5","E21.5","PND7.5","PND14.5")))
+
+avg.bw.data<-bw.data%>%
+  group_by(Genotype, week)%>%
+  summarise_at(vars(gram.values), funs(mean, se))
+```
+
+#Analysis
+```{r bodyweight-timecourse}
+#plot, all values
+ggplot(bw.data, aes(gest.age, gram.values, col = Genotype))+
+  geom_point(aes(col = Genotype))+
+  geom_smooth(aes(col = Genotype), se= FALSE, span =0.4)+
+  scale_color_manual(values = defense.color.scheme)+
+  labs(title = "Maternal Perinatal Body Weight", y = "body weight (grams)",x= "Gestational Day")+
+  theme_bw()+
+  theme(legend.position = c(0.1, 0.865), legend.background = element_blank(),text = element_text(size=14))
+  
+#plot averaged values
+ avg.bw.data%>%
+   ggplot(aes(as.numeric(week), mean, col = Genotype))+
+   geom_point(aes(col = Genotype))+
+   geom_errorbar(aes(ymin = mean - se, ymax = mean + se), width =0.3)+
+   scale_color_manual(values = defense.color.scheme)+
+   geom_smooth(aes(col = Genotype),se=FALSE)+
+  labs(title = "Maternal Perinatal Body Weight", y = "body weight(grams)",x= "Gestational Day")+
+  theme(legend.position = c(0.1, 0.865), legend.background = element_blank(),text = element_text(size=14))+
+  theme_bw() 
+ 
+
+```
+```{r weight-prenatal}
+#calculate gestational weight gain
+prenatal.bw.data<-bw.data%>%
+  filter(postnatal=="n")%>%
+  arrange(gest.age)%>%
+  group_by(MouseID)%>%
+  mutate(gwg = last(gram.values)-first(gram.values))
+#filter data for one observation per animal
+prenatal.bw.data.cleaned<-prenatal.bw.data%>%
+  group_by(MouseID, Genotype)%>%
+  distinct(MouseID, .keep_all = T)%>%
+  select(MouseID, Genotype, gwg)
+  
+#bar plot
+prenatal.bw.data.cleaned%>%
+  group_by(Genotype)%>%
+  summarize(avg.gwg = mean(gwg),
+            error.gwg = se(gwg))%>%
+ggplot(aes(Genotype,avg.gwg, fill = Genotype))+
+  geom_col()+
+  scale_fill_manual(values = defense.color.scheme)+
+  geom_errorbar(aes(ymin = avg.gwg - error.gwg, ymax = avg.gwg + error.gwg), width =0.3)+
+  labs(title = "Prenatal weight change", y = "Prenatal weight change (grams/dam)")+
+  theme_bw()+
+  theme(legend.position = "none",text = element_text(size=14))
+#stats
+shapiro.test(prenatal.bw.data.cleaned$gwg[prenatal.bw.data.cleaned$Genotype=="+/+"])#p=0.5
+shapiro.test(prenatal.bw.data.cleaned$gwg[prenatal.bw.data.cleaned$Genotype=="-/-"])#p=0.3
+leveneTest(gwg ~ Genotype, prenatal.bw.data.cleaned)#p=0.26
+t.test(gwg ~ Genotype, prenatal.bw.data.cleaned)#p=0.99
+```
+
+```{r weight-postnatal}
+#calculate postnatal weight loss 
+postnatal.bw.data<-bw.data%>%
+  filter(postnatal=="y")%>%
+  arrange(gest.age)%>%
+  group_by(MouseID)%>%
+  mutate(loss = last(gram.values)-first(gram.values))
+#filter data for one observation per animal
+postnatal.bw.data.cleaned<-postnatal.bw.data%>%
+  group_by(MouseID, Genotype)%>%
+  distinct(MouseID, .keep_all = T)%>%
+  select(MouseID, Genotype, loss)
+#bar plot
+postnatal.bw.data.cleaned%>%
+   group_by(Genotype)%>%
+  summarize(avg.loss = mean(loss),
+            error.loss = se(loss))%>%
+ggplot(aes(Genotype,avg.loss, fill = Genotype))+
+  geom_col()+
+  scale_fill_manual(values = defense.color.scheme)+
+  geom_errorbar(aes(ymin = avg.loss - error.loss, ymax = avg.loss + error.loss), width =0.3)+
+  labs(title = "Postnatal weight loss", y = "Postnatal weight loss (grams/dam)")+
+  theme_bw()+
+  theme(legend.position = "none",text = element_text(size=14))
+
+#stats
+shapiro.test(postnatal.bw.data.cleaned$loss[postnatal.bw.data.cleaned$Genotype=="-/-"])#p=0.1
+shapiro.test(postnatal.bw.data.cleaned$loss[postnatal.bw.data.cleaned$Genotype=="+/+"])#p=0.4
+leveneTest(loss ~ Genotype, postnatal.bw.data.cleaned)#p=0.11
+t.test(loss ~ Genotype, postnatal.bw.data.cleaned)#$p.value#p=0.2
+```
+
+```{r stats}
+# pre birth
+bw.data.pre<-bw.data%>%
+  filter(postnatal=="n")
+#linear mixed effect Models
+base.model<-lmer(gram.values ~ 1+ (1|MouseID), data = bw.data.pre)
+time.model<-lmer(gram.values ~ gest.age + (1|MouseID), data = bw.data.pre)
+anova(base.model, time.model)#significant effect of gestational age
+geno.model<-lmer(gram.values ~ gest.age + Genotype + (1|MouseID), data = bw.data.pre)
+anova(time.model, geno.model)#no independent effect of genotype
+geno.int.model<-lmer(gram.values ~ gest.age*Genotype +(1|MouseID), data = bw.data.pre)
+anova(geno.model,geno.int.model)# no differnece between simple and interaction model
+Anova(geno.int.model)#no interaction effect
+fixef(geno.model)
+Anova(geno.model)
+
+#post birth
+bw.data.post<-bw.data%>%
+  filter(postnatal=="y")
+
+#linear mixed effect models
+base.post<-lmer(gram.values ~ 1 + (1|MouseID) ,data = bw.data.post)
+time.post<-lmer(gram.values ~ gest.age + (1|MouseID), data = bw.data.post)
+anova(base.post, time.post)#significant effect of time
+geno.post<-lmer(gram.values ~ gest.age + Genotype + (1|MouseID), data = bw.data.post)
+anova(time.post, geno.post)# no independent effect of genotype
+geno.int.post<-lmer(gram.values ~ gest.age*Genotype + (1|MouseID), data = bw.data.post)
+anova(geno.int.post, geno.post)
+Anova(geno.int.post)#no interaction
+fixef(geno.post)
+Anova(geno.post)
+```
+
+
+```{r power}
+weight.change<-prenatal.bw.data%>%
+  group_by(MouseID)%>%
+  arrange(gest.age)%>%
+  mutate(percent.wt.change = (gwg/first(gram.values)*100))
+
+summary.weight.change<-weight.change%>%
+  group_by(MouseID, Genotype)%>%
+  distinct(MouseID, .keep_all = T)%>%
+  select(MouseID, Genotype, percent.wt.change, gwg)
+
+avg.weight.change<-summary.weight.change%>%
+  group_by(Genotype)%>%
+  summarize(avg.pct = mean(percent.wt.change),
+            stdev.pct = sd(percent.wt.change),
+            num = length(percent.wt.change),
+            avg.gwg = mean(gwg),
+            stdev.gwg = sd(gwg),
+            num.gwg = length(gwg))
+
+```

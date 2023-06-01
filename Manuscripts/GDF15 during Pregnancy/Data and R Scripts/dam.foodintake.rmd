@@ -1,0 +1,211 @@
+---
+title: "dam.foodintake"
+author: "Molly C. Mulcahy"
+date: '2022-05-25'
+output: html_document
+---
+
+```{r setup}
+#load commonly needed packages
+library(processx)
+library(devtools)
+library(tidyr)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(knitr)
+library(car)
+library(lme4)
+library(broom)
+library(forcats)
+
+#figures made will go to directory called figures, will make them as both png and pdf files 
+opts_chunk$set(fig.path='figures/',
+               echo=FALSE, warning=FALSE, message=FALSE,dev=c('png','pdf'))
+options(scipen = 2, digits = 3)
+# set echo and message to TRUE if you want to display code blocks and code output respectively
+knitr::knit_hooks$set(inline = function(x) {
+  knitr:::format_sci(x, 'md')
+})
+se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
+
+#set plot color scheme
+color.scheme = c("#333333","#CCCCCC")
+defense.color.scheme<- c("#00274C","#A5A508")
+```
+
+#data entry
+```{r data-entry}
+dam.foodintake.file<-"dam_foodintake.csv"
+
+intake.data<-read_csv(dam.foodintake.file, 
+  col_types = cols(
+  MouseID = col_factor(levels = NULL),
+  "food start" = col_double(),
+  "food end" = col_double(),
+  "number in cage" = col_double(),
+  kcals.consumed = col_double(),
+  Genotype = col_factor(levels = c("+/+","-/-")),
+  gest.age = col_double(),
+  postnatal = col_factor(levels = c("n","y")),
+  food.cumulative = col_double()
+  ))
+          
+intake.data.cleaned<-intake.data%>%
+mutate( week = cut(gest.age, breaks = c(-7.5,0,7.5, 14.5, 21.5, 28.5, 35.5,42.5), labels = c("-1","0","1","2","3","4","5")))%>%
+  mutate(week=as.numeric(week))
+```
+
+
+```{r prenatal-food-bar}
+ #generate final prenatal food value for each animal
+prenatal.food.cumulative<-intake.data.cleaned%>%
+  filter(postnatal =="n")%>%
+  arrange(week)%>%
+  group_by(MouseID)%>%
+  mutate(final.pre = last(food.cumulative))
+#select only needed variables, one observation per animal
+prenatal.final<-prenatal.food.cumulative%>%
+  group_by(MouseID, Genotype)%>%
+  distinct(MouseID, .keep_all = T)%>%
+  select(MouseID, final.pre, Genotype)
+
+#bar graph, prenatal food intake
+prenatal.final%>%
+  group_by(Genotype)%>%
+  summarize(avg.kcal = mean(final.pre),
+               error.kcal = se(final.pre))%>%
+  ggplot(aes(Genotype, avg.kcal, fill = Genotype))+
+  geom_col()+
+  geom_errorbar(aes(ymin = avg.kcal -error.kcal, ymax = avg.kcal + error.kcal),width=0.3)+
+  scale_fill_manual(values = defense.color.scheme)+
+  labs(title = "Prenatal cumulative food intake", y="Prenatal cumulative food intake (kcal/dam)")+
+  theme_bw()+
+  theme(legend.position = "none",text = element_text(size=14))
+
+#prenatal food intake stats
+shapiro.test(prenatal.final$final.pre[prenatal.final$Genotype=="-/-"])#0.5
+shapiro.test(prenatal.final$final.pre[prenatal.final$Genotype=="+/+"])#0.08
+leveneTest(final.pre ~ Genotype, data = prenatal.final)#0.98
+t.test(final.pre ~ Genotype, data = prenatal.final)$p.value#p=0.5
+```
+
+
+```{r postnatal-food-bar}
+ #generate final postnatal food value for each animal
+postnatal.food.cumulative<-intake.data.cleaned%>%
+  filter(postnatal =="y")%>%
+  arrange(week)%>%
+  group_by(MouseID)%>%
+  mutate(final.post = last(food.cumulative))
+#select only needed variables, one observation per animal
+postnatal.final<-postnatal.food.cumulative%>%
+  group_by(MouseID, Genotype)%>%
+  distinct(MouseID, .keep_all = T)%>%
+  select(MouseID, final.post, Genotype)
+merged.final<-merge(postnatal.final, prenatal.final, by =c("Genotype", "MouseID"))
+#merge data from prenatal period, subtract kcals from prenatal period
+sub.post<-merged.final%>%
+  group_by(MouseID)%>%
+  mutate(postnatal.final = final.post-final.pre)
+
+#bar graph, postnatal food intake
+sub.post%>%
+   group_by(Genotype)%>%
+  summarize(avg.kcal = mean(postnatal.final),
+               error.kcal = se(postnatal.final))%>%
+  ggplot(aes(Genotype, avg.kcal, fill = Genotype))+
+  geom_col()+
+  geom_errorbar(aes(ymin = avg.kcal -error.kcal, ymax = avg.kcal + error.kcal),width=0.3)+
+  scale_fill_manual(values = defense.color.scheme)+
+  labs(title = "Postnatal cumulative food intake", y="Postnatal cumulative food intake (kcal/dam)")+
+  theme_bw()+
+    theme(legend.position = "none",text = element_text(size=14))
+
+#postnatal food intake stats
+shapiro.test(sub.post$postnatal.final[sub.post$Genotype=="+/+"])#0.1
+shapiro.test(sub.post$postnatal.final[sub.post$Genotype=="-/-"])#0.3
+leveneTest(postnatal.final ~ Genotype, sub.post)#0.83
+t.test(postnatal.final ~ Genotype, sub.post)$p.value#0.9
+  
+```
+ 
+```{r weekly-plots}
+ #Daily Food 
+ggplot(intake.data.cleaned, aes(as.integer(week), kcals.consumed, col = Genotype))+
+  geom_point(aes(col = Genotype))+
+  geom_smooth(aes(col = Genotype), se = FALSE, span =0.5)+
+  scale_x_continuous(breaks=c(1,2,3,4,5,6,7),labels = c("pre","0","1","2","3","4","5"))+
+  scale_color_manual(values = defense.color.scheme)+
+  labs(title = "Maternal Food Intake", y= "food intake (kcal/mouse/day)",x="Gestational Age")+
+  theme_bw()+
+  theme(legend.position = c(0.1,0.85), legend.background = element_blank(),text = element_text(size=14))
+
+#Cumulative Food Intake
+ intake.data.cleaned%>%
+  #filter(postnatal=="n")%>%
+   ggplot(aes(gest.age, food.cumulative, col = Genotype))+
+   geom_point(aes(col = Genotype))+
+    scale_color_manual(values = defense.color.scheme)+
+   geom_smooth(aes(col = Genotype),se=FALSE)+
+  labs(title = "Maternal Cumulative Food Intake", y= "kcals/mouse",x="Gestational Day")+
+  theme(legend.position = c(0.1,0.85),legend.background = element_blank())
+```
+
+
+```{ stats}
+#pre birth
+##daily kcals
+pre.birth.intake<-intake.data.cleaned%>%
+  filter(postnatal == "n")#filter for only pre-birth observations
+daily.null<-lmer(kcals.consumed ~ 1 + (1|MouseID), data = pre.birth.intake)
+daily.day<-lmer(kcals.consumed ~ as.factor(gest.age) + (1|MouseID), pre.birth.intake)
+anova(daily.null, daily.day) #significant effect of gestational age
+daily.geno<-lmer(kcals.consumed ~ gest.age + Genotype +(1|MouseID), pre.birth.intake)
+anova(daily.day, daily.geno)#no significant effect for genotype
+daily.geno.int<-lmer(kcals.consumed ~ gest.age*Genotype + (1|MouseID), pre.birth.intake)
+anova(daily.geno, daily.geno.int)
+Anova(daily.geno.int)# No interaction effect 
+Anova(daily.geno)
+fixef(daily.geno)
+
+#cumulative kcals
+cumu.null<-lmer(food.cumulative ~1 + (1|MouseID), data = pre.birth.intake)
+cumu.day<-lmer(food.cumulative ~gest.age + (1|MouseID), data = pre.birth.intake)
+anova(cumu.null, cumu.day)#sig effect of day
+cumu.geno <- lmer(food.cumulative ~gest.age + Genotype + (1|MouseID), data = pre.birth.intake)
+anova(cumu.day, cumu.geno)#sig efect of geno
+cumu.geno.int <- lmer(food.cumulative ~gest.age*Genotype + (1|MouseID), data = pre.birth.intake)
+anova(cumu.geno, cumu.geno.int)#no interaction
+Anova(cumu.geno.int)# no interaction present, use simple model 
+Anova(cumu.geno)
+fixef(cumu.geno)
+
+
+#post models
+ post.birth.intake<-intake.data.cleaned%>%
+  filter(postnatal=="y")
+#daily kcals
+post.null<-lmer(kcals.consumed ~ 1 + (1|MouseID), data = post.birth.intake)
+daily.post<-lmer(kcals.consumed ~ gest.age + (1|MouseID), data = post.birth.intake)
+anova(post.null, daily.post)#sig effect of day
+geno.post<-lmer(kcals.consumed ~ gest.age + Genotype + (1|MouseID), data = post.birth.intake)
+anova(daily.post, geno.post)#no significant difference between models
+geno.post.int<-lmer(kcals.consumed ~ gest.age*Genotype + (1|MouseID), data = post.birth.intake)
+anova(geno.post, geno.post.int)
+Anova(geno.post.int)#no effect of interaction
+Anova(geno.post)
+fixef(geno.post)
+
+#cumulative kcals
+post.cumu.null<-lmer(food.cumulative ~ 1 + (1|MouseID), data = post.birth.intake)
+daily.cumu.post<-lmer(food.cumulative ~ gest.age + (1|MouseID), data = post.birth.intake)
+anova(post.cumu.null, daily.cumu.post)#significant effect of gestational age
+geno.cumu.post<-lmer(food.cumulative ~ gest.age + Genotype + (1|MouseID), data = post.birth.intake)
+anova(daily.cumu.post, geno.cumu.post)#significant difference between models
+geno.int.cumu.post<-lmer(food.cumulative ~ gest.age*Genotype + (1|MouseID), data = post.birth.intake)
+anova(geno.cumu.post, geno.int.cumu.post)#no differences between models
+Anova(geno.int.cumu.post)#No interaction effect present, continue with simple genotype model
+Anova(geno.cumu.post)
+fixef(geno.cumu.post)
+``

@@ -1,0 +1,190 @@
+Pregnancy,Treatment,ID,time,glucose
+Not Pregnant,Water,7829,0,172
+Not Pregnant,Water,7829,15,128
+Not Pregnant,Water,7829,30,117
+Not Pregnant,Water,7829,45,89
+Not Pregnant,Water,7829,60,88
+Not Pregnant,Water,7829,75,87
+Not Pregnant,Water,7829,90,98
+Not Pregnant,Water,7829,105,91
+Not Pregnant,Water,7829,120,108
+Not Pregnant,Water,7826,0,164
+Not Pregnant,Water,7826,15,142
+Not Pregnant,Water,7826,30,60
+Not Pregnant,Water,7826,45,41
+Not Pregnant,Water,7826,60,45
+Not Pregnant,Water,7826,75,56
+Not Pregnant,Water,7826,90,74
+Not Pregnant,Water,7826,105,111
+Not Pregnant,Water,7826,120,124
+Not Pregnant,Water,7827,0,196
+Not Pregnant,Water,7827,15,121
+Not Pregnant,Water,7827,30,107
+Not Pregnant,Water,7827,45,88
+Not Pregnant,Water,7827,60,85
+Not Pregnant,Water,7827,75,82
+Not Pregnant,Water,7827,90,118
+Not Pregnant,Water,7827,105,152
+Not Pregnant,Water,7827,120,176
+Not Pregnant,Water,7830,0,122
+Not Pregnant,Water,7830,15,103
+Not Pregnant,Water,7830,30,78
+Not Pregnant,Water,7830,45,73
+Not Pregnant,Water,7830,60,118
+Not Pregnant,Water,7830,75,95
+Not Pregnant,Water,7830,90,100
+Not Pregnant,Water,7830,105,115
+Not Pregnant,Water,7830,120,120
+Not Pregnant,Water,7833,0,163
+Not Pregnant,Water,7833,15,107
+Not Pregnant,Water,7833,30,101
+Not Pregnant,Water,7833,45,104
+Not Pregnant,Water,7833,60,76
+Not Pregnant,Water,7833,75,87
+Not Pregnant,Water,7833,90,82
+Not Pregnant,Water,7833,105,77
+Not Pregnant,Water,7833,120,110
+Not Pregnant,Water,7864,0,154
+Not Pregnant,Water,7864,15,98
+Not Pregnant,Water,7864,30,67
+Not Pregnant,Water,7864,45,70
+Not Pregnant,Water,7864,60,89
+Not Pregnant,Water,7864,75,111
+Not Pregnant,Water,7864,90,116
+Not Pregnant,Water,7864,105,128
+Not Pregnant,Water,7864,120,159
+Not Pregnant,Water,7835,0,202
+Not Pregnant,Water,7835,15,115
+Not Pregnant,Water,7835,30,73
+Not Pregnant,Water,7835,45,70
+Not Pregnant,Water,7835,60,73
+Not Pregnant,Water,7835,75,101
+Not Pregnant,Water,7835,90,95
+Not Pregnant,Water,7835,105,90
+Not Pregnant,Water,7835,120,92
+Not Pregnant,Water,7839,0,84
+Not Pregnant,Water,7839,15,117
+Not Pregnant,Water,7839,30,90
+Not Pregnant,Water,7839,45,81
+Not Pregnant,Water,7839,60,80
+Not Pregnant,Water,7839,75,90
+Not Pregnant,Water,7839,90,92
+Not Pregnant,Water,7839,105,83
+Not Pregnant,Water,7839,120,66
+Pregnant,Water,7822,0,152
+Pregnant,Water,7822,15,126
+Pregnant,Water,7822,30,128
+Pregnant,Water,7822,45,129
+Pregnant,Water,7822,60,130
+Pregnant,Water,7822,75,125
+Pregnant,Water,7822,90,132
+Pregnant,Water,7822,105,138
+Pregnant,Water,7822,120,132
+Pregnant,Water,7863,0,137
+Pregnant,Water,7863,15,120
+Pregnant,Water,7863,30,107
+Pregnant,Water,7863,45,93
+Pregnant,Water,7863,60,79
+Pregnant,Water,7863,75,69
+Pregnant,Water,7863,90,71
+Pregnant,Water,7863,105,86
+Pregnant,Water,7863,120,84
+Pregnant,Dexamethasone,7832,0,93
+Pregnant,Dexamethasone,7832,15,104
+Pregnant,Dexamethasone,7832,30,104
+Pregnant,Dexamethasone,7832,45,95
+Pregnant,Dexamethasone,7832,60,103
+Pregnant,Dexamethasone,7832,75,101
+Pregnant,Dexamethasone,7832,90,108
+Pregnant,Dexamethasone,7832,105,112
+Pregnant,Dexamethasone,7832,120,106
+Pregnant,Dexamethasone,7828,0,115
+Pregnant,Dexamethasone,7828,15,97
+Pregnant,Dexamethasone,7828,30,87
+Pregnant,Dexamethasone,7828,45,112
+Pregnant,Dexamethasone,7828,60,117
+Pregnant,Dexamethasone,7828,75,114
+Pregnant,Dexamethasone,7828,90,122
+Pregnant,Dexamethasone,7828,105,137
+Pregnant,Dexamethasone,7828,120,149
+Pregnant,Water,7843,0,131
+Pregnant,Water,7843,15,125
+Pregnant,Water,7843,30,114
+Pregnant,Water,7843,45,113
+Pregnant,Water,7843,60,109
+Pregnant,Water,7843,75,106
+Pregnant,Water,7843,90,108
+Pregnant,Water,7843,105,109
+Pregnant,Water,7843,120,106
+Pregnant,Water,7862,0,158
+Pregnant,Water,7862,15,91
+Pregnant,Water,7862,30,97
+Pregnant,Water,7862,45,93
+Pregnant,Water,7862,60,85
+Pregnant,Water,7862,75,79
+Pregnant,Water,7862,90,73
+Pregnant,Water,7862,105,92
+Pregnant,Water,7862,120,84
+Pregnant,Water,7841,0,160
+Pregnant,Water,7841,15,93
+Pregnant,Water,7841,30,91
+Pregnant,Water,7841,45,81
+Pregnant,Water,7841,60,69
+Pregnant,Water,7841,75,71
+Pregnant,Water,7841,90,86
+Pregnant,Water,7841,105,102
+Pregnant,Water,7841,120,113
+Pregnant,Water,7838,0,116
+Pregnant,Water,7838,15,126
+Pregnant,Water,7838,30,106
+Pregnant,Water,7838,45,106
+Pregnant,Water,7838,60,104
+Pregnant,Water,7838,75,123
+Pregnant,Water,7838,90,122
+Pregnant,Water,7838,105,122
+Pregnant,Water,7838,120,103
+Pregnant,Dexamethasone,7842,0,103
+Pregnant,Dexamethasone,7842,15,106
+Pregnant,Dexamethasone,7842,30,114
+Pregnant,Dexamethasone,7842,45,114
+Pregnant,Dexamethasone,7842,60,101
+Pregnant,Dexamethasone,7842,75,136
+Pregnant,Dexamethasone,7842,90,117
+Pregnant,Dexamethasone,7842,105,123
+Pregnant,Dexamethasone,7842,120,110
+Pregnant,Water,7834,0,97
+Pregnant,Water,7834,15,94
+Pregnant,Water,7834,30,97
+Pregnant,Water,7834,45,104
+Pregnant,Water,7834,60,97
+Pregnant,Water,7834,75,112
+Pregnant,Water,7834,90,103
+Pregnant,Water,7834,105,99
+Pregnant,Water,7834,120,96
+Pregnant,Dexamethasone,7844,0,107
+Pregnant,Dexamethasone,7844,15,111
+Pregnant,Dexamethasone,7844,30,109
+Pregnant,Dexamethasone,7844,45,89
+Pregnant,Dexamethasone,7844,60,119
+Pregnant,Dexamethasone,7844,75,103
+Pregnant,Dexamethasone,7844,90,79
+Pregnant,Dexamethasone,7844,105,89
+Pregnant,Dexamethasone,7844,120,75
+Pregnant,Dexamethasone,7837,0,93
+Pregnant,Dexamethasone,7837,15,98
+Pregnant,Dexamethasone,7837,30,115
+Pregnant,Dexamethasone,7837,45,108
+Pregnant,Dexamethasone,7837,60,127
+Pregnant,Dexamethasone,7837,75,108
+Pregnant,Dexamethasone,7837,90,91
+Pregnant,Dexamethasone,7837,105,90
+Pregnant,Dexamethasone,7837,120,98
+Pregnant,Dexamethasone,7840,0,100
+Pregnant,Dexamethasone,7840,15,103
+Pregnant,Dexamethasone,7840,30,93
+Pregnant,Dexamethasone,7840,45,107
+Pregnant,Dexamethasone,7840,60,99
+Pregnant,Dexamethasone,7840,75,106
+Pregnant,Dexamethasone,7840,90,89
+Pregnant,Dexamethasone,7840,105,87
+Pregnant,Dexamethasone,7840,120,75

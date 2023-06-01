@@ -1,0 +1,352 @@
+---
+title: "Gestational-outcomes"
+author: "Molly C. Mulcahy"
+date: "2023-01-08"
+output: html_document
+---
+
+```{r global_options, include=FALSE}
+library(knitr)
+library(readr)
+library(tidyr)
+library(ggplot2)
+library(car)
+library(lme4)
+library(dplyr)
+#figures makde will go to directory called figures, will make them as both png and pdf files 
+opts_chunk$set(fig.path='figures/',
+               echo=FALSE, warning=FALSE, message=FALSE,dev=c('png','pdf'))
+options(scipen = 2, digits = 3)
+# set echo and message to TRUE if you want to display code blocks and code output respectively
+
+knitr::knit_hooks$set(inline = function(x) {
+  knitr:::format_sci(x, 'md')
+})
+
+
+superpose.eb <- function (x, y, ebl, ebu = ebl, length = 0.08, ...)
+  arrows(x, y + ebu, x, y - ebl, angle = 90, code = 3,
+  length = length, ...)
+
+  
+se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
+# sets maize and blue color scheme
+color.scheme <-  c('#999999','#333333')
+defense.color.scheme<-c('#00274C','#9A3324')
+```
+
+```{r data-entry}
+litter.data.file<-"litter.data.csv"
+
+litter.data<-read_csv(litter.data.file,
+         col_types = cols(
+        MouseID = col_factor(levels = NULL),
+        `#.pups.born` = col_double(),
+        `#.pups.dead` = col_double(),
+        treatment = col_factor(levels = c("AL","eTRF")),
+        cohort = col_factor(levels = c("1","2","3")),
+        GA = col_double()
+        ))
+
+litter.data.mutated<-litter.data%>%
+  mutate(percent.dead = (`#.pups.dead`/`#.pups.born`)*100,
+         percent.survival = 100-percent.dead)
+
+pup.data.file<-"pup.data.csv"
+
+pup.data<-read_csv(pup.data.file,
+        col_types = cols(
+        birth.weight = col_double(),
+        MouseID = col_factor(levels = NULL),
+        alive.at.birth = col_factor(levels = c("yes","no","")),
+        sex = col_factor(levels = c("male","female","")),
+        survival = col_factor(levels = c("yes","no","")),
+        culled = col_factor(levels = c("yes","no","")),
+        pnd3 = col_double(),
+        pnd7 = col_double(),
+        pnd14 = col_double(),
+        pnd21 = col_double(),
+        cohort = col_factor(levels = c("1","2","3")),
+        treatment = col_factor(levels = c("AL","eTRF")),
+        pup.number = col_factor(levels= NULL)
+                   ))
+
+pup.data.mutated<-pup.data%>%
+ mutate(pnd0.5 = birth.weight)%>%
+  pivot_longer(cols = starts_with("pnd"),
+               names_to = "day",
+               names_prefix = "pnd",
+               values_to = "weight",
+               values_drop_na = TRUE)%>%
+  mutate(day = as.numeric(day))
+```
+
+```{r table-counts}
+#total dams per cohort and treatment group
+litter.data%>%
+  group_by(cohort, treatment)%>%
+  distinct(MouseID, keep_all = T)%>%
+  count
+#total dams per treatment group, cohorts combined
+litter.data%>%
+  group_by(treatment)%>%
+  distinct(MouseID, keep_all = T)%>%
+  count
+```
+
+```{r gestational-age}
+summary.litter<-litter.data.mutated%>%
+  group_by(treatment)%>%
+  summarize_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+#plot
+
+  ggplot(summary.litter, aes(treatment,GA_mean, fill = treatment))+
+  geom_col()+
+    geom_errorbar(aes(ymin = GA_mean - GA_se, ymax = GA_mean + GA_se), width = 0.3)+
+    scale_fill_manual(values = defense.color.scheme)+
+  labs(title = "Gestational Age", y = "Gestational Age (days)")+
+  theme_bw()+
+  theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
+  
+  #stats
+  kable(shapiro.test(litter.data.mutated$GA[litter.data.mutated$treatment=="AL"])$p.value)#not normal
+  kable(shapiro.test(litter.data.mutated$GA[litter.data.mutated$treatment=="eTRF"])$p.value)#normal
+  leveneTest(GA~treatment, data = litter.data.mutated)#equivalent variance
+  
+wilcox.test(GA~treatment, data = litter.data.mutated, paired = FALSE)$p.value%>%kable
+```
+
+
+```{r percent-survival}
+ggplot(summary.litter, aes(treatment,percent.survival_mean, fill = treatment))+
+  geom_col()+
+    geom_errorbar(aes(ymin = percent.survival_mean - percent.survival_se, ymax = percent.survival_mean + percent.survival_se), width = 0.3)+
+    scale_fill_manual(values = defense.color.scheme)+
+  labs(title = "Survival to PND 3", y = "Pups Survived to PND 3 (%)")+
+  theme_bw()+
+  theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
+  
+  #stats
+  kable(shapiro.test(litter.data.mutated$percent.survival[litter.data.mutated$treatment=="AL"])$p.value)#not normal
+  kable(shapiro.test(litter.data.mutated$percent.survival[litter.data.mutated$treatment=="eTRF"])$p.value)# not normal
+  leveneTest(percent.survival~treatment, data = litter.data.mutated)#equivalent variance
+  
+wilcox.test(percent.survival~treatment, data = litter.data.mutated, paired = FALSE)$p.value%>%kable
+```
+
+```{r litter-size}
+ggplot(summary.litter, aes(treatment,`#.pups.born_mean`, fill = treatment))+
+  geom_col()+
+    geom_errorbar(aes(ymin = `#.pups.born_mean` - `#.pups.born_se`, ymax = `#.pups.born_mean` + `#.pups.born_se`), width = 0.3)+
+    scale_fill_manual(values = defense.color.scheme)+
+  labs(title = "Litter Size", y = "Litter Size (pups)")+
+  theme_bw()+
+  theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
+  
+  #stats
+  kable(shapiro.test(litter.data.mutated$`#.pups.born`[litter.data.mutated$treatment=="AL"])$p.value)#normal
+  kable(shapiro.test(litter.data.mutated$`#.pups.born`[litter.data.mutated$treatment=="eTRF"])$p.value)#normal
+  leveneTest(`#.pups.born`~treatment, data = litter.data.mutated)#equivalent variance
+  
+t.test(`#.pups.born`~treatment, data = litter.data.mutated)$p.value%>%kable
+```
+
+```{r birth-weight}
+pup.data.mutated%>%
+  filter(day=="0.5")%>%
+  group_by(treatment, MouseID)%>%
+  summarize(avg.dam = mean(birth.weight))%>%
+  group_by(treatment)%>%
+  summarize(avg.bw = mean(avg.dam),
+  error.bw = se(avg.dam))%>%
+  ggplot(aes(treatment, avg.bw, fill = treatment))+
+  geom_col()+
+  geom_errorbar(aes(ymin = avg.bw - error.bw, ymax = avg.bw + error.bw), width = 0.3)+
+  scale_fill_manual(values = defense.color.scheme)+
+  labs(title = "Birthweight", y = "Birthweight (grams)")+
+  theme_bw()+
+  theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
+  
+  #stats
+  kable(shapiro.test(pup.data.mutated$birth.weight[pup.data.mutated$treatment=="AL"])$p.value)# not normal
+  kable(shapiro.test(pup.data.mutated$birth.weight[pup.data.mutated$treatment=="eTRF"])$p.value)#not normal
+  leveneTest(birth.weight~treatment, data = pup.data.mutated)#not-equivalent variance
+
+  wilcox.test(birth.weight~treatment,filter(pup.data.mutated, day=="0.5"), paired = FALSE)$p.value
+```
+
+```{r postnatal-weights}
+#summary dataset
+sex.pup.data<-pup.data.mutated%>%
+  filter(!(sex==""))%>%
+  group_by(day, sex, treatment)%>%
+  summarize(avg.weight = mean(weight),
+            error.weight = se(weight))
+#plot  
+ggplot(sex.pup.data,aes(day,avg.weight, col = treatment))+
+  geom_point(aes(col = treatment))+
+  facet_grid(.~sex)+
+  geom_errorbar(aes(ymin = avg.weight - error.weight, ymax = avg.weight + error.weight), width =0.3)+
+  geom_line(aes(col = treatment))+
+  scale_color_manual(values = defense.color.scheme)+
+  labs(title = "Pup Body Weight", y = "Body Weight (grams)", x = "Age (days)")+
+  theme_bw()+
+  theme(legend.position = c(0.20, 0.85),text = element_text(size=18), legend.background = element_blank())
+  
+  ##stats
+  full.sex.data<-pup.data.mutated%>%
+  filter(!(is.na(sex)))
+null.lme<-lmer(weight ~ 1 +  (1|MouseID) + (day||pup.number)+(1|pup.number)+(day||MouseID), data = full.sex.data)
+
+day.lme<-lmer(weight ~ day +  (1|MouseID) + (day||pup.number)+(1|pup.number)+(day||MouseID), data = full.sex.data)
+anova(null.lme, day.lme)#p<0.0001
+day.lme%>%summary
+sex.lme<-lmer(weight ~ day + sex  +(1|MouseID) + (day||pup.number)+(1|pup.number)+(day||MouseID), data = full.sex.data)
+anova(sex.lme, day.lme)#0.41
+sex.lme%>%summary
+tx.lme<-lmer(weight ~ day + sex + treatment +  (1|MouseID) + (day||pup.number)+(1|pup.number)+(day||MouseID), data = full.sex.data)
+anova(sex.lme, tx.lme)#no significant effect of treatment, p=0.073
+tx.lme%>%summary
+  fixef(tx.lme)      
+  Anova(tx.lme)
+  
+  int.sex.time<-lmer(weight ~ day*sex +treatment +  (1|MouseID) + (day||pup.number)+(1|pup.number)+(day||MouseID), data = full.sex.data)
+Anova(int.sex.time)#no interaction effect
+
+full.sex.data%>%
+  group_by(treatment, sex)%>%
+  distinct(pup.number, keep_all = T)%>%
+  count
+```
+
+
+```{r pg-success}
+success.file<-"mating.success.csv"
+
+success.data<-read_csv(success.file,
+         col_types = cols(
+           ID = col_factor(levels = NULL),
+           treatment = col_factor(levels = c("AL","eTRF")),
+           gave.birth = col_factor(levels = c("yes","no"))
+         ))
+
+success.data%>%
+  group_by(treatment)%>%
+  distinct(ID)%>%
+  count()%>%
+  kable(caption = "total matings by group")
+
+summary.success<-success.data%>%
+  group_by(treatment, gave.birth)%>%
+  count%>%
+  mutate(mating.success = case_when(
+         treatment=="eTRF"~(n/24)*100,
+         treatment=="AL"~(n/22)*100))%>%
+  filter(gave.birth =="yes")
+
+ggplot(summary.success, aes(treatment, mating.success, fill = treatment))+
+  geom_col()+
+  scale_fill_manual(values = defense.color.scheme)+
+  labs(title = "Mating Success", y = "Successful Mating Events (%)")+
+  theme_bw()+
+  theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
+
+#chi-square test for mating success
+mating.success.table<-table(success.data$treatment, success.data$gave.birth)
+library(tidyr)
+library(tidyverse)
+chisq.test(mating.success.table)#%>%tidy%>%kable(caption = "Effect of Treatment on Mating Success")
+```
+
+
+```{r time-in-estrus}
+estrus.file<-"estrus-raw-data.csv"
+
+
+estrus.data<-read_csv(estrus.file,
+                      col_types = cols(
+                        ID = col_factor(levels = NULL),
+                        treatment = col_factor(levels = c("AL","eTRF")),
+                        pregnancy = col_factor(levels = NULL),
+                        cohort = col_factor(levels = NULL),
+                        gave.birth = col_factor(levels = c("yes","no")),
+                        date = col_date(),
+                        estrus.stage = col_factor(levels = c("P","E","M","D")),
+                        estrus.number = col_double()
+                      ))
+#create column with full name of estrus stage
+estrus.full.data<-estrus.data%>%
+  mutate(estrus.stage.name = case_when(
+    estrus.stage =="P"~ "Proestrus",
+    estrus.stage =="E"~ "Estrus",
+    estrus.stage =="M"~"Metestrus",
+    estrus.stage =="D"~"Diestrus"
+  ))
+
+#summary dataset
+estrus.summary.data<-estrus.full.data%>%
+  group_by(ID, estrus.stage.name, treatment)%>%
+  count(estrus.stage.name)%>%
+  group_by(treatment, estrus.stage.name)%>%
+  summarize_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+#cumulative plot 
+  ggplot(estrus.summary.data, aes(treatment, mean, fill = treatment))+
+  geom_bar(stat = "identity", aes(fill = treatment))+
+    facet_grid(.~estrus.stage.name)+
+  geom_errorbar(aes(ymin = mean-se, ymax=mean+se), width =0.4)+
+    scale_fill_manual(values = defense.color.scheme)+
+    labs(title = "Estrus cycle", y="average days per stage")+
+     theme_bw()+
+  theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
+  
+#Chi-Sq of estrus stage by treatment
+estrus.table<-table(estrus.full.data$treatment, estrus.full.data$estrus.stage.name)
+chisq.test(estrus.table)$p.value#%>%tidy%>%kable(caption = "Effect of Treatment on Time Spent in Each Stage of Estrus")
+
+
+estrus.data%>%
+  group_by(treatment)%>%
+  distinct(ID, keep_all = T)%>%
+  count
+```
+
+
+```{r latency-to-plug}
+#read in data
+fertility.data.file<-"latency_data.csv"
+fertility.data.raw<-read_csv(fertility.data.file,
+                             col_types = cols(
+                               ID = col_factor(levels = NULL),
+                               treatment = col_factor(levels = c("AL","eTRF")),
+                               latency.to.plug = col_double(),
+                               pg.success = col_logical(),
+                               gave.birth = col_factor(levels = c("yes","no")),
+                               pregnancy = col_factor(levels = NULL),
+                               cohort = col_factor(levels = c("1","2","3"))
+                             ))
+
+#summary dataset
+summary.fertility<-fertility.data.raw%>%
+  filter(pg.success=="TRUE")%>%
+  group_by(treatment)%>%
+  summarise_if(is.numeric, .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+#plot of plug latency
+ggplot(summary.fertility, aes(treatment,mean, fill = treatment))+
+  geom_col(aes(fill = treatment))+
+  geom_errorbar(aes(ymax= mean + se, ymin = mean - se), width = 0.3)+
+  scale_fill_manual(values = defense.color.scheme)+
+  labs(title = "Latency to Plug", y = "Days since mating")+
+   theme_bw()+
+  theme(legend.position = "none",text = element_text(size=18), axis.title.x = element_blank())
+
+#stats
+success.pg<-fertility.data.raw%>%
+  filter(pg.success=="TRUE")
+shapiro.test(success.pg$latency.to.plug[success.pg$treatment == "eTRF"])# not normal, p=0.007
+shapiro.test(success.pg$latency.to.plug[success.pg$treatment == "AL"])#not normal, p=0.006
+leveneTest(latency.to.plug~ treatment, data = success.pg)#equal variance, p=0.27
+
+wilcox.test(latency.to.plug~treatment, data = fertility.data.raw)#%>%tidy%>%kable(caption="Welch's t-test for effects of group on latency to plug") #P=0.39
+```

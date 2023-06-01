@@ -34,6 +34,7 @@ knitr::knit_hooks$set(inline = function(x) {
 se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
 # sets color scheme for plots
 color.scheme <- c('gray69','gray36')
+defense.color.scheme<-c('#9A3324','#00274C')
 ```
 
 #Data Entry
@@ -60,17 +61,17 @@ MRI.raw.data<-MRI.raw.data%>%
     Sex=="F"~"female",
     Sex =="M"~"male"))
 
-cage.file<-"cage_mapping_offspring.csv"
-cage.data<-read_csv(cage.file,
-                    col_types = cols(
-                      ID = col_factor(levels = NULL),
-                      treatment = col_factor(levels = c("eTRF", "AL")),
-                      dam = col_factor(levels = NULL),
-                      cohort = col_factor(levels = NULL),
-                      cage = col_factor(levels = NULL)
-                    ))
+#cage.file<-"cage_mapping_offspring.csv"
+#cage.data<-read_csv(cage.file,
+                  #  col_types = cols(
+                    #  ID = col_factor(levels = NULL),
+                     # treatment = col_factor(levels = c("eTRF", "AL")),
+                     # dam = col_factor(levels = NULL),
+                     # cohort = col_factor(levels = NULL),
+                     # cage = col_factor(levels = NULL)
+                   # ))
 
-MRI.raw.data<-full_join(cage.data, MRI.raw.data, by = c("ID", "treatment","dam","cohort"))
+#MRI.raw.data<-full_join(cage.data, MRI.raw.data, by = c("ID", "treatment","dam","cohort"))
 ```
 #Pre-HFD analysis (PND 21- PND 70)
 #Body Composition
@@ -94,7 +95,7 @@ ggplot(BW.data,aes(age, gram.values_mean, col = treatment))+
   geom_point(aes(col = treatment))+
   geom_smooth(span = 0.7,aes(col = treatment), se = FALSE)+
   facet_grid(.~sex)+
-  scale_color_manual(values = color.scheme)+
+  scale_color_manual(values = defense.color.scheme)+
   labs(title = "Offspring Body Weight", y = "Body weight (grams)",x="Age (days)")+
   theme(text = element_text(size=18),legend.position = c(0.9,0.19), legend.background = element_rect(fill = "transparent"))
 
@@ -129,7 +130,7 @@ ggplot(LM.data,aes(age, gram.values_mean, col = treatment))+
   geom_point(aes(col = treatment))+
   geom_smooth(span = 0.7,aes(col = treatment), se = FALSE)+
   facet_grid(.~sex)+
-  scale_color_manual(values = color.scheme)+
+  scale_color_manual(values = defense.color.scheme)+
   labs(title = "Offspring Lean Mass", y = "Lean Mass (grams)",x="Age (days)")+
   theme(text = element_text(size=18),legend.position = c(0.88,0.20), legend.background = element_rect(fill = "transparent"))
 
@@ -161,7 +162,7 @@ ggplot(FM.data,aes(age, gram.values_mean, col = treatment))+
   geom_point(aes(col = treatment))+
   geom_smooth(span = 1,aes(col = treatment), se = FALSE)+
   facet_grid(.~sex)+
-  scale_color_manual(values = color.scheme)+
+  scale_color_manual(values = defense.color.scheme)+
   labs(title = "Offspring Fat Mass", y = "Fat Mass (grams)",x="Age (days)")+
   theme(text = element_text(size=18),legend.position = c(0.9,0.80), legend.background = element_rect(fill = "transparent"))
 #Stats
@@ -191,7 +192,7 @@ ggplot(BW.data.HFD,aes(age, gram.values_mean, col = treatment))+
   geom_point(aes(col = treatment))+
   geom_smooth(span = 0.7,aes(col = treatment), se = FALSE)+
   facet_grid(.~sex)+
-  scale_color_manual(values = color.scheme)+
+  scale_color_manual(values = defense.color.scheme)+
   labs(title = "Offspring Body Weight", y = "Body weight (grams)",x="Age (days)")+
   theme(text = element_text(size=18),legend.position = c(0.9,0.19), legend.background = element_rect(fill = "transparent"))
 
@@ -226,7 +227,7 @@ ggplot(FM.data.HFD,aes(age, gram.values_mean, col = treatment))+
   geom_point(aes(col = treatment))+
   geom_smooth(span = 0.7,aes(col = treatment), se = FALSE)+
   facet_grid(.~sex)+
-  scale_color_manual(values =color.scheme)+
+  scale_color_manual(values =defense.color.scheme)+
   labs(title = "Offspring Fat Mass", y = "Fat Mass (grams)",x="Age (days)")+
   theme(text = element_text(size=18),legend.position = c(0.9,0.19), legend.background = element_rect(fill = "transparent"))
 
@@ -258,7 +259,7 @@ ggplot(LM.data.HFD,aes(age, gram.values_mean, col = treatment))+
   geom_point(aes(col = treatment))+
   geom_smooth(span = 0.7,aes(col = treatment), se = FALSE)+
   facet_grid(.~sex)+
-  scale_color_manual(values = color.scheme)+
+  scale_color_manual(values = defense.color.scheme)+
   labs(title = "Offspring Lean Mass", y = "Lean Mass (grams)",x="Age (days)")+
   theme(text = element_text(size=18),legend.position = c(0.9,0.19), legend.background = element_rect(fill = "transparent"))
 #stats
@@ -284,4 +285,13 @@ MRI.raw.data %>%
   group_by(treatment)%>%
   count(treatment) %>%
   kable(caption="Dams per feeding group")
+
+MRI.raw.data %>%
+  mutate(diet = case_when(
+    age>=70~ "HFHS",
+    age<70 ~ "NCD"))%>%
+  group_by(sex,treatment,diet) %>%
+  distinct(ID, .keep_all = T) %>%
+  count %>%
+  kable(caption="Animals in each group of this cohort")
 ```

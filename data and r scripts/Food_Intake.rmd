@@ -30,6 +30,7 @@ knitr::knit_hooks$set(inline = function(x) {
 se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
 # sets color scheme for plots
 color.scheme <- c('gray69','gray36')
+defense.color.scheme<-c('#9A3324','#00274C')
 ```
 
 #Food Intake Data
@@ -90,7 +91,7 @@ ggplot(Pre.HFD.data, aes(week, food.cumulative_mean, col = treatment))+
   facet_grid(.~sex)+
   labs(x="Week",y="Cumulative Food Intake (kcals)")+
   ggtitle("Cumulative Food Intake")+
-  scale_color_manual(values = color.scheme)+
+  scale_color_manual(values = defense.color.scheme)+
   theme(text = element_text(size=18),legend.position = c(0.1,0.80), legend.background = element_rect(fill = "transparent"))
 
 #statistics for cumulative food intake
@@ -114,7 +115,7 @@ filter(Pre.HFD.data, week == 8)%>%
 geom_col(aes(x= treatment, y = food.cumulative_mean, fill = treatment))+
   geom_errorbar(aes(ymin = food.cumulative_mean -food.cumulative_se, ymax = food.cumulative_mean + food.cumulative_se), width =0.2)+
   facet_grid(.~ sex)+
-  scale_fill_manual(values = color.scheme)
+  scale_fill_manual(values = defense.color.scheme)
   
 shapiro.test(Pre.HFD.data$food.cumulative_mean[Pre.HFD.data$treatment=="AL"])  #0.40
 shapiro.test(Pre.HFD.data$food.cumulative_mean[Pre.HFD.data$treatment=="eTRF"])#0.30
@@ -150,7 +151,7 @@ ggplot(HFD.data.filtered, aes(week, food.cumulative_mean,col = treatment))+
   geom_errorbar(aes(ymin = food.cumulative_mean -food.cumulative_se, ymax = food.cumulative_mean +food.cumulative_se), width = 0.3)+
   facet_grid(.~sex)+
   labs(title="Cumulative Food Intake", y = "Cumulative Food Intake (kcals)", x="Week")+
-  scale_color_manual(values = color.scheme)+
+  scale_color_manual(values = defense.color.scheme)+
    theme(text = element_text(size=18),legend.position = c(0.1,0.80), legend.background = element_rect(fill = "transparent"))
 
 #statistics
@@ -179,7 +180,7 @@ filter(HFD.data, week == 20)%>%
 geom_col(aes(x= treatment, y = food.cumulative_mean, fill = treatment))+
   geom_errorbar(aes(ymin = food.cumulative_mean -food.cumulative_se, ymax = food.cumulative_mean + food.cumulative_se), width =0.2)+
   facet_grid(.~ sex)+
-  scale_fill_manual(values = color.scheme)
+  scale_fill_manual(values = defense.color.scheme)
   
 shapiro.test(Pre.HFD.data$food.cumulative_mean[HFD.data$treatment=="AL"])  #0.40
 shapiro.test(Pre.HFD.data$food.cumulative_mean[HFD.data$treatment=="eTRF"])#0.30

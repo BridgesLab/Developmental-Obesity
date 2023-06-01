@@ -1,0 +1,336 @@
+---
+title: "IR_of_Pregnancy"
+author: "Molly C. Mulcahy"
+date: "2022-11-18"
+output: html_document
+---
+
+```{r setup}
+#load commonly needed packages
+library(processx)
+library(devtools)
+library(tidyr)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(knitr)
+library(car)
+library(lme4)
+library(broom)
+library(forcats)
+
+#figures made will go to directory called figures, will make them as both png and pdf files 
+opts_chunk$set(fig.path='figures/',
+               echo=FALSE, warning=FALSE, message=FALSE,dev=c('png','pdf'))
+options(scipen = 2, digits = 3)
+# set echo and message to TRUE if you want to display code blocks and code output respectively
+knitr::knit_hooks$set(inline = function(x) {
+  knitr:::format_sci(x, 'md')
+})
+se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
+```
+
+#load data
+```{r data-input}
+ITT.file<-"ITT.csv"
+itt.data<-read_csv(ITT.file,
+                   col_types = cols(
+                     ID = col_factor(levels = NULL),
+                     Pregnancy = col_factor(levels = NULL),
+                     Treatment = col_factor(levels = NULL),
+                     ID = col_factor(levels = NULL),
+                     time = col_double(),
+                     glucose = col_double()))
+
+itt.mutated<-itt.data%>%
+  group_by(ID)%>%
+  mutate(rel.glucose = (glucose/glucose[time==0])*100,
+         AUC = sum(glucose),
+         rel.auc = sum(rel.glucose))
+  
+
+avg.itt.data<-itt.mutated%>%
+  group_by(Treatment, Pregnancy, time)%>%
+  summarize_at(vars(glucose, rel.glucose), .funs = funs(mean=mean(.,na.rm = TRUE),se=se, n=length))
+
+AUC.data<-itt.mutated%>%
+  select(ID, Treatment,Pregnancy, AUC,rel.auc)%>%
+  group_by(ID)%>%
+  unique
+```
+#data analysis
+```{r line-plot}
+#effect of pregnancy
+avg.itt.data%>%
+  filter(Treatment=="Water")%>%
+  ggplot(aes(time, glucose_mean, col = Pregnancy))+
+  geom_point()+
+  geom_line()+
+  geom_errorbar(aes(ymax = glucose_mean + glucose_se, ymin = glucose_mean - glucose_se))+
+  labs(title = "Effect of Pregnancy on Insulin Tolerance", y = "glucose (mg/dL)", x="time(minutes)")+
+  scale_color_manual(values = c("grey45", "grey3"))+
+  theme_bw()+
+  theme(legend.position = c(0.85, 0.85), legend.background = element_blank(),text = element_text(size=14))
+
+AUC.data%>%
+  filter(Treatment =="Water")%>%
+  group_by(Pregnancy)%>%
+  summarize(avg.auc = mean(AUC),
+            error.auc = se(AUC),
+            length.auc = length(AUC))%>%
+  ggplot(aes(Pregnancy, avg.auc))+
+  geom_col(aes(fill = Pregnancy))+
+    geom_errorbar(aes(ymin = avg.auc + error.auc, ymax = avg.auc - error.auc), width =0.3)+
+  scale_fill_manual(values = c("grey45", "grey3"))+
+  labs(title = "Area Under the Curve", y="glucose (mg/dL)")+
+  theme_bw()+
+  theme(legend.position = "none",text = element_text(size=14))
+  #stats
+pregnant.data<-itt.mutated%>%
+  filter(Treatment=="Water")
+pregnancy.mlm<-lmer(glucose~time + Pregnancy + (1|ID), data = pregnant.data)
+summary(pregnancy.mlm)
+pregnant.auc<-AUC.data%>%
+  filter(Treatment=="Water")
+shapiro.test(pregnant.auc$AUC[pregnant.auc$Pregnancy=="Pregnant"])#normal p=0.1
+shapiro.test(pregnant.auc$AUC[pregnant.auc$Pregnancy=="Not Pregnant"])#normal p=0.8
+leveneTest(AUC~Pregnancy, data= pregnant.auc)#equal variance p=0.63
+t.test(AUC~Pregnancy, data= pregnant.auc)#p=0.7
+
+#effect of dexamethasone in pregnant mice
+avg.itt.data%>%
+  filter(Pregnancy=="Pregnant")%>%
+  ggplot(aes(time, glucose_mean, col = Treatment))+
+  geom_point()+
+  geom_line()+
+  geom_errorbar(aes(ymax = glucose_mean + glucose_se, ymin = glucose_mean - glucose_se))+
+  labs(title = "Effect of Dexamethasone on Insulin Tolerance", y = "glucose (mg/dL)", x="time(minutes)")+
+  scale_color_manual(values = c("grey3","grey79"))+
+  theme_bw()+
+  theme(legend.position = c(0.85, 0.85), legend.background = element_blank(),text = element_text(size=14))
+  
+AUC.data%>%
+  filter(Pregnancy =="Pregnant")%>%
+  group_by(Treatment)%>%
+  summarize(avg.auc = mean(AUC),
+            error.auc = se(AUC),
+            length.auc = length(AUC))%>%
+  ggplot(aes(Treatment, avg.auc))+
+  geom_col(aes(fill = Treatment))+
+    geom_errorbar(aes(ymin = avg.auc + error.auc, ymax = avg.auc - error.auc), width =0.3)+
+    scale_fill_manual(values = c("grey3","grey79"))+
+  labs(title = "Area Under the Curve", y="glucose (mg/dL)")+
+  theme_bw()+
+   theme(legend.position = "none",text = element_text(size=14))
+  
+#stats
+dex.data<-itt.mutated%>%
+  filter(Pregnancy=="Pregnant")
+dex.mlm<-lmer(glucose~time+Treatment+(1|ID), data = dex.data)
+summary(dex.mlm)
+dex.auc<-AUC.data%>%
+  filter(Pregnancy=="Pregnant")
+shapiro.test(dex.auc$AUC[dex.auc$Treatment=="Water"])#normal p=0.1
+shapiro.test(dex.auc$AUC[dex.auc$Treatment=="Dexamethasone"])#normal p=0.4
+leveneTest(AUC~Treatment, data= dex.auc)#equal variance p=0.38
+t.test(AUC~Treatment, data= dex.auc)#p=0.8
+```
+```{r rel-glucose}
+avg.itt.data%>%
+filter(Treatment=="Water")%>%
+   ggplot(aes(time, rel.glucose_mean, col = Pregnancy))+
+  geom_point()+
+  geom_line()+
+  geom_errorbar(aes(ymax = rel.glucose_mean + rel.glucose_se, ymin = rel.glucose_mean - rel.glucose_se))+
+  labs(title = "Effect of Pregnancy on Insulin Tolerance", y = "relative glucose (%baseline)",x="Time From Injection (minutes)")+
+  scale_color_manual(values = c("grey45", "grey3"))+
+  theme_bw()+
+  theme(legend.position = c(0.85, 0.15), legend.background = element_blank(),text = element_text(size=14))
+#effect of dex
+avg.itt.data%>%
+filter(Pregnancy=="Pregnant")%>%
+   ggplot(aes(time, rel.glucose_mean, col = Treatment))+
+  geom_point()+
+  geom_line()+
+  geom_errorbar(aes(ymax = rel.glucose_mean + rel.glucose_se, ymin = rel.glucose_mean - rel.glucose_se))+
+  labs(title = "Effect of Dexamethasone on Insulin Tolerance", y = "relative glucose (%baseline)", x="Time From Injection (minutes)")+
+  scale_color_manual(values = c("grey3","grey79"))+
+  theme_bw()+
+  theme(legend.position = c(0.15, 0.15), legend.background = element_blank(),text = element_text(size=14))
+
+AUC.data%>%
+   filter(Treatment=="Water")%>%
+  group_by(Pregnancy)%>%
+  summarize(avg.auc = mean(rel.auc),
+            error.auc = se(rel.auc),
+            length.auc = length(rel.auc))%>%
+  ggplot(aes(Pregnancy, avg.auc))+
+  geom_col(aes(fill = Pregnancy))+
+    geom_errorbar(aes(ymin = avg.auc + error.auc, ymax = avg.auc - error.auc), width =0.3)+
+  scale_fill_manual(values = c("grey45", "grey3"))+
+  labs(title = "Area Under the Curve")+
+  theme_bw()+
+  theme(legend.position = "none",text = element_text(size=14))
+
+#stats
+
+  
+shapiro.test(pregnant.auc$rel.auc[pregnant.auc$Pregnancy=="Not Pregnant"])#normal, p-0.3
+shapiro.test(pregnant.auc$rel.auc[pregnant.auc$Pregnancy=="Pregnant"])#normal, p-0.3
+leveneTest(rel.auc~Pregnancy, data = pregnant.auc)#equal variance, p=0.68
+t.test(rel.auc~Pregnancy, data = pregnant.auc)#p0.2
+
+#models
+preg.data<-itt.mutated%>%
+  filter(Treatment=="Water")
+null.relglu.mlm<-lmer(rel.glucose ~ 1 + (1|ID), data = preg.data)
+time.relglu.mlm<-lmer(rel.glucose ~ time + (1|ID), data = preg.data)
+anova(null.relglu.mlm, time.relglu.mlm)#significant
+preg.relglu.mlm<-lmer(rel.glucose ~ time + Pregnancy + (1|ID), data = preg.data)
+anova(time.relglu.mlm, preg.relglu.mlm)#no differences
+int.preg.relglu.mlm<-preg.relglu.mlm<-lmer(rel.glucose ~ time*Pregnancy + (1|ID), data = preg.data)
+Anova(int.preg.relglu.mlm)#interaction is not significant
+summary(preg.relglu.mlm)
+dex.data.itt<-itt.mutated%>%
+  filter(Pregnancy == "Pregnant")
+null.dex.mlm<-lmer(rel.glucose ~ 1 + (1|ID), data = dex.data.itt)
+time.dex.mlm<-lmer(rel.glucose ~ time + (1|ID), data = dex.data.itt)
+anova(null.dex.mlm, time.dex.mlm)#significant effect of time
+treat.dex.mlm<-lmer(rel.glucose ~ time +Treatment +(1|ID), data = dex.data.itt)
+anova(time.dex.mlm, treat.dex.mlm)#significant effect of dex
+int.treat.dex.mlm<-treat.dex.mlm<-lmer(rel.glucose ~ time*Treatment +(1|ID), data = dex.data.itt)
+summary(int.treat.dex.mlm)
+```
+
+
+```{r FBG}
+FBG.data<-itt.mutated%>%
+  filter(time=="0")
+pregnancy.FBG<-FBG.data%>%
+  filter(Treatment=="Water")
+
+
+#Effect of pregnancy on FBG
+pregnancy.FBG%>%
+  group_by(Pregnancy)%>%
+  summarize(avg.glucose = mean(glucose),
+            error.glucose  = se(glucose))%>%
+  ggplot(aes(Pregnancy, avg.glucose, fill =  Pregnancy))+
+  geom_col()+
+  geom_errorbar(aes(ymin = avg.glucose -error.glucose, ymax = avg.glucose + error.glucose), width=0.3)+
+  scale_fill_manual(values = c("grey45", "grey3"))+
+  labs(title = "Fasting Blood Glucose", y = "glucose (mg/dL)")+
+  theme_bw()+
+  theme(legend.position = "none",text = element_text(size=14))
+
+#stats
+shapiro.test(pregnancy.FBG$glucose[pregnancy.FBG$Pregnancy=="Not Pregnant"])#0.4
+shapiro.test(pregnancy.FBG$glucose[pregnancy.FBG$Pregnancy=="Pregnant"])#0.5
+leveneTest(glucose~Pregnancy, data = pregnancy.FBG)#0.47
+t.test(glucose~Pregnancy, data = pregnancy.FBG)
+
+
+#Effect of dexamethasone on FBG
+FBG.data%>%
+  filter(Pregnancy=="Pregnant")%>%
+  group_by(Treatment)%>%
+  summarize(avg.glucose = mean(glucose),
+            error.glucose  = se(glucose))%>%
+  ggplot(aes(Treatment, avg.glucose, fill =  Treatment))+
+  geom_col()+
+  geom_errorbar(aes(ymin = avg.glucose -error.glucose, ymax = avg.glucose + error.glucose), width=0.3)+
+  scale_fill_manual(values = c("grey3","grey79"))+
+  labs(title = "Fasting Blood Glucose", y = "glucose (mg/dL)")+
+  theme_bw()+
+   theme(legend.position = "none",text = element_text(size=14))
+
+#stats
+dex.FBG<-FBG.data%>%
+  filter(Pregnancy=="Pregnant")
+
+shapiro.test(dex.FBG$glucose[dex.FBG$Treatment=="Water"])#0.5
+shapiro.test(dex.FBG$glucose[dex.FBG$Treatment=="Dexamethasone"])#0.6
+leveneTest(glucose ~ Treatment, data = dex.FBG)#0.064
+t.test(glucose ~ Treatment, data = dex.FBG)
+```
+
+
+```{r body-weight}
+bw.file<-"IR.study.bodyweight.csv"
+
+
+bw.data<-read_csv(bw.file,
+                  col_types = cols(
+                    animal.MouseID = col_factor(levels = NULL),
+                    assay.assay = col_factor(levels=c("Body Weight","Lean Mass","Total Fat Mass","Free Water")),
+                    Weight = col_double(),
+                    Pregnancy = col_factor(levels = c("Not Pregnant", "Pregnant")),
+                    Treatment = col_factor(levels = c("Water","Dexamethasone")),
+                    experiment.time = col_double()
+                  ))
+
+bw.only<-bw.data%>%
+  filter(assay.assay=="Body Weight")%>%
+  filter(experiment.time<41)
+  #body weight plot dex vs water
+bw.only%>%  
+  filter(Pregnancy=="Pregnant")%>%
+ggplot( aes(experiment.time, Weight, col = Treatment))+
+  geom_point()+
+  scale_color_manual(values = c("grey3","grey79"))+
+  geom_smooth(method = loess,aes( col = Treatment))+
+    labs(title = "Body Weight", y = "weight (grams)",x= "days from mating",subtitle = "water vs dexamethasone dams")+
+  theme_bw()+
+  theme(legend.position = c(0.15, 0.85), legend.background = element_blank(),text = element_text(size=14))
+#body weight plot pregnant vs not pregnant
+bw.only%>%  
+  filter(Treatment=="Water")%>%
+ggplot(aes(experiment.time, Weight, col = Pregnancy))+
+  geom_point()+
+  scale_color_manual(values = c("grey45","grey3"))+
+  geom_smooth(method = loess,aes( col = Pregnancy))+
+    labs(title = "Body Weight", y = "weight (grams)",x= "days from mating",subtitle = "pregnant vs non-pregnant females")+
+  theme_bw()+
+  theme(legend.position = c(0.15, 0.85), legend.background = element_blank(),text = element_text(size=14))
+
+
+
+fm.only<-bw.data%>%
+   filter(assay.assay=="Total Fat Mass")%>%
+  filter(experiment.time<41)
+#fat mass
+ ggplot(data = fm.only, aes(experiment.time, Weight, col = Treatment))+
+  geom_point()+
+  facet_grid(.~Pregnancy)+
+  geom_smooth(method = loess,aes( col = Treatment))+
+    labs(title = "Fat Mass", y = "fat mass (grams)",x= "days from mating")+
+    theme(legend.position = c(0.10, 0.85), legend.background = element_blank(), text = element_text(size=14))+
+  theme_bw()
+
+ lm.only<-bw.data%>%
+   filter(assay.assay=="Lean Mass")%>%
+  filter(experiment.time<41)
+#lean mass 
+ggplot(data = fm.only, aes(experiment.time, Weight, col = Treatment))+
+  geom_point()+
+  facet_grid(.~Pregnancy)+
+  geom_smooth(method = loess,aes( col = Treatment))+
+    labs(title = "Lean Mass", y = "lean mass (grams)",x= "days from mating")+
+    theme(legend.position = c(0.10, 0.85), legend.background = element_blank(),text = element_text(size=14))+
+  theme_bw()
+
+#stats
+pregnancy.data<-bw.data%>%
+  filter(assay.assay=="Body Weight")%>%
+  filter(Pregnancy=="Pregnant")
+pregnant.mlm<-lmer(Weight ~ experiment.time+Treatment + (1|animal.MouseID),data = pregnancy.data)
+summary(pregnant.mlm)
+Anova(pregnant.mlm)
+
+water.data<-bw.data%>%
+   filter(assay.assay=="Body Weight")%>%
+  filter(Treatment=="Water")
+water.mlm<-lmer(Weight ~ experiment.time+Pregnancy+ (1|animal.MouseID),data = water.data)
+summary(water.mlm)
+Anova(water.mlm)
+```
