@@ -176,11 +176,13 @@ Anova(geno.post)
 
 ```{r power}
 weight.change<-prenatal.bw.data%>%
+  arrange(gest.age)%>%
   group_by(MouseID)%>%
   arrange(gest.age)%>%
   mutate(percent.wt.change = (gwg/first(gram.values)*100))
 
 summary.weight.change<-weight.change%>%
+  filter(gest.age>13)%>%
   group_by(MouseID, Genotype)%>%
   distinct(MouseID, .keep_all = T)%>%
   select(MouseID, Genotype, percent.wt.change, gwg)
@@ -193,5 +195,16 @@ avg.weight.change<-summary.weight.change%>%
             avg.gwg = mean(gwg),
             stdev.gwg = sd(gwg),
             num.gwg = length(gwg))
+
+
+library(pwrss)
+library(pwr)
+pwrss.t.2means(mu1= 26.4, mu2 = 24.5,
+               sd1 = 3.835, sd2 = 2.781,
+               alpha = 0.05, welch.df = FALSE,n2=6, 
+               alternative = "not equal", power = NULL, verbose = TRUE)
+
+pwr.t.test(n = 6, d =  0.716124, sig.level = 0.05, power = , 
+    type = "two.sample")
 
 ```
