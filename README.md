@@ -1,4 +1,4 @@
-Code and Raw Data for early Time-Restricted Feeding studies in maternal and child health
+Code and Raw Data for various studies in maternal and child health
 
 This repository contains raw data from studies done by the Bridges lab and collaborators on the effects of eTRF in the context of Gestation. 
 The tag column refers the state of the dataset at the indicated time of the manuscript's publishing.
