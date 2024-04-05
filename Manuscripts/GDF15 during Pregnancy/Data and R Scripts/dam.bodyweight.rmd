@@ -48,7 +48,10 @@ bw.data<-read_csv(dam.bodyweight.file,
           gest.age = col_double(),
           postnatal = col_factor(levels = c("n","y"))  
          ))%>%
-mutate( week = cut(gest.age, breaks = c(-7.5,0,7.5, 14.5, 21.5, 28.5, 35.5,42.5), labels = c("pre-pregnancy","E0.5","E7.5","E14.5","E21.5","PND7.5","PND14.5")))
+mutate( week = cut(gest.age, breaks = c(-7.5,0,7.5, 14.5, 21.5, 28.5, 35.5,42.5), labels = c("pre-pregnancy","E0.5","E7.5","E14.5","E21.5","PND7.5","PND14.5"))) %>%
+  mutate(Genotype=fct_recode(Genotype,
+                             "Wild-type"="+/+",
+                             "GDF15 Knockout"="-/-"))
 
 avg.bw.data<-bw.data%>%
   group_by(Genotype, week)%>%
@@ -56,15 +59,16 @@ avg.bw.data<-bw.data%>%
 ```
 
 #Analysis
+
 ```{r bodyweight-timecourse}
 #plot, all values
 ggplot(bw.data, aes(gest.age, gram.values, col = Genotype))+
   geom_point(aes(col = Genotype))+
   geom_smooth(aes(col = Genotype), se= FALSE, span =0.4)+
   scale_color_manual(values = color.scheme)+
-  labs(title = "Maternal Perinatal Body Weight", y = "body weight (grams)",x= "Gestational Day")+
-  theme_bw()+
-  theme(legend.position = c(0.1, 0.865), legend.background = element_blank(),text = element_text(size=14))
+  labs(title = "Maternal Postnatal Body Weight", y = "body weight (grams)",x= "Gestational Day")+
+  theme_bw(base_size=18)+
+  theme(legend.position = c(0.2, 0.865), legend.background = element_blank())
   
 #plot averaged values
  avg.bw.data%>%
@@ -73,9 +77,9 @@ ggplot(bw.data, aes(gest.age, gram.values, col = Genotype))+
    geom_errorbar(aes(ymin = mean - se, ymax = mean + se), width =0.3)+
    scale_color_manual(values = color.scheme)+
    geom_smooth(aes(col = Genotype),se=FALSE)+
-  labs(title = "Maternal Perinatal Body Weight", y = "body weight(grams)",x= "Gestational Day")+
-  theme(legend.position = c(0.1, 0.865), legend.background = element_blank(),text = element_text(size=14))+
-  theme_bw() 
+  labs(title = "Maternal Postnatal Body Weight", y = "body weight(grams)",x= "Gestational Day")+
+  theme(legend.position = c(0.2, 0.865), legend.background = element_blank())
+  theme_bw(base_size=18) 
  
 
 ```
@@ -102,11 +106,11 @@ ggplot(aes(Genotype,avg.gwg, fill = Genotype))+
   scale_fill_manual(values = color.scheme)+
   geom_errorbar(aes(ymin = avg.gwg - error.gwg, ymax = avg.gwg + error.gwg), width =0.3)+
   labs(title = "Prenatal weight change", y = "Prenatal weight change (grams/dam)")+
-  theme_bw()+
-  theme(legend.position = "none",text = element_text(size=14))
+  theme_bw(base_size=18)+
+  theme(legend.position = "none")
 #stats
-shapiro.test(prenatal.bw.data.cleaned$gwg[prenatal.bw.data.cleaned$Genotype=="+/+"])#p=0.5
-shapiro.test(prenatal.bw.data.cleaned$gwg[prenatal.bw.data.cleaned$Genotype=="-/-"])#p=0.3
+shapiro.test(prenatal.bw.data.cleaned$gwg[prenatal.bw.data.cleaned$Genotype=="Wild-type"])#p=0.5
+shapiro.test(prenatal.bw.data.cleaned$gwg[prenatal.bw.data.cleaned$Genotype=="GDF15 Knockout"])#p=0.3
 leveneTest(gwg ~ Genotype, prenatal.bw.data.cleaned)#p=0.26
 t.test(gwg ~ Genotype, prenatal.bw.data.cleaned)#p=0.99
 ```
@@ -133,12 +137,12 @@ ggplot(aes(Genotype,avg.loss, fill = Genotype))+
   scale_fill_manual(values = color.scheme)+
   geom_errorbar(aes(ymin = avg.loss - error.loss, ymax = avg.loss + error.loss), width =0.3)+
   labs(title = "Postnatal weight loss", y = "Postnatal weight loss (grams/dam)")+
-  theme_bw()+
-  theme(legend.position = "none",text = element_text(size=14))
+  theme_bw(base_size=18)+
+  theme(legend.position = "none")
 
 #stats
-shapiro.test(postnatal.bw.data.cleaned$loss[postnatal.bw.data.cleaned$Genotype=="-/-"])#p=0.1
-shapiro.test(postnatal.bw.data.cleaned$loss[postnatal.bw.data.cleaned$Genotype=="+/+"])#p=0.4
+shapiro.test(postnatal.bw.data.cleaned$loss[postnatal.bw.data.cleaned$Genotype=="GDF15 Knockout"])#p=0.1
+shapiro.test(postnatal.bw.data.cleaned$loss[postnatal.bw.data.cleaned$Genotype=="Wild-type"])#p=0.4
 leveneTest(loss ~ Genotype, postnatal.bw.data.cleaned)#p=0.11
 t.test(loss ~ Genotype, postnatal.bw.data.cleaned)#$p.value#p=0.2
 ```
