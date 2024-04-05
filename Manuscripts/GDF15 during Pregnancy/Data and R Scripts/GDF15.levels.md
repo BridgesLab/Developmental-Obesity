@@ -9,43 +9,10 @@ output:
 ---
 
 
-```{r global_options, include=FALSE}
-library(knitr)
-library(survival)
-library("car")
-library("zip")
-#figures made will go to directory called figures, will make them as both png and pdf files 
-opts_chunk$set(fig.path='figures/',
-               echo=TRUE, warning=FALSE, message=FALSE,dev=c('png','pdf'))
-options(scipen = 2, digits = 3)
-# set echo and message to TRUE if you want to display code blocks and code output respectively
 
-knitr::knit_hooks$set(inline = function(x) {
-  knitr:::format_sci(x, 'md')
-})
-
-
-superpose.eb <- function (x, y, ebl, ebu = ebl, length = 0.08, ...)
-  arrows(x, y + ebu, x, y - ebl, angle = 90, code = 3,
-  length = length, ...)
-
-  
-se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
-color.scheme<-c("#333333" ,"#CCCCCC")
-defense.color.scheme<-c("","")
-#load these packages, nearly always needed
-library(tidyr)
-library(tidyverse)
-library(dplyr)
-library(broom)
-library(readr)
-library(forcats)
-library(car)
-library(ggpubr)
-library(readr)
-```
      
-```{r read-data}
+
+```r
 ##old 2020 plate with 2022 standard
 reanalyzed.plate<-"2020plate2022std.csv"
 
@@ -118,7 +85,8 @@ both.plate.data<-full_join(new.plate.reduced, old.plate.reduced)
 ```
 
 
-```{r IR-pg}
+
+```r
 test<-both.plate.data%>%
   filter(Study=="IR")%>%
   group_by(dex, pregnancy, time)%>%
@@ -130,7 +98,11 @@ test<-both.plate.data%>%
   facet_grid(dex~pregnancy)+
   geom_errorbar(data = test, aes(x = time, y = avg, ymin = avg-error, ymax = avg+error), width = 0.3)+
   labs(title = "GDF15 Concentration", y="GDF15 (pg/mL)", subtitle = "x axis = pregnancy, yaxis = dexamethasone")
-  
+```
+
+![](figures/IR-pg-1.png)<!-- -->
+
+```r
   IR.data.dex<-both.plate.data%>%
   filter(Study=="IR")%>%
   filter(pregnancy=="yes")
@@ -138,14 +110,86 @@ test<-both.plate.data%>%
 library(lmerTest)
   dex.gdf15.mlm<-lmer(concentration~ time + dex + (1|MouseID), data = IR.data.dex)
   summary(dex.gdf15.mlm)
-  
+```
+
+```
+## Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+## lmerModLmerTest]
+## Formula: concentration ~ time + dex + (1 | MouseID)
+##    Data: IR.data.dex
+## 
+## REML criterion at convergence: 381
+## 
+## Scaled residuals: 
+##    Min     1Q Median     3Q    Max 
+## -1.405 -0.884  0.133  0.798  1.369 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  MouseID  (Intercept)    0      0.0    
+##  Residual             3447     58.7    
+## Number of obs: 37, groups:  MouseID, 13
+## 
+## Fixed effects:
+##             Estimate Std. Error     df t value Pr(>|t|)    
+## (Intercept)   78.359     16.412 34.000    4.77 0.000034 ***
+## time13         0.183     19.582 34.000    0.01     0.99    
+## dexno         31.767     19.582 34.000    1.62     0.11    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##        (Intr) time13
+## time13 -0.625       
+## dexno  -0.447 -0.101
+## optimizer (nloptwrap) convergence code: 0 (OK)
+## boundary (singular) fit: see help('isSingular')
+```
+
+```r
   IR.data.pg<-both.plate.data%>%
   filter(Study=="IR")%>%
   filter(dex=="no")
 
 pg.gdf15.mlm<-lmer(concentration~ time + pregnancy + (1|MouseID), data = IR.data.pg)
   summary(pg.gdf15.mlm)
-  
+```
+
+```
+## Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+## lmerModLmerTest]
+## Formula: concentration ~ time + pregnancy + (1 | MouseID)
+##    Data: IR.data.pg
+## 
+## REML criterion at convergence: 308
+## 
+## Scaled residuals: 
+##    Min     1Q Median     3Q    Max 
+## -1.598 -0.912  0.222  0.666  1.563 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  MouseID  (Intercept)    0      0.0    
+##  Residual             2655     51.5    
+## Number of obs: 31, groups:  MouseID, 15
+## 
+## Fixed effects:
+##             Estimate Std. Error      df t value Pr(>|t|)    
+## (Intercept)  109.987     17.450  28.000    6.30  8.1e-07 ***
+## time13         0.405     18.835  28.000    0.02    0.983    
+## pregnancyno  -54.609     18.756  28.000   -2.91    0.007 ** 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr) time13
+## time13      -0.675       
+## pregnancyno -0.614  0.159
+## optimizer (nloptwrap) convergence code: 0 (OK)
+## boundary (singular) fit: see help('isSingular')
+```
+
+```r
   #Plot np vs pregnant
   avg.pg.data<-IR.data.pg%>%
     group_by(pregnancy, time)%>%
@@ -161,7 +205,11 @@ pg.gdf15.mlm<-lmer(concentration~ time + pregnancy + (1|MouseID), data = IR.data
       labs(title = "GDF15 levels by Pregnancy Status", y= "GDF15 (pg/mL)", x= "Zeitgeber Time")+
   theme_bw(base_size=18) +
       theme(legend.position="none")
-  
+```
+
+![](figures/IR-pg-2.png)<!-- -->
+
+```r
 #plot, dex vs water dams
     avg.dex.data<-IR.data.dex%>%
       group_by(time, dex)%>%
@@ -180,8 +228,11 @@ pg.gdf15.mlm<-lmer(concentration~ time + pregnancy + (1|MouseID), data = IR.data
       theme(legend.position="none")
 ```
 
+![](figures/IR-pg-3.png)<!-- -->
 
-```{r Knockout-study}
+
+
+```r
 summary.Gdf<-both.plate.data%>%
   filter(Study=="GDF15")%>%
   group_by(time, Genotype)%>%
@@ -198,8 +249,9 @@ ggplot()+
     scale_fill_manual(values = c("#00274C","#A5A508"))+
   theme_bw()+
   theme(text = element_text(size=14), legend.position = "none")
-
 ```
+
+![](figures/Knockout-study-1.png)<!-- -->
 
 
 ```
