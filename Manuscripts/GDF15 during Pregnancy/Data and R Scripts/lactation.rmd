@@ -2,7 +2,10 @@
 title: "lactation"
 author: "Molly C. Mulcahy"
 date: "2022-10-12"
-output: html_document
+output:
+  html_document:
+    toc: yes
+    keep_md: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -50,7 +53,10 @@ wsw.data<-read_csv(wsw.file,
                      PupWeight = col_double(),
                      PupWeightSeparated = col_double(),
                      PupWeightNursing = col_double()
-                   ))
+                   )) %>%
+  mutate(Genotype=fct_recode(Genotype,
+                             "Wild-type"="+/+",
+                             "GDF15 Knockout"="-/-"))
 
 milk.file<-"milkfat.csv"
 
@@ -62,7 +68,10 @@ milk.data<-read_csv(milk.file,
     Fat.inches = col_double(),
     Aqueous.inches.1 = col_double(),
     Aqueous.inches.2 = col_double()
-  ))
+  )) %>%
+  mutate(Genotype=fct_recode(Genotype,
+                             "Wild-type"="+/+",
+                             "GDF15 Knockout"="-/-"))
 ```
 
 ```{r wsw}
@@ -81,14 +90,14 @@ milk.weights <- wsw.data %>%
 ggplot(avg.wsw, aes(Genotype, avg.dam.loss, fill = Genotype))+
   geom_col(aes(fill = Genotype))+
   geom_errorbar(aes(ymin = avg.dam.loss - error.dam.loss, ymax = avg.dam.loss + error.dam.loss), width =0.3)+
-  scale_fill_manual(values = defense.color.scheme)+
-  labs(title = "Mass Lost by Dam", y = "Mass lost after suckling (grams)")+
-  theme_bw()+
-  theme(legend.position = "none",text = element_text(size=14))
+  scale_fill_manual(values = color.scheme)+
+  labs(title = "Weight Lost by Dam During Lactation", y = "Weight Lost by Suckling (grams)")+
+  theme_bw(base_size=18)+
+  theme(legend.position = "none")
 
 #stats
-shapiro.test(milk.weights$Dam.Lost.Weight.norm[milk.weights$Genotype=="+/+"])#normal
-shapiro.test(milk.weights$Dam.Lost.Weight.norm[milk.weights$Genotype=="-/-"])#normal
+shapiro.test(milk.weights$Dam.Lost.Weight.norm[milk.weights$Genotype=="Wild-type"])#normal
+shapiro.test(milk.weights$Dam.Lost.Weight.norm[milk.weights$Genotype=="GDF15 Knockout"])#normal
 leveneTest(Dam.Lost.Weight.norm ~ Genotype, data = milk.weights)#equivalent variance
 t.test(Dam.Lost.Weight.norm ~ Genotype, data = milk.weights)
 
@@ -100,14 +109,14 @@ t.test(Dam.Lost.Weight.norm ~ Genotype, data = milk.weights)
 ggplot(avg.wsw.pup, aes(Genotype, avg.pup.gain, fill = Genotype))+
   geom_col(aes(fill = Genotype))+
   geom_errorbar(aes(ymin = avg.pup.gain - error.pup.gain , ymax = avg.pup.gain  + error.pup.gain ), width =0.3)+
-  scale_fill_manual(values = defense.color.scheme)+
-  labs(title = "Mass Gained by Pup", y = "Mass gained after suckling (grams)")+
-  theme_bw()+
-    theme(legend.position = "none",text = element_text(size=14))
+  scale_fill_manual(values = color.scheme)+
+  labs(title = "Weight Gained by Pup During Lactation", y = "Weight Gained by Suckling (grams)")+
+  theme_bw(base_size=18)+
+    theme(legend.position = "none")
 
 #stats
-shapiro.test(milk.weights$Pup.Gained.Weight.norm[milk.weights$Genotype=="+/+"])#not normal
-shapiro.test(milk.weights$Pup.Gained.Weight.norm[milk.weights$Genotype=="-/-"])#normal
+shapiro.test(milk.weights$Pup.Gained.Weight.norm[milk.weights$Genotype=="Wild-type"])#not normal
+shapiro.test(milk.weights$Pup.Gained.Weight.norm[milk.weights$Genotype=="GDF15 Knockout"])#normal
 wilcox.test(Pup.Gained.Weight.norm ~ Genotype, data = milk.weights, paired = FALSE)
 ```
 
@@ -131,10 +140,10 @@ summary.milk.data%>%
   ggplot(aes(Genotype,milk.fat, fill = Genotype))+
            geom_col()+
   geom_errorbar(aes(ymin = milk.fat - se.milk.fat, ymax = milk.fat + se.milk.fat), width =0.3)+
-  scale_fill_manual(values = defense.color.scheme)+
-  labs(title = "Milk Fat Percentage", y = "Energy from fat (%)")+
-  theme_bw()+
-  theme(legend.position = "none",text = element_text(size=14))
+  scale_fill_manual(values = color.scheme)+
+  labs(title = "Milk Fat Percentage", y = "Milk Fat (%)")+
+  theme_bw(base_size=18)+
+  theme(legend.position = "none")
   
 
 #stats
@@ -144,8 +153,8 @@ milk.stats<-mutated.milk.data%>%
   select(MouseID, Genotype, avg.milkfat)%>%
   distinct()
 
-  shapiro.test(milk.stats$avg.milkfat[milk.stats$Genotype=="+/+"])#p=0.6
-  shapiro.test(milk.stats$avg.milkfat[milk.stats$Genotype=="-/-"])#p=0.4
+  shapiro.test(milk.stats$avg.milkfat[milk.stats$Genotype=="Wild-type"])#p=0.6
+  shapiro.test(milk.stats$avg.milkfat[milk.stats$Genotype=="GDF15 Knockout"])#p=0.4
   leveneTest(avg.milkfat ~ Genotype, milk.stats)#p=0.75
   t.test(avg.milkfat ~Genotype, data = milk.stats)#p=0.93
 
