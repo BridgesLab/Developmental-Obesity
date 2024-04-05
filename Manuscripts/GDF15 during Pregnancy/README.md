@@ -8,3 +8,6 @@
 | 2D | IR_of_pregnancy.Rmd | rel-glucose-2.pdf
 | 2E | IR_of_pregnancy.Rmd | FBG-2.pdf
 | 2F|  GDF15.levels.rmd | IR-pg-3.pdf
+| 3A | dam.foodintake.rmd | prenatal-food-bar-1.pdf
+| 3C | dam.foodintake.rmd | postnatal-food-bar-1.pdf
+| 3E | dam.foodintake.rmd | weekly-plots-1.pdf
