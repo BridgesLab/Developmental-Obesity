@@ -42,6 +42,7 @@ color.scheme = c("#333333","#CCCCCC")
 ```{r data-entry}
 dam.foodintake.file<-"dam_foodintake.csv"
 
+library(forcats)
 intake.data<-read_csv(dam.foodintake.file, 
   col_types = cols(
   MouseID = col_factor(levels = NULL),
@@ -53,7 +54,10 @@ intake.data<-read_csv(dam.foodintake.file,
   gest.age = col_double(),
   postnatal = col_factor(levels = c("n","y")),
   food.cumulative = col_double()
-  ))
+  )) %>%
+  mutate(Genotype=fct_recode(Genotype,
+                             "Wild-type"="+/+",
+                             "GDF15 Knockout"="-/-"))
           
 intake.data.cleaned<-intake.data%>%
 mutate( week = cut(gest.age, breaks = c(-7.5,0,7.5, 14.5, 21.5, 28.5, 35.5,42.5), labels = c("-1","0","1","2","3","4","5")))%>%
@@ -88,8 +92,8 @@ prenatal.final%>%
   theme(legend.position = "none")
 
 #prenatal food intake stats
-shapiro.test(prenatal.final$final.pre[prenatal.final$Genotype=="-/-"])#0.5
-shapiro.test(prenatal.final$final.pre[prenatal.final$Genotype=="+/+"])#0.08
+shapiro.test(prenatal.final$final.pre[prenatal.final$Genotype=="GDF15 Knockout"])#0.5
+shapiro.test(prenatal.final$final.pre[prenatal.final$Genotype=="Wild-type"])#0.08
 leveneTest(final.pre ~ Genotype, data = prenatal.final)#0.98
 t.test(final.pre ~ Genotype, data = prenatal.final)$p.value#p=0.5
 ```
@@ -127,8 +131,8 @@ sub.post%>%
     theme(legend.position = "none")
 
 #postnatal food intake stats
-shapiro.test(sub.post$postnatal.final[sub.post$Genotype=="+/+"])#0.1
-shapiro.test(sub.post$postnatal.final[sub.post$Genotype=="-/-"])#0.3
+shapiro.test(sub.post$postnatal.final[sub.post$Genotype=="Wild-type"])#0.1
+shapiro.test(sub.post$postnatal.final[sub.post$Genotype=="GDF15 Knockout"])#0.3
 leveneTest(postnatal.final ~ Genotype, sub.post)#0.83
 t.test(postnatal.final ~ Genotype, sub.post)$p.value#0.9
   
@@ -143,7 +147,7 @@ ggplot(intake.data.cleaned, aes(as.integer(week), kcals.consumed, col = Genotype
   scale_color_manual(values = color.scheme)+
   labs(title = "Maternal Food Intake", y= "food intake (kcal/mouse/day)",x="Gestational Age")+
   theme_bw(base_size=18)+
-  theme(legend.position = c(0.1,0.85), legend.background = element_blank())
+  theme(legend.position = c(0.2,0.85), legend.background = element_blank())
 
 #Cumulative Food Intake
  intake.data.cleaned%>%
