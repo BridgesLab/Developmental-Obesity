@@ -13,4 +13,4 @@
 | 3C | dam.foodintake.rmd | postnatal-food-bar-1.pdf
 | 3B | dam.bodyweight.rmd | weight-postnatal-1.pdf
 | 3E | dam.foodintake.rmd | weekly-plots-1.pdf
-| 3EF| dam.bodyweight.rmd | weekly-plots-1.pdf
+| 3F| dam.bodyweight.rmd | bodyweight-timecourse-1.pdf
