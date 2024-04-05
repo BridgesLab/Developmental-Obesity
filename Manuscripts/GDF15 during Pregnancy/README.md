@@ -18,3 +18,9 @@
 | 4B | dam.ITT.rmd | Fasting-BG-1.pdf | 
 | 4C | dam.ITT.rmd | AUC-1.pdf | 
 | 4D | dam.ITT.rmd | rate-of-drop-1.pdf | 
+| 5A | pup.early.postnatal | latency-1.pdf | 
+| 5B | pup.early.postnatal | gest-age-1.pdf | 
+| 5C | pup.early.postnatal | birth-weight-1.pdf | 
+| 5D | pup.early.postnatal | litter-size-1.pdf | 
+| 5E | pup.early.postnatal | litter-size-2.pdf | 
+| 5F | pup.early.postnatal | survival-1.pdf | 

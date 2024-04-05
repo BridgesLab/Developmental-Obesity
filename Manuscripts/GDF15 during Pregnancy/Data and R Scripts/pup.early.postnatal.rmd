@@ -2,7 +2,10 @@
 title: "pup.early.postnatal"
 author: "Molly C. Mulcahy"
 date: '2022-06-13'
-output: html_document
+output:
+  html_document:
+    toc: yes
+    keep_md: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -50,7 +53,10 @@ pup.data<-read_csv(pup.file,
                      survival = col_factor(levels =c("yes","no")),
                      culled = col_factor(levels =c("yes","no")),
                      Genotype = col_factor(levels = c("+/+","-/-"))
-                   ))
+                   )) %>%
+  mutate(Genotype=fct_recode(Genotype,
+                             "Wild-type"="+/+",
+                             "GDF15 Knockout"="-/-"))
 litter.file<-"litter.size.csv"
 
 litter.size.data<-read_csv(litter.file,
@@ -61,7 +67,10 @@ litter.size.data<-read_csv(litter.file,
                       Genotype = col_factor(levels = c("+/+","-/-")),
                       latency = col_double(),
                       '3d.n.dead' = col_double()
-                    ))
+                    )) %>%
+  mutate(Genotype=fct_recode(Genotype,
+                             "Wild-type"="+/+",
+                             "GDF15 Knockout"="-/-"))
 
 pup.weight.file<-"pup.wt.data.csv"
 
@@ -96,15 +105,15 @@ ggplot(birth.weight.data, aes(Genotype, mean, fill = Genotype))+
   geom_errorbar(aes(ymin = mean -se, ymax = mean + se), width = 0.3)+
   scale_fill_manual(values = defense.color.scheme)+
   ylim(0,1.3)+
-  labs(title = "Pup Birth Weight", y = "birth weight (grams)")+
-  theme_bw()+
-  theme(legend.position = "none",text = element_text(size=14))
+  labs(title = "Pup Birth Weight", y = "Birth Weight (grams)")+
+  theme_bw(base_size=18)+
+  theme(legend.position = "none")
 
 #stats
 birth.weight.stats <-pup.data%>%
   filter(!(alive.at.birth =="no"))
-shapiro.test(birth.weight.stats$birth.weight[birth.weight.stats$Genotype=="-/-"])#normal
-shapiro.test(birth.weight.stats$birth.weight[birth.weight.stats$Genotype=="+/+"])#normal
+shapiro.test(birth.weight.stats$birth.weight[birth.weight.stats$Genotype=="GDF15 Knockout"])#normal
+shapiro.test(birth.weight.stats$birth.weight[birth.weight.stats$Genotype=="Wild-type"])#normal
 leveneTest(birth.weight ~ Genotype, data = birth.weight.stats)#equivalent variance
 t.test(birth.weight ~ Genotype, data = birth.weight.stats)#$p.value
 ```
@@ -123,16 +132,16 @@ ggplot(GA.data, aes(Genotype, mean,fill = Genotype))+
   geom_col (aes(fill = Genotype))+
   geom_errorbar(aes(ymin = mean - se, ymax = mean + se), width = 0.3)+
   scale_fill_manual(values = defense.color.scheme)+
-  labs(title = "Gestational Age", y = "gestational age (days)")+
-  theme_bw()+
-   theme(legend.position = "none",text = element_text(size=14))
+  labs(title = "Gestational Age", y = "Gestational Age (days)")+
+  theme_bw(base_size=18)+
+   theme(legend.position = "none")
 #stats
 GA.stat<-pup.data%>%
   select(MouseID, Genotype, gest.age)%>%
   group_by(MouseID)%>%
   unique
-shapiro.test(GA.stat$gest.age[GA.stat$Genotype=="-/-"])#not normal
-shapiro.test(GA.stat$gest.age[GA.stat$Genotype=="+/+"])#not normal
+shapiro.test(GA.stat$gest.age[GA.stat$Genotype=="GDF15 Knockout"])#not normal
+shapiro.test(GA.stat$gest.age[GA.stat$Genotype=="Wild-type"])#not normal
 leveneTest(gest.age ~ Genotype, data = GA.stat)#equivalent variance
 wilcox.test(gest.age ~ Genotype, data = GA.stat, paired = FALSE)
 ```
@@ -150,12 +159,12 @@ avg.litter%>%
    geom_col (aes(fill = Genotype))+
   geom_errorbar(aes(ymin = total.pups_mean - total.pups_se, ymax = total.pups_mean + total.pups_se), width = 0.3)+
   scale_fill_manual(values = defense.color.scheme)+
-  labs(title = "Total Litter Size", y = "average pups per dam")+
-  theme_bw()+
-   theme(legend.position = "none",text = element_text(size=14))
+  labs(title = "Total Litter Size", y = "Mean Pups per Dam")+
+  theme_bw(base_size=18)+
+   theme(legend.position = "none")
 #stats
-shapiro.test(litter.size.data$total.pups[litter.size.data$Genotype=="-/-"])#normal
-shapiro.test(litter.size.data$total.pups[litter.size.data$Genotype=="+/+"])#normal
+shapiro.test(litter.size.data$total.pups[litter.size.data$Genotype=="GDF15 Knockout"])#normal
+shapiro.test(litter.size.data$total.pups[litter.size.data$Genotype=="Wild-type"])#normal
 leveneTest(total.pups ~Genotype, data = litter.size.data)#equivalent variance
 t.test(total.pups ~Genotype, data = litter.size.data)
 #living pups plot
@@ -164,12 +173,12 @@ avg.litter%>%
    geom_col (aes(fill = Genotype))+
   geom_errorbar(aes(ymin = living.pups_mean - living.pups_se, ymax = living.pups_mean + living.pups_se), width = 0.3)+
   scale_fill_manual(values = defense.color.scheme)+
-  labs(title = "Litter Size (living pups)", y = "average pups per dam")+
-  theme_bw()+
-  theme(legend.position = "none",text = element_text(size=14))
+  labs(title = "Litter Size (living pups)", y = "Mean Pups per Dam")+
+  theme_bw(base_size=18)+
+  theme(legend.position = "none")
 #stats
-shapiro.test(litter.size.data$living.pups[litter.size.data$Genotype=="-/-"])#normal
-shapiro.test(litter.size.data$living.pups[litter.size.data$Genotype=="+/+"])#normal
+shapiro.test(litter.size.data$living.pups[litter.size.data$Genotype=="GDF15 Knockout"])#normal
+shapiro.test(litter.size.data$living.pups[litter.size.data$Genotype=="Wild-type"])#normal
 leveneTest(living.pups ~Genotype, data = litter.size.data)#equivalent variance
 t.test(living.pups ~Genotype, data = litter.size.data)
 ```
@@ -185,13 +194,13 @@ latency.data%>%
   geom_col(aes(fill = Genotype))+
   geom_errorbar(aes(ymin = mean - se, ymax = mean + se),width =0.3)+
   scale_fill_manual(values = defense.color.scheme)+
-  labs(title = "Latency to Plug", y = "time from pairing to plug (days)")+
-  theme_bw()+
-  theme(legend.position = "none",text = element_text(size=14))
+  labs(title = "Latency to Plug", y = "Time from Pairing to Plug (days)")+
+  theme_bw(base_size=18)+
+  theme(legend.position = "none")
 
 #stats
-shapiro.test(litter.size.data$latency[litter.size.data$Genotype=="-/-"])#normal
-shapiro.test(litter.size.data$latency[litter.size.data$Genotype=="+/+"])#normal
+shapiro.test(litter.size.data$latency[litter.size.data$Genotype=="GDF15 Knockout"])#normal
+shapiro.test(litter.size.data$latency[litter.size.data$Genotype=="Wild-type"])#normal
 leveneTest(latency ~ Genotype, data = litter.size.data)#equivalent variance
 t.test(latency ~ Genotype, data = litter.size.data)
 ```
@@ -212,12 +221,12 @@ survival.data%>%
   geom_col(aes(fill = Genotype))+
   geom_errorbar(aes(ymin = mean - se, ymax = mean + se),width =0.3)+
   scale_fill_manual(values = defense.color.scheme)+
-  labs(title = "Pup Survival to PND 3", y = "pups survived (% of born alive)")+
-  theme_bw()+
-  theme(legend.position = "none",text = element_text(size=14))
+  labs(title = "Pup Survival to PND 3", y = "Pups Survival (% Born Alive)")+
+  theme_bw(base_size=18)+
+  theme(legend.position = "none")
 #stats
-shapiro.test(mutated.litter.data$percent.survival[mutated.litter.data$Genotype=="-/-"])#not normal
-shapiro.test(mutated.litter.data$percent.survival[mutated.litter.data$Genotype=="+/+"])#not normal
+shapiro.test(mutated.litter.data$percent.survival[mutated.litter.data$Genotype=="GDF15 Knockout"])#not normal
+shapiro.test(mutated.litter.data$percent.survival[mutated.litter.data$Genotype=="Wild-type"])#not normal
 leveneTest(percent.survival ~ Genotype, data = mutated.litter.data)#equivalent variance
 wilcox.test(percent.survival ~ Genotype, data = mutated.litter.data)
 ```
@@ -236,9 +245,9 @@ ggplot(avg.wt.data, aes(day, avg.wt))+
    facet_grid(.~sex)+
   scale_color_manual(values = defense.color.scheme)+
   geom_errorbar(aes(ymin = avg.wt - error.wt, ymax = avg.wt + error.wt), width = 0.3)+
-  labs(title = "Offspring postnatal body weight", y = "body weight (grams)",x="Time from birth (days)")+
-  theme_bw()+
-  theme(legend.background = element_blank(),legend.position = c(0.15,0.85),text = element_text(size=14))
+  labs(title = "Offspring Postnatal Body Weight", y = "Body Weight (grams)",x="Time from Birth (days)")+
+  theme_bw(base_size=18)+
+  theme(legend.background = element_blank(),legend.position = c(0.15,0.85))
 #stats
 full.sex.data<-pup.weight.data%>%
   filter(!(is.na(sex)))
