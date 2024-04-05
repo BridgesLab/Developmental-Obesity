@@ -2,7 +2,10 @@
 title: "dam.foodintake"
 author: "Molly C. Mulcahy"
 date: '2022-05-25'
-output: html_document
+output:
+  html_document:
+    toc: yes
+    keep_md: yes
 ---
 
 ```{r setup}
@@ -31,7 +34,7 @@ se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
 
 #set plot color scheme
 color.scheme = c("#333333","#CCCCCC")
-defense.color.scheme<- c("#00274C","#A5A508")
+#defense.color.scheme<- c("#00274C","#A5A508")
 ```
 
 #data entry
@@ -78,7 +81,7 @@ prenatal.final%>%
   ggplot(aes(Genotype, avg.kcal, fill = Genotype))+
   geom_col()+
   geom_errorbar(aes(ymin = avg.kcal -error.kcal, ymax = avg.kcal + error.kcal),width=0.3)+
-  scale_fill_manual(values = defense.color.scheme)+
+  scale_fill_manual(values = color.scheme)+
   labs(title = "Prenatal cumulative food intake", y="Prenatal cumulative food intake (kcal/dam)")+
   theme_bw()+
   theme(legend.position = "none",text = element_text(size=14))
@@ -117,7 +120,7 @@ sub.post%>%
   ggplot(aes(Genotype, avg.kcal, fill = Genotype))+
   geom_col()+
   geom_errorbar(aes(ymin = avg.kcal -error.kcal, ymax = avg.kcal + error.kcal),width=0.3)+
-  scale_fill_manual(values = defense.color.scheme)+
+  scale_fill_manual(values = color.scheme)+
   labs(title = "Postnatal cumulative food intake", y="Postnatal cumulative food intake (kcal/dam)")+
   theme_bw()+
     theme(legend.position = "none",text = element_text(size=14))
@@ -136,7 +139,7 @@ ggplot(intake.data.cleaned, aes(as.integer(week), kcals.consumed, col = Genotype
   geom_point(aes(col = Genotype))+
   geom_smooth(aes(col = Genotype), se = FALSE, span =0.5)+
   scale_x_continuous(breaks=c(1,2,3,4,5,6,7),labels = c("pre","0","1","2","3","4","5"))+
-  scale_color_manual(values = defense.color.scheme)+
+  scale_color_manual(values = color.scheme)+
   labs(title = "Maternal Food Intake", y= "food intake (kcal/mouse/day)",x="Gestational Age")+
   theme_bw()+
   theme(legend.position = c(0.1,0.85), legend.background = element_blank(),text = element_text(size=14))
@@ -146,7 +149,7 @@ ggplot(intake.data.cleaned, aes(as.integer(week), kcals.consumed, col = Genotype
   #filter(postnatal=="n")%>%
    ggplot(aes(gest.age, food.cumulative, col = Genotype))+
    geom_point(aes(col = Genotype))+
-    scale_color_manual(values = defense.color.scheme)+
+    scale_color_manual(values = color.scheme)+
    geom_smooth(aes(col = Genotype),se=FALSE)+
   labs(title = "Maternal Cumulative Food Intake", y= "kcals/mouse",x="Gestational Day")+
   theme(legend.position = c(0.1,0.85),legend.background = element_blank())
