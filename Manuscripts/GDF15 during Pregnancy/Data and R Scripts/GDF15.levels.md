@@ -243,11 +243,11 @@ summary.Gdf<-both.plate.data%>%
 ggplot()+
   geom_col(data = summary.Gdf, aes(x=time, y=avg, fill = Genotype, group = Genotype), position = position_dodge(1.0))+
   geom_point(data = filter(both.plate.data, Study =="GDF15"), aes(x=time, y=concentration, group = Genotype), position = position_dodge2(width = 0.6))+
-  labs(title = "GDF15 in Dams",y="GDF15 (pg/mL)", x= "zeitgeber time (hours from midnight)")+
+  labs(title = "GDF15 in Dams",y="GDF15 (pg/mL)", x= "Zeitgeber Time")+
   facet_grid(.~Genotype)+
  geom_errorbar(data = summary.Gdf, aes(x=time, y=avg, ymax = avg+error, ymin = avg-error), width = 0.3)+
-    scale_fill_manual(values = c("#00274C","#A5A508"))+
-  theme_bw()+
+  scale_fill_grey()+
+  theme_bw(base_size=18)+
   theme(text = element_text(size=14), legend.position = "none")
 ```
 

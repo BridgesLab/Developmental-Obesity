@@ -235,6 +235,7 @@ se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
 ##         mean in group Water mean in group Dexamethasone 
 ##                         958                         945
 ```
+
 ![](figures/rel-glucose-1.png)<!-- -->![](figures/rel-glucose-2.png)<!-- -->![](figures/rel-glucose-3.png)<!-- -->
 
 ```

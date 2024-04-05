@@ -27,4 +27,12 @@
 | 6A | lactation.rmd | survival-1.pdf | 
 | 6B | lactation.rmd | survival-1.pdf | 
 | 6C | lactation.rmd | survival-1.pdf | 
-| 7 | pup.early.postnatal.rmd | pup-growth-1.pdf | 
+| 7 | pup.early.postnatal.rmd | pup-growth-1.pdf |
+
+## Supplementary Figures
+
+| Figure | Script | File |
+|---------|-------|-------|
+| S1 | GDF15.levels.rmd | Knockout-study-1.pdf | 
+| S2A | IR_of_pregnancy.Rmd | body-weight-2.pdf | 
+| S2B | IR_of_pregnancy.Rmd | body-weight-1.pdf | 
