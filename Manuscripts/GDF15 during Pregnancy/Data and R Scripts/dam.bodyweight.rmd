@@ -2,7 +2,10 @@
 title: "Dam Weight"
 author: "Molly C. Mulcahy"
 date: '2022-05-05'
-output: html_document
+output:
+  html_document:
+    toc: yes
+    keep_md: yes
 ---
 
 ```{r setup}
@@ -58,7 +61,7 @@ avg.bw.data<-bw.data%>%
 ggplot(bw.data, aes(gest.age, gram.values, col = Genotype))+
   geom_point(aes(col = Genotype))+
   geom_smooth(aes(col = Genotype), se= FALSE, span =0.4)+
-  scale_color_manual(values = defense.color.scheme)+
+  scale_color_manual(values = color.scheme)+
   labs(title = "Maternal Perinatal Body Weight", y = "body weight (grams)",x= "Gestational Day")+
   theme_bw()+
   theme(legend.position = c(0.1, 0.865), legend.background = element_blank(),text = element_text(size=14))
@@ -68,7 +71,7 @@ ggplot(bw.data, aes(gest.age, gram.values, col = Genotype))+
    ggplot(aes(as.numeric(week), mean, col = Genotype))+
    geom_point(aes(col = Genotype))+
    geom_errorbar(aes(ymin = mean - se, ymax = mean + se), width =0.3)+
-   scale_color_manual(values = defense.color.scheme)+
+   scale_color_manual(values = color.scheme)+
    geom_smooth(aes(col = Genotype),se=FALSE)+
   labs(title = "Maternal Perinatal Body Weight", y = "body weight(grams)",x= "Gestational Day")+
   theme(legend.position = c(0.1, 0.865), legend.background = element_blank(),text = element_text(size=14))+
@@ -96,7 +99,7 @@ prenatal.bw.data.cleaned%>%
             error.gwg = se(gwg))%>%
 ggplot(aes(Genotype,avg.gwg, fill = Genotype))+
   geom_col()+
-  scale_fill_manual(values = defense.color.scheme)+
+  scale_fill_manual(values = color.scheme)+
   geom_errorbar(aes(ymin = avg.gwg - error.gwg, ymax = avg.gwg + error.gwg), width =0.3)+
   labs(title = "Prenatal weight change", y = "Prenatal weight change (grams/dam)")+
   theme_bw()+
@@ -127,7 +130,7 @@ postnatal.bw.data.cleaned%>%
             error.loss = se(loss))%>%
 ggplot(aes(Genotype,avg.loss, fill = Genotype))+
   geom_col()+
-  scale_fill_manual(values = defense.color.scheme)+
+  scale_fill_manual(values = color.scheme)+
   geom_errorbar(aes(ymin = avg.loss - error.loss, ymax = avg.loss + error.loss), width =0.3)+
   labs(title = "Postnatal weight loss", y = "Postnatal weight loss (grams/dam)")+
   theme_bw()+
