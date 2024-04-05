@@ -32,6 +32,8 @@ se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
 #set plot color scheme
 color.scheme = c("#333333","#CCCCCC")
 defense.color.scheme<- c("#00274C","#A5A508")
+
+defense.color.scheme <- color.scheme
 ```
 
 
