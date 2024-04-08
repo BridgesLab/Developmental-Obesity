@@ -15,7 +15,8 @@ The tag column refers the state of the dataset at the indicated time of the manu
 
 | Publication | Dataset | Tag |
 |-------------|---------|-----|
-| Mulcahy, M.C., N. El Habbal, D. Snyder, J.R. Redd, H. Sun, B.E. Gregg, D. Bridges.  2023.  Gestational Early-Time Restricted Feeding Results in Sex-Specific Glucose Intolerance in Adult Male Mice.  Journal of Obesity [doi:10.1155/2023/6666613](https://doi.org/10.1155/2023/6666613). | | [v0.1.1](https://github.com/BridgesLab/Developmental-Obesity/releases/tag/v0.1.1)|
+| Mulcahy, M.C., N. El Habbal, D. Snyder, J.R. Redd, H. Sun, B.E. Gregg, D. Bridges.  2023.  Gestational Early-Time Restricted Feeding Results in Sex-Specific Glucose Intolerance in Adult Male Mice.  Journal of Obesity [doi:10.1155/2023/6666613](https://doi.org/10.1155/2023/6666613). | [<img src="https://zenodo.org/badge/DOI/10.5281/zenodo.8396933.svg"](https://zenodo.org/doi/10.5281/zenodo.6498112)| [v1.0.0](https://github.com/BridgesLab/Developmental-Obesity/releases/tag/v1.0.0)|
+
 
 ## License
 This developmental obesity data is made available under the CC-BY license (see LICENSE.md):
