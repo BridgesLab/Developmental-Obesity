@@ -26,7 +26,7 @@ output:
 ## 
 ## 	Shapiro-Wilk normality test
 ## 
-## data:  milk.weights$Dam.Lost.Weight.norm[milk.weights$Genotype == "GDF15 Knockout"]
+## data:  milk.weights$Dam.Lost.Weight.norm[milk.weights$Genotype == "Gdf15 Knockout"]
 ## W = 0.9, p-value = 0.4
 ```
 
@@ -43,11 +43,11 @@ output:
 ## 
 ## data:  Dam.Lost.Weight.norm by Genotype
 ## t = 0.4, df = 8, p-value = 0.7
-## alternative hypothesis: true difference in means between group Wild-type and group GDF15 Knockout is not equal to 0
+## alternative hypothesis: true difference in means between group Wild-type and group Gdf15 Knockout is not equal to 0
 ## 95 percent confidence interval:
 ##  -0.161  0.219
 ## sample estimates:
-##      mean in group Wild-type mean in group GDF15 Knockout 
+##      mean in group Wild-type mean in group Gdf15 Knockout 
 ##                        0.188                        0.158
 ```
 
@@ -65,7 +65,7 @@ output:
 ## 
 ## 	Shapiro-Wilk normality test
 ## 
-## data:  milk.weights$Pup.Gained.Weight.norm[milk.weights$Genotype == "GDF15 Knockout"]
+## data:  milk.weights$Pup.Gained.Weight.norm[milk.weights$Genotype == "Gdf15 Knockout"]
 ## W = 0.9, p-value = 0.2
 ```
 
@@ -93,7 +93,7 @@ output:
 ## 
 ## 	Shapiro-Wilk normality test
 ## 
-## data:  milk.stats$avg.milkfat[milk.stats$Genotype == "GDF15 Knockout"]
+## data:  milk.stats$avg.milkfat[milk.stats$Genotype == "Gdf15 Knockout"]
 ## W = 0.9, p-value = 0.4
 ```
 
@@ -110,10 +110,10 @@ output:
 ## 
 ## data:  avg.milkfat by Genotype
 ## t = 0.09, df = 10, p-value = 0.9
-## alternative hypothesis: true difference in means between group Wild-type and group GDF15 Knockout is not equal to 0
+## alternative hypothesis: true difference in means between group Wild-type and group Gdf15 Knockout is not equal to 0
 ## 95 percent confidence interval:
 ##  -3.61  3.92
 ## sample estimates:
-##      mean in group Wild-type mean in group GDF15 Knockout 
+##      mean in group Wild-type mean in group Gdf15 Knockout 
 ##                         9.88                         9.72
 ```

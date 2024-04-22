@@ -57,7 +57,7 @@ intake.data<-read_csv(dam.foodintake.file,
   )) %>%
   mutate(Genotype=fct_recode(Genotype,
                              "Wild-type"="+/+",
-                             "GDF15 Knockout"="-/-"))
+                             "Gdf15 Knockout"="-/-"))
           
 intake.data.cleaned<-intake.data%>%
 mutate( week = cut(gest.age, breaks = c(-7.5,0,7.5, 14.5, 21.5, 28.5, 35.5,42.5), labels = c("-1","0","1","2","3","4","5")))%>%
@@ -92,7 +92,7 @@ prenatal.final%>%
   theme(legend.position = "none")
 
 #prenatal food intake stats
-shapiro.test(prenatal.final$final.pre[prenatal.final$Genotype=="GDF15 Knockout"])#0.5
+shapiro.test(prenatal.final$final.pre[prenatal.final$Genotype=="Gdf15 Knockout"])#0.5
 shapiro.test(prenatal.final$final.pre[prenatal.final$Genotype=="Wild-type"])#0.08
 leveneTest(final.pre ~ Genotype, data = prenatal.final)#0.98
 t.test(final.pre ~ Genotype, data = prenatal.final)$p.value#p=0.5
@@ -132,7 +132,7 @@ sub.post%>%
 
 #postnatal food intake stats
 shapiro.test(sub.post$postnatal.final[sub.post$Genotype=="Wild-type"])#0.1
-shapiro.test(sub.post$postnatal.final[sub.post$Genotype=="GDF15 Knockout"])#0.3
+shapiro.test(sub.post$postnatal.final[sub.post$Genotype=="Gdf15 Knockout"])#0.3
 leveneTest(postnatal.final ~ Genotype, sub.post)#0.83
 t.test(postnatal.final ~ Genotype, sub.post)$p.value#0.9
   

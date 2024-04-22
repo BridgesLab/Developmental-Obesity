@@ -34,7 +34,6 @@ se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
 
 #set plot color scheme
 color.scheme = c("#333333","#CCCCCC")
-defense.color.scheme<- c("#00274C","#A5A508")
 ```
 
 ```{r data-entry}
@@ -51,7 +50,7 @@ bw.data<-read_csv(dam.bodyweight.file,
 mutate( week = cut(gest.age, breaks = c(-7.5,0,7.5, 14.5, 21.5, 28.5, 35.5,42.5), labels = c("pre-pregnancy","E0.5","E7.5","E14.5","E21.5","PND7.5","PND14.5"))) %>%
   mutate(Genotype=fct_recode(Genotype,
                              "Wild-type"="+/+",
-                             "GDF15 Knockout"="-/-"))
+                             "Gdf15 Knockout"="-/-"))
 
 avg.bw.data<-bw.data%>%
   group_by(Genotype, week)%>%
@@ -66,7 +65,7 @@ ggplot(bw.data, aes(gest.age, gram.values, col = Genotype))+
   geom_point(aes(col = Genotype))+
   geom_smooth(aes(col = Genotype), se= FALSE, span =0.4)+
   scale_color_manual(values = color.scheme)+
-  labs(title = "Maternal Body Weight", y = "Body Weight (grams)",x= "Days Since Mating")+
+  labs(title = "Maternal Body Weight", y = "Body Weight (grams)",x= "Days from Mating")+
   theme_bw(base_size=18)+
   theme(legend.position = c(0.2, 0.865), legend.background = element_blank())
   
@@ -110,7 +109,7 @@ ggplot(aes(Genotype,avg.gwg, fill = Genotype))+
   theme(legend.position = "none")
 #stats
 shapiro.test(prenatal.bw.data.cleaned$gwg[prenatal.bw.data.cleaned$Genotype=="Wild-type"])#p=0.5
-shapiro.test(prenatal.bw.data.cleaned$gwg[prenatal.bw.data.cleaned$Genotype=="GDF15 Knockout"])#p=0.3
+shapiro.test(prenatal.bw.data.cleaned$gwg[prenatal.bw.data.cleaned$Genotype=="Gdf15 Knockout"])#p=0.3
 leveneTest(gwg ~ Genotype, prenatal.bw.data.cleaned)#p=0.26
 t.test(gwg ~ Genotype, prenatal.bw.data.cleaned)#p=0.99
 ```
@@ -141,7 +140,7 @@ ggplot(aes(Genotype,avg.loss, fill = Genotype))+
   theme(legend.position = "none")
 
 #stats
-shapiro.test(postnatal.bw.data.cleaned$loss[postnatal.bw.data.cleaned$Genotype=="GDF15 Knockout"])#p=0.1
+shapiro.test(postnatal.bw.data.cleaned$loss[postnatal.bw.data.cleaned$Genotype=="Gdf15 Knockout"])#p=0.1
 shapiro.test(postnatal.bw.data.cleaned$loss[postnatal.bw.data.cleaned$Genotype=="Wild-type"])#p=0.4
 leveneTest(loss ~ Genotype, postnatal.bw.data.cleaned)#p=0.11
 t.test(loss ~ Genotype, postnatal.bw.data.cleaned)#$p.value#p=0.2

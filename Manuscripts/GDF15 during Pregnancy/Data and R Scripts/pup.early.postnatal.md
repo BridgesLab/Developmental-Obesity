@@ -20,7 +20,7 @@ output:
 ## 
 ## 	Shapiro-Wilk normality test
 ## 
-## data:  birth.weight.stats$birth.weight[birth.weight.stats$Genotype == "GDF15 Knockout"]
+## data:  birth.weight.stats$birth.weight[birth.weight.stats$Genotype == "Gdf15 Knockout"]
 ## W = 1, p-value = 0.8
 ```
 
@@ -45,11 +45,11 @@ output:
 ## 
 ## data:  birth.weight by Genotype
 ## t = 2, df = 77, p-value = 0.05
-## alternative hypothesis: true difference in means between group Wild-type and group GDF15 Knockout is not equal to 0
+## alternative hypothesis: true difference in means between group Wild-type and group Gdf15 Knockout is not equal to 0
 ## 95 percent confidence interval:
 ##  0.00000414 0.07913727
 ## sample estimates:
-##      mean in group Wild-type mean in group GDF15 Knockout 
+##      mean in group Wild-type mean in group Gdf15 Knockout 
 ##                         1.26                         1.22
 ```
 
@@ -60,7 +60,7 @@ output:
 ## 
 ## 	Shapiro-Wilk normality test
 ## 
-## data:  GA.stat$gest.age[GA.stat$Genotype == "GDF15 Knockout"]
+## data:  GA.stat$gest.age[GA.stat$Genotype == "Gdf15 Knockout"]
 ## W = 0.7, p-value = 0.005
 ```
 
@@ -95,7 +95,7 @@ output:
 ## 
 ## 	Shapiro-Wilk normality test
 ## 
-## data:  litter.size.data$total.pups[litter.size.data$Genotype == "GDF15 Knockout"]
+## data:  litter.size.data$total.pups[litter.size.data$Genotype == "Gdf15 Knockout"]
 ## W = 0.8, p-value = 0.07
 ```
 
@@ -120,11 +120,11 @@ output:
 ## 
 ## data:  total.pups by Genotype
 ## t = -2, df = 10, p-value = 0.2
-## alternative hypothesis: true difference in means between group Wild-type and group GDF15 Knockout is not equal to 0
+## alternative hypothesis: true difference in means between group Wild-type and group Gdf15 Knockout is not equal to 0
 ## 95 percent confidence interval:
 ##  -3.873  0.683
 ## sample estimates:
-##      mean in group Wild-type mean in group GDF15 Knockout 
+##      mean in group Wild-type mean in group Gdf15 Knockout 
 ##                         5.83                         7.43
 ```
 
@@ -134,7 +134,7 @@ output:
 ## 
 ## 	Shapiro-Wilk normality test
 ## 
-## data:  litter.size.data$living.pups[litter.size.data$Genotype == "GDF15 Knockout"]
+## data:  litter.size.data$living.pups[litter.size.data$Genotype == "Gdf15 Knockout"]
 ## W = 0.9, p-value = 0.2
 ```
 
@@ -159,11 +159,11 @@ output:
 ## 
 ## data:  living.pups by Genotype
 ## t = -0.4, df = 11, p-value = 0.7
-## alternative hypothesis: true difference in means between group Wild-type and group GDF15 Knockout is not equal to 0
+## alternative hypothesis: true difference in means between group Wild-type and group Gdf15 Knockout is not equal to 0
 ## 95 percent confidence interval:
 ##  -2.94  2.04
 ## sample estimates:
-##      mean in group Wild-type mean in group GDF15 Knockout 
+##      mean in group Wild-type mean in group Gdf15 Knockout 
 ##                         5.83                         6.29
 ```
 
@@ -174,7 +174,7 @@ output:
 ## 
 ## 	Shapiro-Wilk normality test
 ## 
-## data:  litter.size.data$latency[litter.size.data$Genotype == "GDF15 Knockout"]
+## data:  litter.size.data$latency[litter.size.data$Genotype == "Gdf15 Knockout"]
 ## W = 0.9, p-value = 0.4
 ```
 
@@ -199,11 +199,11 @@ output:
 ## 
 ## data:  latency by Genotype
 ## t = -0.3, df = 9, p-value = 0.7
-## alternative hypothesis: true difference in means between group Wild-type and group GDF15 Knockout is not equal to 0
+## alternative hypothesis: true difference in means between group Wild-type and group Gdf15 Knockout is not equal to 0
 ## 95 percent confidence interval:
 ##  -2.16  1.59
 ## sample estimates:
-##      mean in group Wild-type mean in group GDF15 Knockout 
+##      mean in group Wild-type mean in group Gdf15 Knockout 
 ##                         3.00                         3.29
 ```
 
@@ -214,7 +214,7 @@ output:
 ## 
 ## 	Shapiro-Wilk normality test
 ## 
-## data:  mutated.litter.data$percent.survival[mutated.litter.data$Genotype == "GDF15 Knockout"]
+## data:  mutated.litter.data$percent.survival[mutated.litter.data$Genotype == "Gdf15 Knockout"]
 ## W = 0.6, p-value = 0.0006
 ```
 
