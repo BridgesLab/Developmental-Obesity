@@ -31,7 +31,6 @@ se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
 
 #set plot color scheme
 color.scheme = c("#333333","#CCCCCC")
-defense.color.scheme<- c("#00274C","#A5A508")
 ```
 
 
@@ -49,7 +48,7 @@ ITT.data<-read_csv(ITT.file,
     rel.auc = col_double()))   %>%
   mutate(Genotype=fct_recode(Genotype,
                              "Wild-type"="+/+",
-                             "GDF15 Knockout"="-/-"))
+                             "Gdf15 Knockout"="-/-"))
 
 avg.data<- ITT.data%>%
   group_by(time, Genotype)%>%
@@ -126,7 +125,7 @@ ITT.data%>%
 #stats
 FBG.data <-ITT.data%>%
   filter(time == "0")
-shapiro.test(FBG.data$glucose[FBG.data$Genotype=="GDF15 Knockout"])#normal
+shapiro.test(FBG.data$glucose[FBG.data$Genotype=="Gdf15 Knockout"])#normal
 shapiro.test(FBG.data$glucose[FBG.data$Genotype=="Wild-type"])#normal
 leveneTest(glucose ~ Genotype, data = FBG.data)#equal variance
 t.test(glucose ~ Genotype, data = FBG.data)#p=0.20
@@ -151,7 +150,7 @@ AUC.data%>%
   theme(legend.position = "none",text = element_text(size=14))
 #stats
 shapiro.test(AUC.data$"AUC"[AUC.data$Genotype=="Wild-type"])#normal
-shapiro.test(AUC.data$"AUC"[AUC.data$Genotype=="GDF15 Knockout"])#normal
+shapiro.test(AUC.data$"AUC"[AUC.data$Genotype=="Gdf15 Knockout"])#normal
 leveneTest(AUC ~ Genotype, data = AUC.data)#not equal variance
 t.test(AUC ~ Genotype, data = AUC.data,var.equal = FALSE)$p.value%>%tidy%>%kable#0.7
 ```
@@ -183,7 +182,7 @@ ggplot(summary.models, aes(Genotype, mean, fill = Genotype))+
   theme_bw()+
   theme(legend.position = "none",text = element_text(size=14)) 
 #stats
-shapiro.test(models$slope[models$Genotype=="GDF15 Knockout"])#normal
+shapiro.test(models$slope[models$Genotype=="Gdf15 Knockout"])#normal
 shapiro.test(models$slope[models$Genotype=="Wild-type"])#normal
 leveneTest(slope~Genotype, data = models)#not equal variance
 t.test(slope~Genotype, data = models,var.equal = FALSE)

@@ -112,7 +112,7 @@ color.scheme = c("#333333","#CCCCCC")
 ## 
 ## 	Shapiro-Wilk normality test
 ## 
-## data:  prenatal.final$final.pre[prenatal.final$Genotype == "GDF15 Knockout"]
+## data:  prenatal.final$final.pre[prenatal.final$Genotype == "Gdf15 Knockout"]
 ## W = 0.9, p-value = 0.5
 ```
 
@@ -150,7 +150,7 @@ color.scheme = c("#333333","#CCCCCC")
 ## 
 ## 	Shapiro-Wilk normality test
 ## 
-## data:  sub.post$postnatal.final[sub.post$Genotype == "GDF15 Knockout"]
+## data:  sub.post$postnatal.final[sub.post$Genotype == "Gdf15 Knockout"]
 ## W = 0.9, p-value = 0.3
 ```
 

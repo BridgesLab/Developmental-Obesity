@@ -34,7 +34,6 @@ se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
 
 #set plot color scheme
 color.scheme = c("#333333","#CCCCCC")
-defense.color.scheme<- c("#00274C","#A5A508")
 
 defense.color.scheme <- color.scheme
 ```
@@ -56,7 +55,7 @@ pup.data<-read_csv(pup.file,
                    )) %>%
   mutate(Genotype=fct_recode(Genotype,
                              "Wild-type"="+/+",
-                             "GDF15 Knockout"="-/-"))
+                             "Gdf15 Knockout"="-/-"))
 litter.file<-"litter.size.csv"
 
 litter.size.data<-read_csv(litter.file,
@@ -70,7 +69,7 @@ litter.size.data<-read_csv(litter.file,
                     )) %>%
   mutate(Genotype=fct_recode(Genotype,
                              "Wild-type"="+/+",
-                             "GDF15 Knockout"="-/-"))
+                             "Gdf15 Knockout"="-/-"))
 
 pup.weight.file<-"pup.wt.data.csv"
 
@@ -112,7 +111,7 @@ ggplot(birth.weight.data, aes(Genotype, mean, fill = Genotype))+
 #stats
 birth.weight.stats <-pup.data%>%
   filter(!(alive.at.birth =="no"))
-shapiro.test(birth.weight.stats$birth.weight[birth.weight.stats$Genotype=="GDF15 Knockout"])#normal
+shapiro.test(birth.weight.stats$birth.weight[birth.weight.stats$Genotype=="Gdf15 Knockout"])#normal
 shapiro.test(birth.weight.stats$birth.weight[birth.weight.stats$Genotype=="Wild-type"])#normal
 leveneTest(birth.weight ~ Genotype, data = birth.weight.stats)#equivalent variance
 t.test(birth.weight ~ Genotype, data = birth.weight.stats)#$p.value
@@ -140,7 +139,7 @@ GA.stat<-pup.data%>%
   select(MouseID, Genotype, gest.age)%>%
   group_by(MouseID)%>%
   unique
-shapiro.test(GA.stat$gest.age[GA.stat$Genotype=="GDF15 Knockout"])#not normal
+shapiro.test(GA.stat$gest.age[GA.stat$Genotype=="Gdf15 Knockout"])#not normal
 shapiro.test(GA.stat$gest.age[GA.stat$Genotype=="Wild-type"])#not normal
 leveneTest(gest.age ~ Genotype, data = GA.stat)#equivalent variance
 wilcox.test(gest.age ~ Genotype, data = GA.stat, paired = FALSE)
@@ -163,7 +162,7 @@ avg.litter%>%
   theme_bw(base_size=18)+
    theme(legend.position = "none")
 #stats
-shapiro.test(litter.size.data$total.pups[litter.size.data$Genotype=="GDF15 Knockout"])#normal
+shapiro.test(litter.size.data$total.pups[litter.size.data$Genotype=="Gdf15 Knockout"])#normal
 shapiro.test(litter.size.data$total.pups[litter.size.data$Genotype=="Wild-type"])#normal
 leveneTest(total.pups ~Genotype, data = litter.size.data)#equivalent variance
 t.test(total.pups ~Genotype, data = litter.size.data)
@@ -177,7 +176,7 @@ avg.litter%>%
   theme_bw(base_size=18)+
   theme(legend.position = "none")
 #stats
-shapiro.test(litter.size.data$living.pups[litter.size.data$Genotype=="GDF15 Knockout"])#normal
+shapiro.test(litter.size.data$living.pups[litter.size.data$Genotype=="Gdf15 Knockout"])#normal
 shapiro.test(litter.size.data$living.pups[litter.size.data$Genotype=="Wild-type"])#normal
 leveneTest(living.pups ~Genotype, data = litter.size.data)#equivalent variance
 t.test(living.pups ~Genotype, data = litter.size.data)
@@ -199,7 +198,7 @@ latency.data%>%
   theme(legend.position = "none")
 
 #stats
-shapiro.test(litter.size.data$latency[litter.size.data$Genotype=="GDF15 Knockout"])#normal
+shapiro.test(litter.size.data$latency[litter.size.data$Genotype=="Gdf15 Knockout"])#normal
 shapiro.test(litter.size.data$latency[litter.size.data$Genotype=="Wild-type"])#normal
 leveneTest(latency ~ Genotype, data = litter.size.data)#equivalent variance
 t.test(latency ~ Genotype, data = litter.size.data)
@@ -225,7 +224,7 @@ survival.data%>%
   theme_bw(base_size=18)+
   theme(legend.position = "none")
 #stats
-shapiro.test(mutated.litter.data$percent.survival[mutated.litter.data$Genotype=="GDF15 Knockout"])#not normal
+shapiro.test(mutated.litter.data$percent.survival[mutated.litter.data$Genotype=="Gdf15 Knockout"])#not normal
 shapiro.test(mutated.litter.data$percent.survival[mutated.litter.data$Genotype=="Wild-type"])#not normal
 leveneTest(percent.survival ~ Genotype, data = mutated.litter.data)#equivalent variance
 wilcox.test(percent.survival ~ Genotype, data = mutated.litter.data)

@@ -32,11 +32,8 @@ knitr::knit_hooks$set(inline = function(x) {
 se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
 
 
-
-
 #set plot color scheme
 color.scheme = c("#333333","#CCCCCC")
-defense.color.scheme<- c("#00274C","#A5A508")
 ```
 
 ```{r data-input}
@@ -56,7 +53,7 @@ wsw.data<-read_csv(wsw.file,
                    )) %>%
   mutate(Genotype=fct_recode(Genotype,
                              "Wild-type"="+/+",
-                             "GDF15 Knockout"="-/-"))
+                             "Gdf15 Knockout"="-/-"))
 
 milk.file<-"milkfat.csv"
 
@@ -71,7 +68,7 @@ milk.data<-read_csv(milk.file,
   )) %>%
   mutate(Genotype=fct_recode(Genotype,
                              "Wild-type"="+/+",
-                             "GDF15 Knockout"="-/-"))
+                             "Gdf15 Knockout"="-/-"))
 ```
 
 ```{r wsw}
@@ -97,7 +94,7 @@ ggplot(avg.wsw, aes(Genotype, avg.dam.loss, fill = Genotype))+
 
 #stats
 shapiro.test(milk.weights$Dam.Lost.Weight.norm[milk.weights$Genotype=="Wild-type"])#normal
-shapiro.test(milk.weights$Dam.Lost.Weight.norm[milk.weights$Genotype=="GDF15 Knockout"])#normal
+shapiro.test(milk.weights$Dam.Lost.Weight.norm[milk.weights$Genotype=="Gdf15 Knockout"])#normal
 leveneTest(Dam.Lost.Weight.norm ~ Genotype, data = milk.weights)#equivalent variance
 t.test(Dam.Lost.Weight.norm ~ Genotype, data = milk.weights)
 
@@ -116,7 +113,7 @@ ggplot(avg.wsw.pup, aes(Genotype, avg.pup.gain, fill = Genotype))+
 
 #stats
 shapiro.test(milk.weights$Pup.Gained.Weight.norm[milk.weights$Genotype=="Wild-type"])#not normal
-shapiro.test(milk.weights$Pup.Gained.Weight.norm[milk.weights$Genotype=="GDF15 Knockout"])#normal
+shapiro.test(milk.weights$Pup.Gained.Weight.norm[milk.weights$Genotype=="Gdf15 Knockout"])#normal
 wilcox.test(Pup.Gained.Weight.norm ~ Genotype, data = milk.weights, paired = FALSE)
 ```
 
@@ -154,7 +151,7 @@ milk.stats<-mutated.milk.data%>%
   distinct()
 
   shapiro.test(milk.stats$avg.milkfat[milk.stats$Genotype=="Wild-type"])#p=0.6
-  shapiro.test(milk.stats$avg.milkfat[milk.stats$Genotype=="GDF15 Knockout"])#p=0.4
+  shapiro.test(milk.stats$avg.milkfat[milk.stats$Genotype=="Gdf15 Knockout"])#p=0.4
   leveneTest(avg.milkfat ~ Genotype, milk.stats)#p=0.75
   t.test(avg.milkfat ~Genotype, data = milk.stats)#p=0.93
 

@@ -98,7 +98,6 @@ se <- function(x) sd(x, na.rm=T)/sqrt(length(x))
 
 #set plot color scheme
 color.scheme = c("#333333","#CCCCCC")
-defense.color.scheme<- c("#00274C","#A5A508")
 ```
 
 
@@ -108,8 +107,8 @@ defense.color.scheme<- c("#00274C","#A5A508")
 ![](figures/bodyweight-timecourse-1.png)<!-- -->![](figures/bodyweight-timecourse-2.png)<!-- -->
 
 ```
-## List of 136
-##  $ line                            :List of 6
+## List of 97
+##  $ line                      :List of 6
 ##   ..$ colour       : chr "black"
 ##   ..$ linewidth    : num 0.818
 ##   ..$ linetype     : num 1
@@ -117,14 +116,14 @@ defense.color.scheme<- c("#00274C","#A5A508")
 ##   ..$ arrow        : logi FALSE
 ##   ..$ inherit.blank: logi TRUE
 ##   ..- attr(*, "class")= chr [1:2] "element_line" "element"
-##  $ rect                            :List of 5
+##  $ rect                      :List of 5
 ##   ..$ fill         : chr "white"
 ##   ..$ colour       : chr "black"
 ##   ..$ linewidth    : num 0.818
 ##   ..$ linetype     : num 1
 ##   ..$ inherit.blank: logi TRUE
 ##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
-##  $ text                            :List of 11
+##  $ text                      :List of 11
 ##   ..$ family       : chr ""
 ##   ..$ face         : chr "plain"
 ##   ..$ colour       : chr "black"
@@ -138,10 +137,10 @@ defense.color.scheme<- c("#00274C","#A5A508")
 ##   ..$ debug        : logi FALSE
 ##   ..$ inherit.blank: logi TRUE
 ##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ title                           : NULL
-##  $ aspect.ratio                    : NULL
-##  $ axis.title                      : NULL
-##  $ axis.title.x                    :List of 11
+##  $ title                     : NULL
+##  $ aspect.ratio              : NULL
+##  $ axis.title                : NULL
+##  $ axis.title.x              :List of 11
 ##   ..$ family       : NULL
 ##   ..$ face         : NULL
 ##   ..$ colour       : NULL
@@ -155,7 +154,7 @@ defense.color.scheme<- c("#00274C","#A5A508")
 ##   ..$ debug        : NULL
 ##   ..$ inherit.blank: logi TRUE
 ##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.title.x.top                :List of 11
+##  $ axis.title.x.top          :List of 11
 ##   ..$ family       : NULL
 ##   ..$ face         : NULL
 ##   ..$ colour       : NULL
@@ -169,8 +168,8 @@ defense.color.scheme<- c("#00274C","#A5A508")
 ##   ..$ debug        : NULL
 ##   ..$ inherit.blank: logi TRUE
 ##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.title.x.bottom             : NULL
-##  $ axis.title.y                    :List of 11
+##  $ axis.title.x.bottom       : NULL
+##  $ axis.title.y              :List of 11
 ##   ..$ family       : NULL
 ##   ..$ face         : NULL
 ##   ..$ colour       : NULL
@@ -184,14 +183,14 @@ defense.color.scheme<- c("#00274C","#A5A508")
 ##   ..$ debug        : NULL
 ##   ..$ inherit.blank: logi TRUE
 ##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.title.y.left               : NULL
-##  $ axis.title.y.right              :List of 11
+##  $ axis.title.y.left         : NULL
+##  $ axis.title.y.right        :List of 11
 ##   ..$ family       : NULL
 ##   ..$ face         : NULL
 ##   ..$ colour       : NULL
 ##   ..$ size         : NULL
 ##   ..$ hjust        : NULL
-##   ..$ vjust        : num 1
+##   ..$ vjust        : num 0
 ##   ..$ angle        : num -90
 ##   ..$ lineheight   : NULL
 ##   ..$ margin       : 'margin' num [1:4] 0points 0points 0points 4.5points
@@ -199,7 +198,7 @@ defense.color.scheme<- c("#00274C","#A5A508")
 ##   ..$ debug        : NULL
 ##   ..$ inherit.blank: logi TRUE
 ##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.text                       :List of 11
+##  $ axis.text                 :List of 11
 ##   ..$ family       : NULL
 ##   ..$ face         : NULL
 ##   ..$ colour       : chr "grey30"
@@ -212,7 +211,7 @@ defense.color.scheme<- c("#00274C","#A5A508")
 ##   ..$ debug        : NULL
 ##   ..$ inherit.blank: logi TRUE
 ##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.text.x                     :List of 11
+##  $ axis.text.x               :List of 11
 ##   ..$ family       : NULL
 ##   ..$ face         : NULL
 ##   ..$ colour       : NULL
@@ -226,7 +225,7 @@ defense.color.scheme<- c("#00274C","#A5A508")
 ##   ..$ debug        : NULL
 ##   ..$ inherit.blank: logi TRUE
 ##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.text.x.top                 :List of 11
+##  $ axis.text.x.top           :List of 11
 ##   ..$ family       : NULL
 ##   ..$ face         : NULL
 ##   ..$ colour       : NULL
@@ -240,8 +239,8 @@ defense.color.scheme<- c("#00274C","#A5A508")
 ##   ..$ debug        : NULL
 ##   ..$ inherit.blank: logi TRUE
 ##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.text.x.bottom              : NULL
-##  $ axis.text.y                     :List of 11
+##  $ axis.text.x.bottom        : NULL
+##  $ axis.text.y               :List of 11
 ##   ..$ family       : NULL
 ##   ..$ face         : NULL
 ##   ..$ colour       : NULL
@@ -255,8 +254,8 @@ defense.color.scheme<- c("#00274C","#A5A508")
 ##   ..$ debug        : NULL
 ##   ..$ inherit.blank: logi TRUE
 ##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.text.y.left                : NULL
-##  $ axis.text.y.right               :List of 11
+##  $ axis.text.y.left          : NULL
+##  $ axis.text.y.right         :List of 11
 ##   ..$ family       : NULL
 ##   ..$ face         : NULL
 ##   ..$ colour       : NULL
@@ -270,22 +269,7 @@ defense.color.scheme<- c("#00274C","#A5A508")
 ##   ..$ debug        : NULL
 ##   ..$ inherit.blank: logi TRUE
 ##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.text.theta                 : NULL
-##  $ axis.text.r                     :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : num 0.5
-##   ..$ vjust        : NULL
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 0points 3.6points 0points 3.6points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.ticks                      :List of 6
+##  $ axis.ticks                :List of 6
 ##   ..$ colour       : chr "grey20"
 ##   ..$ linewidth    : NULL
 ##   ..$ linetype     : NULL
@@ -293,76 +277,53 @@ defense.color.scheme<- c("#00274C","#A5A508")
 ##   ..$ arrow        : logi FALSE
 ##   ..$ inherit.blank: logi TRUE
 ##   ..- attr(*, "class")= chr [1:2] "element_line" "element"
-##  $ axis.ticks.x                    : NULL
-##  $ axis.ticks.x.top                : NULL
-##  $ axis.ticks.x.bottom             : NULL
-##  $ axis.ticks.y                    : NULL
-##  $ axis.ticks.y.left               : NULL
-##  $ axis.ticks.y.right              : NULL
-##  $ axis.ticks.theta                : NULL
-##  $ axis.ticks.r                    : NULL
-##  $ axis.minor.ticks.x.top          : NULL
-##  $ axis.minor.ticks.x.bottom       : NULL
-##  $ axis.minor.ticks.y.left         : NULL
-##  $ axis.minor.ticks.y.right        : NULL
-##  $ axis.minor.ticks.theta          : NULL
-##  $ axis.minor.ticks.r              : NULL
-##  $ axis.ticks.length               : 'simpleUnit' num 4.5points
+##  $ axis.ticks.x              : NULL
+##  $ axis.ticks.x.top          : NULL
+##  $ axis.ticks.x.bottom       : NULL
+##  $ axis.ticks.y              : NULL
+##  $ axis.ticks.y.left         : NULL
+##  $ axis.ticks.y.right        : NULL
+##  $ axis.ticks.length         : 'simpleUnit' num 4.5points
 ##   ..- attr(*, "unit")= int 8
-##  $ axis.ticks.length.x             : NULL
-##  $ axis.ticks.length.x.top         : NULL
-##  $ axis.ticks.length.x.bottom      : NULL
-##  $ axis.ticks.length.y             : NULL
-##  $ axis.ticks.length.y.left        : NULL
-##  $ axis.ticks.length.y.right       : NULL
-##  $ axis.ticks.length.theta         : NULL
-##  $ axis.ticks.length.r             : NULL
-##  $ axis.minor.ticks.length         : 'rel' num 0.75
-##  $ axis.minor.ticks.length.x       : NULL
-##  $ axis.minor.ticks.length.x.top   : NULL
-##  $ axis.minor.ticks.length.x.bottom: NULL
-##  $ axis.minor.ticks.length.y       : NULL
-##  $ axis.minor.ticks.length.y.left  : NULL
-##  $ axis.minor.ticks.length.y.right : NULL
-##  $ axis.minor.ticks.length.theta   : NULL
-##  $ axis.minor.ticks.length.r       : NULL
-##  $ axis.line                       : list()
+##  $ axis.ticks.length.x       : NULL
+##  $ axis.ticks.length.x.top   : NULL
+##  $ axis.ticks.length.x.bottom: NULL
+##  $ axis.ticks.length.y       : NULL
+##  $ axis.ticks.length.y.left  : NULL
+##  $ axis.ticks.length.y.right : NULL
+##  $ axis.line                 : list()
 ##   ..- attr(*, "class")= chr [1:2] "element_blank" "element"
-##  $ axis.line.x                     : NULL
-##  $ axis.line.x.top                 : NULL
-##  $ axis.line.x.bottom              : NULL
-##  $ axis.line.y                     : NULL
-##  $ axis.line.y.left                : NULL
-##  $ axis.line.y.right               : NULL
-##  $ axis.line.theta                 : NULL
-##  $ axis.line.r                     : NULL
-##  $ legend.background               :List of 5
+##  $ axis.line.x               : NULL
+##  $ axis.line.x.top           : NULL
+##  $ axis.line.x.bottom        : NULL
+##  $ axis.line.y               : NULL
+##  $ axis.line.y.left          : NULL
+##  $ axis.line.y.right         : NULL
+##  $ legend.background         :List of 5
 ##   ..$ fill         : NULL
 ##   ..$ colour       : logi NA
 ##   ..$ linewidth    : NULL
 ##   ..$ linetype     : NULL
 ##   ..$ inherit.blank: logi TRUE
 ##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
-##  $ legend.margin                   : 'margin' num [1:4] 9points 9points 9points 9points
+##  $ legend.margin             : 'margin' num [1:4] 9points 9points 9points 9points
 ##   ..- attr(*, "unit")= int 8
-##  $ legend.spacing                  : 'simpleUnit' num 18points
+##  $ legend.spacing            : 'simpleUnit' num 18points
 ##   ..- attr(*, "unit")= int 8
-##  $ legend.spacing.x                : NULL
-##  $ legend.spacing.y                : NULL
-##  $ legend.key                      : NULL
-##  $ legend.key.size                 : 'simpleUnit' num 1.2lines
+##  $ legend.spacing.x          : NULL
+##  $ legend.spacing.y          : NULL
+##  $ legend.key                :List of 5
+##   ..$ fill         : chr "white"
+##   ..$ colour       : logi NA
+##   ..$ linewidth    : NULL
+##   ..$ linetype     : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
+##  $ legend.key.size           : 'simpleUnit' num 1.2lines
 ##   ..- attr(*, "unit")= int 3
-##  $ legend.key.height               : NULL
-##  $ legend.key.width                : NULL
-##  $ legend.key.spacing              : 'simpleUnit' num 9points
-##   ..- attr(*, "unit")= int 8
-##  $ legend.key.spacing.x            : NULL
-##  $ legend.key.spacing.y            : NULL
-##  $ legend.frame                    : NULL
-##  $ legend.ticks                    : NULL
-##  $ legend.ticks.length             : 'rel' num 0.2
-##  $ legend.axis.line                : NULL
-##  $ legend.text                     :List of 11
+##  $ legend.key.height         : NULL
+##  $ legend.key.width          : NULL
+##  $ legend.text               :List of 11
 ##   ..$ family       : NULL
 ##   ..$ face         : NULL
 ##   ..$ colour       : NULL
@@ -375,8 +336,8 @@ defense.color.scheme<- c("#00274C","#A5A508")
 ##   ..$ debug        : NULL
 ##   ..$ inherit.blank: logi TRUE
 ##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ legend.text.position            : NULL
-##  $ legend.title                    :List of 11
+##  $ legend.text.align         : NULL
+##  $ legend.title              :List of 11
 ##   ..$ family       : NULL
 ##   ..$ face         : NULL
 ##   ..$ colour       : NULL
@@ -389,27 +350,184 @@ defense.color.scheme<- c("#00274C","#A5A508")
 ##   ..$ debug        : NULL
 ##   ..$ inherit.blank: logi TRUE
 ##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ legend.title.position           : NULL
-##  $ legend.position                 : chr "right"
-##  $ legend.position.inside          : NULL
-##  $ legend.direction                : NULL
-##  $ legend.byrow                    : NULL
-##  $ legend.justification            : chr "center"
-##  $ legend.justification.top        : NULL
-##  $ legend.justification.bottom     : NULL
-##  $ legend.justification.left       : NULL
-##  $ legend.justification.right      : NULL
-##  $ legend.justification.inside     : NULL
-##  $ legend.location                 : NULL
-##  $ legend.box                      : NULL
-##  $ legend.box.just                 : NULL
-##  $ legend.box.margin               : 'margin' num [1:4] 0cm 0cm 0cm 0cm
+##  $ legend.title.align        : NULL
+##  $ legend.position           : chr "right"
+##  $ legend.direction          : NULL
+##  $ legend.justification      : chr "center"
+##  $ legend.box                : NULL
+##  $ legend.box.just           : NULL
+##  $ legend.box.margin         : 'margin' num [1:4] 0cm 0cm 0cm 0cm
 ##   ..- attr(*, "unit")= int 1
-##  $ legend.box.background           : list()
+##  $ legend.box.background     : list()
 ##   ..- attr(*, "class")= chr [1:2] "element_blank" "element"
-##  $ legend.box.spacing              : 'simpleUnit' num 18points
+##  $ legend.box.spacing        : 'simpleUnit' num 18points
 ##   ..- attr(*, "unit")= int 8
-##   [list output truncated]
+##  $ panel.background          :List of 5
+##   ..$ fill         : chr "white"
+##   ..$ colour       : logi NA
+##   ..$ linewidth    : NULL
+##   ..$ linetype     : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
+##  $ panel.border              :List of 5
+##   ..$ fill         : logi NA
+##   ..$ colour       : chr "grey20"
+##   ..$ linewidth    : NULL
+##   ..$ linetype     : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
+##  $ panel.spacing             : 'simpleUnit' num 9points
+##   ..- attr(*, "unit")= int 8
+##  $ panel.spacing.x           : NULL
+##  $ panel.spacing.y           : NULL
+##  $ panel.grid                :List of 6
+##   ..$ colour       : chr "grey92"
+##   ..$ linewidth    : NULL
+##   ..$ linetype     : NULL
+##   ..$ lineend      : NULL
+##   ..$ arrow        : logi FALSE
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_line" "element"
+##  $ panel.grid.major          : NULL
+##  $ panel.grid.minor          :List of 6
+##   ..$ colour       : NULL
+##   ..$ linewidth    : 'rel' num 0.5
+##   ..$ linetype     : NULL
+##   ..$ lineend      : NULL
+##   ..$ arrow        : logi FALSE
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_line" "element"
+##  $ panel.grid.major.x        : NULL
+##  $ panel.grid.major.y        : NULL
+##  $ panel.grid.minor.x        : NULL
+##  $ panel.grid.minor.y        : NULL
+##  $ panel.ontop               : logi FALSE
+##  $ plot.background           :List of 5
+##   ..$ fill         : NULL
+##   ..$ colour       : chr "white"
+##   ..$ linewidth    : NULL
+##   ..$ linetype     : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
+##  $ plot.title                :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : NULL
+##   ..$ size         : 'rel' num 1.2
+##   ..$ hjust        : num 0
+##   ..$ vjust        : num 1
+##   ..$ angle        : NULL
+##   ..$ lineheight   : NULL
+##   ..$ margin       : 'margin' num [1:4] 0points 0points 9points 0points
+##   .. ..- attr(*, "unit")= int 8
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ plot.title.position       : chr "panel"
+##  $ plot.subtitle             :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : NULL
+##   ..$ size         : NULL
+##   ..$ hjust        : num 0
+##   ..$ vjust        : num 1
+##   ..$ angle        : NULL
+##   ..$ lineheight   : NULL
+##   ..$ margin       : 'margin' num [1:4] 0points 0points 9points 0points
+##   .. ..- attr(*, "unit")= int 8
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ plot.caption              :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : NULL
+##   ..$ size         : 'rel' num 0.8
+##   ..$ hjust        : num 1
+##   ..$ vjust        : num 1
+##   ..$ angle        : NULL
+##   ..$ lineheight   : NULL
+##   ..$ margin       : 'margin' num [1:4] 9points 0points 0points 0points
+##   .. ..- attr(*, "unit")= int 8
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ plot.caption.position     : chr "panel"
+##  $ plot.tag                  :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : NULL
+##   ..$ size         : 'rel' num 1.2
+##   ..$ hjust        : num 0.5
+##   ..$ vjust        : num 0.5
+##   ..$ angle        : NULL
+##   ..$ lineheight   : NULL
+##   ..$ margin       : NULL
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ plot.tag.position         : chr "topleft"
+##  $ plot.margin               : 'margin' num [1:4] 9points 9points 9points 9points
+##   ..- attr(*, "unit")= int 8
+##  $ strip.background          :List of 5
+##   ..$ fill         : chr "grey85"
+##   ..$ colour       : chr "grey20"
+##   ..$ linewidth    : NULL
+##   ..$ linetype     : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
+##  $ strip.background.x        : NULL
+##  $ strip.background.y        : NULL
+##  $ strip.clip                : chr "inherit"
+##  $ strip.placement           : chr "inside"
+##  $ strip.text                :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : chr "grey10"
+##   ..$ size         : 'rel' num 0.8
+##   ..$ hjust        : NULL
+##   ..$ vjust        : NULL
+##   ..$ angle        : NULL
+##   ..$ lineheight   : NULL
+##   ..$ margin       : 'margin' num [1:4] 7.2points 7.2points 7.2points 7.2points
+##   .. ..- attr(*, "unit")= int 8
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ strip.text.x              : NULL
+##  $ strip.text.x.bottom       : NULL
+##  $ strip.text.x.top          : NULL
+##  $ strip.text.y              :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : NULL
+##   ..$ size         : NULL
+##   ..$ hjust        : NULL
+##   ..$ vjust        : NULL
+##   ..$ angle        : num -90
+##   ..$ lineheight   : NULL
+##   ..$ margin       : NULL
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ strip.text.y.left         :List of 11
+##   ..$ family       : NULL
+##   ..$ face         : NULL
+##   ..$ colour       : NULL
+##   ..$ size         : NULL
+##   ..$ hjust        : NULL
+##   ..$ vjust        : NULL
+##   ..$ angle        : num 90
+##   ..$ lineheight   : NULL
+##   ..$ margin       : NULL
+##   ..$ debug        : NULL
+##   ..$ inherit.blank: logi TRUE
+##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
+##  $ strip.text.y.right        : NULL
+##  $ strip.switch.pad.grid     : 'simpleUnit' num 4.5points
+##   ..- attr(*, "unit")= int 8
+##  $ strip.switch.pad.wrap     : 'simpleUnit' num 4.5points
+##   ..- attr(*, "unit")= int 8
 ##  - attr(*, "class")= chr [1:2] "theme" "gg"
 ##  - attr(*, "complete")= logi TRUE
 ##  - attr(*, "validate")= logi TRUE
@@ -428,7 +546,7 @@ defense.color.scheme<- c("#00274C","#A5A508")
 ## 
 ## 	Shapiro-Wilk normality test
 ## 
-## data:  prenatal.bw.data.cleaned$gwg[prenatal.bw.data.cleaned$Genotype == "GDF15 Knockout"]
+## data:  prenatal.bw.data.cleaned$gwg[prenatal.bw.data.cleaned$Genotype == "Gdf15 Knockout"]
 ## W = 0.9, p-value = 0.3
 ```
 
@@ -445,11 +563,11 @@ defense.color.scheme<- c("#00274C","#A5A508")
 ## 
 ## data:  gwg by Genotype
 ## t = -0.03, df = 12, p-value = 1
-## alternative hypothesis: true difference in means between group Wild-type and group GDF15 Knockout is not equal to 0
+## alternative hypothesis: true difference in means between group Wild-type and group Gdf15 Knockout is not equal to 0
 ## 95 percent confidence interval:
 ##  -3.71  3.61
 ## sample estimates:
-##      mean in group Wild-type mean in group GDF15 Knockout 
+##      mean in group Wild-type mean in group Gdf15 Knockout 
 ##                         9.55                         9.60
 ```
 
@@ -459,7 +577,7 @@ defense.color.scheme<- c("#00274C","#A5A508")
 ## 
 ## 	Shapiro-Wilk normality test
 ## 
-## data:  postnatal.bw.data.cleaned$loss[postnatal.bw.data.cleaned$Genotype == "GDF15 Knockout"]
+## data:  postnatal.bw.data.cleaned$loss[postnatal.bw.data.cleaned$Genotype == "Gdf15 Knockout"]
 ## W = 0.9, p-value = 0.1
 ```
 
@@ -484,11 +602,11 @@ defense.color.scheme<- c("#00274C","#A5A508")
 ## 
 ## data:  loss by Genotype
 ## t = 1, df = 7, p-value = 0.2
-## alternative hypothesis: true difference in means between group Wild-type and group GDF15 Knockout is not equal to 0
+## alternative hypothesis: true difference in means between group Wild-type and group Gdf15 Knockout is not equal to 0
 ## 95 percent confidence interval:
 ##  -0.998  4.048
 ## sample estimates:
-##      mean in group Wild-type mean in group GDF15 Knockout 
+##      mean in group Wild-type mean in group Gdf15 Knockout 
 ##                         2.85                         1.32
 ```
 
@@ -538,7 +656,7 @@ defense.color.scheme<- c("#00274C","#A5A508")
 ```
 
 ```
-##            (Intercept)               gest.age GenotypeGDF15 Knockout 
+##            (Intercept)               gest.age GenotypeGdf15 Knockout 
 ##                 19.912                  0.437                  0.965
 ```
 
@@ -598,7 +716,7 @@ defense.color.scheme<- c("#00274C","#A5A508")
 ```
 
 ```
-##            (Intercept)               gest.age GenotypeGDF15 Knockout 
+##            (Intercept)               gest.age GenotypeGdf15 Knockout 
 ##                 20.538                  0.161                  1.621
 ```
 
