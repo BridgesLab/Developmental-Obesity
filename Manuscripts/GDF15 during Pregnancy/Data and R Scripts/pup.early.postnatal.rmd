@@ -85,7 +85,10 @@ pup.weight.data<-read_csv(pup.weight.file,
                       culled = col_factor(levels = c("yes","no")),
                       day = col_double(),
                       weight = col_double()
-                    ))
+                    ))%>%
+  mutate(Genotype=fct_recode(Genotype,
+                             "Wild-type"="+/+",
+                             "Gdf15 Knockout"="-/-"))
 ```
 
 

@@ -376,24 +376,26 @@ output:
 ## Number of obs: 232, groups:  pup.number, 79; MouseID, 13
 ## 
 ## Fixed effects:
-##             Estimate Std. Error t value
-## (Intercept)   0.8840     0.0517   17.10
-## day           0.4221     0.0136   31.05
-## sexfemale    -0.0533     0.0382   -1.39
-## Genotype-/-  -0.0161     0.0647   -0.25
+##                        Estimate Std. Error t value
+## (Intercept)              0.8840     0.0517   17.10
+## day                      0.4221     0.0136   31.05
+## sexfemale               -0.0533     0.0382   -1.39
+## GenotypeGdf15 Knockout  -0.0161     0.0647   -0.25
 ## 
 ## Correlation of Fixed Effects:
 ##             (Intr) day    sexfml
 ## day         -0.105              
 ## sexfemale   -0.372 -0.008       
-## Genotype-/- -0.667  0.008 -0.035
+## GntypGdf15K -0.667  0.008 -0.035
 ## optimizer (nloptwrap) convergence code: 0 (OK)
 ## boundary (singular) fit: see help('isSingular')
 ```
 
 ```
-## (Intercept)         day   sexfemale Genotype-/- 
-##      0.8840      0.4221     -0.0533     -0.0161
+##            (Intercept)                    day              sexfemale 
+##                 0.8840                 0.4221                -0.0533 
+## GenotypeGdf15 Knockout 
+##                -0.0161
 ```
 
 ```
