@@ -16,7 +16,7 @@ The tag column refers the state of the dataset at the indicated time of the manu
 | Publication | Dataset | Tag |
 |-------------|---------|-----|
 | Mulcahy, M.C., N. El Habbal, D. Snyder, J.R. Redd, H. Sun, B.E. Gregg, D. Bridges.  2023.  Gestational Early-Time Restricted Feeding Results in Sex-Specific Glucose Intolerance in Adult Male Mice.  Journal of Obesity [doi:10.1155/2023/6666613](https://doi.org/10.1155/2023/6666613). | [<img src="https://zenodo.org/badge/DOI/10.5281/zenodo.8396933.svg">](https://zenodo.org/doi/10.5281/zenodo.6498112)| [v1.0.0](https://github.com/BridgesLab/Developmental-Obesity/releases/tag/v1.0.0)|
-| Mulcahy, M.C., N. El Habbal, J.R. Redd, H. Sun, B.E. Gregg, D. Bridges.  2024.  GDF15 knockout does not substantially impact perinatal body weight or neonatal outcomes in mice.  BioRxiv [doi:10.1101/2024.04.30.591359](https://doi.org/10.1101/2024.04.30.591359|(https://doi.org/10.1101/2024.04.30.591359) | [v1.1.0](https://github.com/BridgesLab/Developmental-Obesity/releases/tag/v2.0.0)|
+| Mulcahy, M.C., N. El Habbal, J.R. Redd, H. Sun, B.E. Gregg, D. Bridges.  2024.  GDF15 knockout does not substantially impact perinatal body weight or neonatal outcomes in mice.  BioRxiv [doi:10.1101/2024.04.30.591359](https://doi.org/10.1101/2024.04.30.591359) || [v2.0.0](https://github.com/BridgesLab/Developmental-Obesity/releases/tag/v2.0.0)| 
 
 
 ## License
