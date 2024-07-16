@@ -140,12 +140,20 @@ library(lmerTest)
   dex.gdf15.mlm<-lmer(concentration~ time + dex + (1|MouseID), data = IR.data.dex)
   summary(dex.gdf15.mlm)
   
+  #ANOVA for effect of time and dexamethasone treatment
+   dex.pg<-aov(concentration ~ time + dex, data = IR.data.dex)
+ Anova(dex.pg)
+   
+   
   IR.data.pg<-both.plate.data%>%
   filter(Study=="IR")%>%
   filter(dex=="no")
 
 pg.gdf15.mlm<-lmer(concentration~ time + pregnancy + (1|MouseID), data = IR.data.pg)
   summary(pg.gdf15.mlm)
+  #ANOVA for effect of time and of pregnancy status
+   pg.not<-aov(concentration ~ time + pregnancy, data = IR.data.pg)
+ Anova(pg.not)
   
   #Plot np vs pregnant
   avg.pg.data<-IR.data.pg%>%
