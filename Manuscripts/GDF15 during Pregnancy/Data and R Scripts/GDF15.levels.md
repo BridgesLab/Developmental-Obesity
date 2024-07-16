@@ -12,7 +12,7 @@ output:
 
      
 
-```r
+``` r
 ##old 2020 plate with 2022 standard
 reanalyzed.plate<-"2020plate2022std.csv"
 
@@ -86,7 +86,7 @@ both.plate.data<-full_join(new.plate.reduced, old.plate.reduced)
 
 
 
-```r
+``` r
 test<-both.plate.data%>%
   filter(Study=="IR")%>%
   group_by(dex, pregnancy, time)%>%
@@ -102,7 +102,7 @@ test<-both.plate.data%>%
 
 ![](figures/IR-pg-1.png)<!-- -->
 
-```r
+``` r
   IR.data.dex<-both.plate.data%>%
   filter(Study=="IR")%>%
   filter(pregnancy=="yes")
@@ -146,7 +146,23 @@ library(lmerTest)
 ## boundary (singular) fit: see help('isSingular')
 ```
 
-```r
+``` r
+  #ANOVA for effect of time and dexamethasone treatment
+   dex.pg<-aov(concentration ~ time + dex, data = IR.data.dex)
+ Anova(dex.pg)
+```
+
+```
+## Anova Table (Type II tests)
+## 
+## Response: concentration
+##           Sum Sq Df F value Pr(>F)
+## time           0  1    0.00   0.99
+## dex         9070  1    2.63   0.11
+## Residuals 117186 34
+```
+
+``` r
   IR.data.pg<-both.plate.data%>%
   filter(Study=="IR")%>%
   filter(dex=="no")
@@ -189,7 +205,25 @@ pg.gdf15.mlm<-lmer(concentration~ time + pregnancy + (1|MouseID), data = IR.data
 ## boundary (singular) fit: see help('isSingular')
 ```
 
-```r
+``` r
+  #ANOVA for effect of time and of pregnancy status
+   pg.not<-aov(concentration ~ time + pregnancy, data = IR.data.pg)
+ Anova(pg.not)
+```
+
+```
+## Anova Table (Type II tests)
+## 
+## Response: concentration
+##           Sum Sq Df F value Pr(>F)   
+## time           1  1    0.00  0.983   
+## pregnancy  22504  1    8.48  0.007 **
+## Residuals  74334 28                  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+``` r
   #Plot np vs pregnant
   avg.pg.data<-IR.data.pg%>%
     group_by(pregnancy, time)%>%
@@ -209,7 +243,7 @@ pg.gdf15.mlm<-lmer(concentration~ time + pregnancy + (1|MouseID), data = IR.data
 
 ![](figures/IR-pg-2.png)<!-- -->
 
-```r
+``` r
 #plot, dex vs water dams
     avg.dex.data<-IR.data.dex%>%
       group_by(time, dex)%>%
@@ -232,7 +266,7 @@ pg.gdf15.mlm<-lmer(concentration~ time + pregnancy + (1|MouseID), data = IR.data
 
 
 
-```r
+``` r
  summary.Gdf<-both.plate.data%>%
   filter(Study=="GDF15")%>%
  mutate(Genotype=fct_recode(Genotype,

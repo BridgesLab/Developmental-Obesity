@@ -9,17 +9,25 @@ output:
 ---
 
 
-```r
+``` r
 #load commonly needed packages
 library(processx)
 library(devtools)
 ```
 
 ```
+## Warning: package 'devtools' was built under R version 4.4.1
+```
+
+```
 ## Loading required package: usethis
 ```
 
-```r
+```
+## Warning: package 'usethis' was built under R version 4.4.1
+```
+
+``` r
 library(tidyr)
 library(dplyr)
 ```
@@ -41,7 +49,7 @@ library(dplyr)
 ##     intersect, setdiff, setequal, union
 ```
 
-```r
+``` r
 library(readr)
 library(ggplot2)
 library(knitr)
@@ -63,7 +71,7 @@ library(car)
 ##     recode
 ```
 
-```r
+``` r
 library(lme4)
 ```
 
@@ -82,7 +90,7 @@ library(lme4)
 ##     expand, pack, unpack
 ```
 
-```r
+``` r
 library(broom)
 library(forcats)
 

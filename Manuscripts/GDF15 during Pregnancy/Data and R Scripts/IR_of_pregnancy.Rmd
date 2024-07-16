@@ -70,10 +70,10 @@ avg.itt.data%>%
   geom_point()+
   geom_line()+
   geom_errorbar(aes(ymax = glucose_mean + glucose_se, ymin = glucose_mean - glucose_se))+
-  labs(title = "Effect of Pregnancy on Insulin Tolerance", y = "glucose (mg/dL)", x="
-       Insulin (minutes)")+
+  labs(title = "Effect of Pregnancy on Insulin Tolerance", y = "glucose (mg/dL)", x="Insulin (minutes)")+
   scale_color_manual(values = c("grey45", "grey3"))+
   theme_bw()+
+  scale_x_continuous(breaks=seq(0, 120, 15))+
   theme(legend.position = c(0.85, 0.85), legend.background = element_blank(),text = element_text(size=14))
 
 AUC.data%>%
@@ -86,7 +86,7 @@ AUC.data%>%
   geom_col(aes(fill = Pregnancy))+
     geom_errorbar(aes(ymin = avg.auc + error.auc, ymax = avg.auc - error.auc), width =0.3)+
   scale_fill_manual(values = c("grey45", "grey3"))+
-  labs(title = "Area Under the Curve", y="glucose (mg/dL)")+
+  labs(title = "Area Under the Curve", y="glucose (mg/dL)",x="Insulin (minutes)")+
   theme_bw()+
   theme(legend.position = "none",text = element_text(size=14))
   #stats
@@ -108,9 +108,10 @@ avg.itt.data%>%
   geom_point()+
   geom_line()+
   geom_errorbar(aes(ymax = glucose_mean + glucose_se, ymin = glucose_mean - glucose_se))+
-  labs(title = "Effect of Dexamethasone on Insulin Tolerance", y = "glucose (mg/dL)", x="time(minutes)")+
+  labs(title = "Effect of Dexamethasone on Insulin Tolerance", y = "glucose (mg/dL)", x="Insulin (minutes)")+
   scale_color_manual(values = c("grey3","grey79"))+
   theme_bw(base_size=18)+
+  scale_x_continuous(breaks=seq(0, 120, 15))+
   theme(legend.position = c(0.85, 0.85), legend.background = element_blank(),text = element_text(size=14))
   
 AUC.data%>%

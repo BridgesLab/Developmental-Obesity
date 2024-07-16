@@ -365,14 +365,14 @@ output:
 ## -2.698 -0.844  0.268  0.758  2.506 
 ## 
 ## Random effects:
-##  Groups       Name        Variance Std.Dev.  
-##  pup.number   (Intercept) 0.00e+00 0.00000000
-##  pup.number.1 day         1.58e-07 0.00039787
-##  pup.number.2 (Intercept) 1.43e-11 0.00000378
-##  MouseID      day         2.05e-03 0.04530244
-##  MouseID.1    (Intercept) 2.87e-06 0.00169410
-##  MouseID.2    (Intercept) 4.91e-03 0.07004201
-##  Residual                 7.38e-02 0.27169177
+##  Groups       Name        Variance Std.Dev.
+##  pup.number   (Intercept) 0.00e+00 0.000000
+##  pup.number.1 day         1.42e-07 0.000377
+##  pup.number.2 (Intercept) 0.00e+00 0.000000
+##  MouseID      day         2.05e-03 0.045296
+##  MouseID.1    (Intercept) 4.91e-03 0.070063
+##  MouseID.2    (Intercept) 2.61e-06 0.001616
+##  Residual                 7.38e-02 0.271693
 ## Number of obs: 232, groups:  pup.number, 79; MouseID, 13
 ## 
 ## Fixed effects:
@@ -403,7 +403,7 @@ output:
 ## 
 ## Response: weight
 ##           Chisq Df Pr(>Chisq)    
-## day      963.85  1     <2e-16 ***
+## day      964.09  1     <2e-16 ***
 ## sex        1.94  1       0.16    
 ## Genotype   0.06  1       0.80    
 ## ---
@@ -415,9 +415,9 @@ output:
 ## 
 ## Response: weight
 ##           Chisq Df Pr(>Chisq)    
-## day      975.29  1     <2e-16 ***
+## day      975.51  1     <2e-16 ***
 ## sex        1.92  1       0.17    
-## Genotype   0.06  1       0.80    
+## Genotype   0.07  1       0.80    
 ## day:sex    0.23  1       0.63    
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
