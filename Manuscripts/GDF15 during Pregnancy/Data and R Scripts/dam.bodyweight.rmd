@@ -120,13 +120,14 @@ postnatal.bw.data<-bw.data%>%
   filter(postnatal=="y")%>%
   arrange(gest.age)%>%
   group_by(MouseID)%>%
-  mutate(loss = last(gram.values)-first(gram.values))
+  mutate(loss = last(gram.values)-first(gram.values),
+         percent.loss = (loss/first(gram.values))*100)
 #filter data for one observation per animal
 postnatal.bw.data.cleaned<-postnatal.bw.data%>%
   group_by(MouseID, Genotype)%>%
   distinct(MouseID, .keep_all = T)%>%
-  select(MouseID, Genotype, loss)
-#bar plot
+  select(MouseID, Genotype, loss, percent.loss)
+#bar plot, total loss
 postnatal.bw.data.cleaned%>%
    group_by(Genotype)%>%
   summarize(avg.loss = mean(loss),
@@ -139,11 +140,33 @@ ggplot(aes(Genotype,avg.loss, fill = Genotype))+
   theme_bw(base_size=18)+
   theme(legend.position = "none")
 
-#stats
+
+#stats, total loss
 shapiro.test(postnatal.bw.data.cleaned$loss[postnatal.bw.data.cleaned$Genotype=="Gdf15 Knockout"])#p=0.1
 shapiro.test(postnatal.bw.data.cleaned$loss[postnatal.bw.data.cleaned$Genotype=="Wild-type"])#p=0.4
 leveneTest(loss ~ Genotype, postnatal.bw.data.cleaned)#p=0.11
 t.test(loss ~ Genotype, postnatal.bw.data.cleaned)#$p.value#p=0.2
+
+#bar plot, percent loss
+postnatal.bw.data.cleaned%>%
+   group_by(Genotype)%>%
+  summarize(avg.percent = mean(percent.loss),
+            error.percent = se(percent.loss))%>%
+ggplot(aes(Genotype,avg.percent, fill = Genotype))+
+  geom_col()+
+  scale_fill_manual(values = color.scheme)+
+  geom_errorbar(aes(ymin = avg.percent - error.percent, ymax = avg.percent + error.percent), width =0.3)+
+  labs(title = "Postnatal weight loss", y = "Postnatal weight loss (%)")+
+  theme_bw(base_size=18)+
+  theme(legend.position = "none")
+
+#stats, percent loss
+shapiro.test(postnatal.bw.data.cleaned$percent.loss[postnatal.bw.data.cleaned$Genotype=="Gdf15 Knockout"])#p=0.4
+shapiro.test(postnatal.bw.data.cleaned$percent.loss[postnatal.bw.data.cleaned$Genotype=="Wild-type"])#p=0.6
+leveneTest(percent.loss ~ Genotype, postnatal.bw.data.cleaned)#p=0.053
+t.test(percent.loss ~ Genotype, postnatal.bw.data.cleaned)$p.value#p=0.143
+
+
 ```
 
 ```{r stats}
