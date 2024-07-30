@@ -100,15 +100,15 @@ ggplot(aes(time, mean, col = Genotype))+
   
 
 #stats
-null.rel <- lmer(glucose ~ 1 + (1|MouseID), ITT.data)
-time.rel <- lmer(glucose ~ time + (1|MouseID), ITT.data)
+null.rel <- lmer(rel.glucose ~ 1 + (1|MouseID), ITT.data)
+time.rel <- lmer(rel.glucose ~ time + (1|MouseID), ITT.data)
 anova(null.rel, time.rel)#significant effect of time
-geno.rel<- lmer(glucose ~ time + Genotype + (1|MouseID), ITT.data)
-anova(time.rel, geno.rel)#p=0.68
-geno.int.rel<-lmer(glucose ~ time*Genotype + (1|MouseID), ITT.data)
-anova(geno.rel, geno.int.rel)#p=0.07
-Anova(geno.int.rel)
+geno.rel<- lmer(rel.glucose ~ time + Genotype + (1|MouseID), ITT.data)
+anova(time.rel, geno.rel)#p=0.19
+geno.int.rel<-lmer(rel.glucose ~ time*Genotype + (1|MouseID), ITT.data)
+anova(geno.rel, geno.int.rel)#p=0.12
 Anova(geno.rel)
+fixef(geno.rel)
 ```
 
 
