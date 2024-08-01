@@ -145,7 +145,7 @@ intake.data.cleaned %>%
 ggplot(aes(as.integer(week), kcals.consumed, col = Genotype))+
   geom_point(aes(col = Genotype))+
   geom_smooth(aes(col = Genotype), se = FALSE, span =0.5)+
-  scale_x_continuous(breaks=c(1,2,3,4,5,6,7),labels = c("-7.5","0.5","7.5","14.5","21.5","28.5","35.5"))+
+  scale_x_continuous(breaks=c(1,2,3,4,5,6,7),labels = c("-7.5","-0.5","7.5","14.5","21.5","28.5","35.5"))+
   scale_color_manual(values = color.scheme)+
   labs(title = "Maternal Food Intake", y= "Food Intake (kcal/mouse/day)",x="Days from Mating")+
   theme_bw(base_size=18)+
