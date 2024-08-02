@@ -290,6 +290,7 @@ ggplot( aes(experiment.time, Weight, col = Treatment))+
   scale_color_manual(values = c("grey3","grey79"))+
   geom_smooth(method = loess,aes( col = Treatment))+
     labs(title = "Body Weight", y = "Weight (grams)",x= "Days from Mating",subtitle = "Water vs Dexamethasone Dams")+
+    scale_x_continuous(breaks=seq(-14, 35, 7))+
   theme_bw(base_size=18)+
   theme(legend.position = c(0.15, 0.85), legend.background = element_blank())
 
@@ -301,6 +302,7 @@ ggplot(aes(experiment.time, Weight, col = Pregnancy))+
   scale_color_manual(values = c("grey45","grey3"))+
   geom_smooth(method = loess,aes( col = Pregnancy))+
     labs(title = "Body Weight", y = "Weight (grams)",x= "Days from Mating",subtitle = "Pregnant vs Non-Pregnant Females")+
+  scale_x_continuous(breaks=seq(-14, 35, 7))+
   theme_bw(base_size=18)+
   theme(legend.position = c(0.15, 0.85), legend.background = element_blank())
 
