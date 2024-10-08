@@ -148,7 +148,7 @@ library(lmerTest)
 
 ``` r
   #ANOVA for effect of time and dexamethasone treatment
-   dex.pg<-aov(concentration ~ time + dex, data = IR.data.dex)
+   dex.pg<-aov(concentration ~ time + dex + dex*time, data = IR.data.dex)
  Anova(dex.pg)
 ```
 
@@ -158,8 +158,9 @@ library(lmerTest)
 ## Response: concentration
 ##           Sum Sq Df F value Pr(>F)
 ## time           0  1    0.00   0.99
-## dex         9070  1    2.63   0.11
-## Residuals 117186 34
+## dex         9070  1    2.58   0.12
+## time:dex    1252  1    0.36   0.55
+## Residuals 115934 33
 ```
 
 ``` r
@@ -207,7 +208,7 @@ pg.gdf15.mlm<-lmer(concentration~ time + pregnancy + (1|MouseID), data = IR.data
 
 ``` r
   #ANOVA for effect of time and of pregnancy status
-   pg.not<-aov(concentration ~ time + pregnancy, data = IR.data.pg)
+   pg.not<-aov(concentration ~ time + pregnancy + time*pregnancy, data = IR.data.pg)
  Anova(pg.not)
 ```
 
@@ -215,10 +216,11 @@ pg.gdf15.mlm<-lmer(concentration~ time + pregnancy + (1|MouseID), data = IR.data
 ## Anova Table (Type II tests)
 ## 
 ## Response: concentration
-##           Sum Sq Df F value Pr(>F)   
-## time           1  1    0.00  0.983   
-## pregnancy  22504  1    8.48  0.007 **
-## Residuals  74334 28                  
+##                Sum Sq Df F value Pr(>F)   
+## time                1  1    0.00 0.9831   
+## pregnancy       22504  1    8.33 0.0076 **
+## time:pregnancy   1417  1    0.52 0.4751   
+## Residuals       72917 27                  
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -231,7 +233,7 @@ pg.gdf15.mlm<-lmer(concentration~ time + pregnancy + (1|MouseID), data = IR.data
               error.gdf = se(concentration))
     ggplot()+
     geom_col(data= avg.pg.data, aes(x=time, y = avg.gdf, fill = pregnancy, group = pregnancy ),position = position_dodge(1.0))+
-    geom_point(data = IR.data.pg, aes(x=time, y=concentration, group = pregnancy), position = position_dodge2(width = 0.6))+
+    geom_point(data = IR.data.pg, color='black', fill='white', shape=21, size=2.5,aes(x=time, y=concentration, group = pregnancy), position = position_dodge2(width = 0.6))+
       ylim(0,275)+
        geom_errorbar(data = avg.pg.data, aes(x=time, y=avg.gdf, ymax = avg.gdf+error.gdf, ymin = avg.gdf-error.gdf), width = 0.3)+
       facet_grid(.~pregnancy)+
@@ -252,7 +254,7 @@ pg.gdf15.mlm<-lmer(concentration~ time + pregnancy + (1|MouseID), data = IR.data
     
     ggplot()+
     geom_col(data= avg.dex.data, aes(x=time, y = avg.gdf, fill = dex, group = dex ),position = position_dodge(1.0))+
-    geom_point(data = IR.data.dex, aes(x=time, y=concentration, group = dex), position = position_dodge2(width = 0.6))+
+    geom_point(data = IR.data.dex, color='black', fill='white', shape=21, size=2.5,aes(x=time, y=concentration, group = dex), position = position_dodge2(width = 0.6))+
        geom_errorbar(data = avg.dex.data, aes(x=time, y=avg.gdf, ymax = avg.gdf+error.gdf, ymin = avg.gdf-error.gdf), width = 0.3)+
         ylim(0,275)+
       facet_grid(.~dex)+
@@ -281,7 +283,7 @@ pg.gdf15.mlm<-lmer(concentration~ time + pregnancy + (1|MouseID), data = IR.data
 
 ggplot()+
   geom_col(data = summary.Gdf.refactor, aes(x=time, y=avg, fill = Genotype, group = Genotype), position = position_dodge(1.0))+
-  geom_point(data = summary.Gdf, aes(x=time, y=concentration, group = Genotype), position = position_dodge2(width = 0.6))+
+  geom_point(data = summary.Gdf, color='black', fill='white', shape=21, size=2.5,aes(x=time, y=concentration, group = Genotype), position = position_dodge2(width = 0.6))+
   labs(title = "GDF15 in Dams",y="GDF15 (pg/mL)", x= "Zeitgeber Time")+
   facet_grid(.~Genotype)+
  geom_errorbar(data = summary.Gdf.refactor, aes(x=time, y=avg, ymax = avg+error, ymin = avg-error), width = 0.3)+
